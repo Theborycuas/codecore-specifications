@@ -1,803 +1,643 @@
-# 05-authentication-management/security-rules.md
+# 06-audit-management/security-rules.md
 
-````md id="t4x8vp"
-# Authentication Management Security Rules
+````md id="h8x4vp"
+# Audit Management Security Rules
 
 ## 1. Introduction
 
-This document defines the security rules enforced by the Authentication Management module.
+This document defines the security rules enforced by the Audit Management module.
 
-These rules establish the foundational security protections required to secure:
+Audit Management is one of the most security-sensitive components of the platform because it protects:
 
-- User identities
-- Authentication flows
-- Sessions
-- Tokens
-- MFA processes
-- Device trust
-- Internal service authentication
-- Distributed authentication ecosystems
+- Legal evidence
+- Compliance traceability
+- Security forensic data
+- Operational accountability
+- Distributed trace reconstruction
+- Incident investigation evidence
 
 The rules are designed following:
 
 - Zero Trust Architecture
 - Defense in Depth
-- Secure-by-default principles
-- OWASP ASVS recommendations
-- NIST authentication guidance
+- Immutable evidence principles
+- OWASP ASVS guidance
 - Enterprise SaaS security standards
+- Regulatory compliance requirements
 
 ---
 
 # 2. Security Principles
 
-## 2.1 Deny by Default
+## 2.1 Immutable Evidence Principle
 
-If authentication cannot be validated:
+Audit evidence must never be mutable after persistence.
 
-```text id="m7v2wr"
-AUTHENTICATION = DENIED
+---
+
+## Forbidden Operations
+
+```text id="m5v8wr"
+- UPDATE audit evidence
+- DELETE audit evidence
+- OVERWRITE audit evidence
 ````
 
 ---
 
-## 2.2 Zero Trust Authentication
+## Allowed Operations
 
-Every request must independently validate:
-
-* Identity
-* Session
-* Token integrity
-* Tenant context
-* Device trust
-* Security policies
-
----
-
-## 2.3 Least Privilege
-
-Authentication sessions should expose minimal scope and lifetime.
-
----
-
-## 2.4 Immutable Auditability
-
-Critical authentication actions must remain traceable.
-
----
-
-## 2.5 Short-Lived Access
-
-Access tokens should minimize exposure windows.
-
----
-
-# 3. Credential Security Rules
-
-## 3.1 Plaintext Password Storage Forbidden
-
-Passwords must never be:
-
-* Stored plaintext
-* Logged
-* Published in events
-* Cached insecurely
-
----
-
-## 3.2 Approved Hashing Algorithms Only
-
-Recommended algorithms:
-
-```text id="p3n8vx"
-Argon2
-bcrypt
-PBKDF2
+```text id="u2x7vt"
+- Archival
+- Legal retention
+- Compliance export
 ```
 
 ---
 
-## 3.3 Salting Mandatory
+# 2.2 Zero Trust Audit Access
 
-All password hashes require secure salts.
+All audit access requires explicit authorization.
 
----
-
-## 3.4 Password Complexity Enforcement
-
-Recommended minimums:
-
-```text id="r6w1tp"
-- Minimum 12 characters
-- Uppercase
-- Lowercase
-- Numeric
-- Special characters
-```
+No implicit trust allowed.
 
 ---
 
-## 3.5 Breached Password Detection
+# 2.3 Least Privilege Principle
 
-Recommended integration with:
-
-* HaveIBeenPwned
-* Internal breach lists
+Audit visibility must expose only the minimum required evidence.
 
 ---
 
-## 3.6 Password Rotation Policies
+# 2.4 Tenant Isolation Principle
 
-Optional based on compliance requirements.
+Audit visibility must remain tenant-scoped.
 
 ---
 
-# 4. Tenant Isolation Rules
+# 2.5 Tamper Resistance Principle
 
-## 4.1 Cross-Tenant Authentication Forbidden
+Audit integrity violations must be detectable.
+
+---
+
+# 3. Tenant Isolation Rules
+
+## 3.1 Cross-Tenant Audit Access Forbidden
 
 Default behavior:
 
-```text id="y2k7wr"
-Tenant A users
-cannot authenticate
-into Tenant B
+```text id="r7m1xp"
+Tenant A
+cannot access
+Tenant B audit evidence
 ```
 
 ---
 
-## 4.2 Mandatory Tenant Context
+## 3.2 Tenant Context Mandatory
 
-All authentication operations require:
+All audit operations require:
 
-```text id="u8v4xp"
+```text id="g4v9wr"
 tenantId
 ```
 
 ---
 
-## 4.3 Tenant-Aware Sessions
+## 3.3 Tenant-Aware Queries Mandatory
 
-Sessions must remain tenant-scoped.
+Repositories must enforce:
 
----
-
-## 4.4 Tenant-Aware JWT Claims
-
-JWTs must include tenant context.
-
----
-
-# 5. JWT Security Rules
-
-## 5.1 JWT Signature Validation Mandatory
-
-Unsigned tokens forbidden.
-
----
-
-## 5.2 JWT Expiration Mandatory
-
-Expired tokens:
-
-```text id="q4m9wt"
-DENY ACCESS
+```sql id="f9x3vt"
+WHERE tenant_id = :tenantId
 ```
 
 ---
 
-## 5.3 Short-Lived Access Tokens
+# 4. Immutable Persistence Rules
 
-Recommended:
+## 4.1 Append-Only Persistence Recommended
 
-| Token         | Recommended Lifetime |
-| ------------- | -------------------- |
-| Access Token  | 5–30 minutes         |
-| MFA Challenge | 5 minutes            |
-| Reset Token   | 15–30 minutes        |
+Preferred persistence strategy:
 
----
-
-## 5.4 Sensitive Claims Forbidden
-
-JWTs must never contain:
-
-* Passwords
-* Secrets
-* Internal hashes
-* Sensitive medical information
-
----
-
-## 5.5 JWT Must Not Be Trusted Alone
-
-Authorization still requires:
-
-* Permission validation
-* Policy evaluation
-* Session validation
-
----
-
-## 5.6 Audience Validation Recommended
-
-Validate:
-
-```text id="k7x3vp"
-aud
-```
-
-to prevent misuse.
-
----
-
-# 6. Refresh Token Security Rules
-
-## 6.1 Rotation Mandatory
-
-Refresh tokens must rotate after use.
-
----
-
-## 6.2 Replay Detection Mandatory
-
-Reuse detection must trigger:
-
-```text id="g5v8wr"
-- Session revocation
-- Security alerts
-- Re-authentication
+```text id="q6m8wp"
+INSERT ONLY
 ```
 
 ---
 
-## 6.3 Refresh Tokens Stored Hashed
+## 4.2 Historical Integrity Mandatory
 
-Raw token persistence forbidden.
-
----
-
-## 6.4 Revocation Support Mandatory
-
-Compromised tokens require immediate invalidation.
+Audit timestamps must remain immutable.
 
 ---
 
-## 6.5 Long-Lived Tokens Require Additional Controls
+## 4.3 Actor Identity Preservation
 
-Examples:
+Audit evidence must preserve:
 
-* Device binding
-* IP heuristics
-* Step-up MFA
-
----
-
-# 7. Session Security Rules
-
-## 7.1 Session Revocation Support Mandatory
-
-Sessions must support immediate invalidation.
+* User identity
+* Service identity
+* Administrative actor
 
 ---
 
-## 7.2 Revoked Sessions Invalid
+# 5. Sensitive Data Protection Rules
 
-Validation result:
+## 5.1 Sensitive Data Restrictions
 
-```text id="n1w6xt"
-DENY
+Audit evidence must NEVER contain:
+
+```text id="n2v7xr"
+- Passwords
+- Secrets
+- MFA tokens
+- Raw JWTs
+- API secrets
+- Private encryption keys
 ```
 
 ---
 
-## 7.3 Session Expiration Mandatory
+## 5.2 Metadata Sanitization Mandatory
 
-Inactive sessions must expire automatically.
-
----
-
-## 7.4 Concurrent Session Restrictions
-
-Optional policies may limit:
-
-* Maximum active sessions
-* Device count
-* Geographic usage
+Operational metadata must be sanitized before persistence.
 
 ---
 
-## 7.5 Session Ownership Immutable
+## 5.3 Privacy-Aware Logging
 
-Sessions cannot transfer between users.
+Sensitive personal information should be minimized where possible.
 
 ---
 
-# 8. MFA Security Rules
+# 6. Security Audit Rules
 
-## 8.1 MFA Required for High-Risk Operations
+## 6.1 Critical Security Events Mandatory
 
-Recommended examples:
+Mandatory audit coverage:
 
-```text id="v9m2wr"
-- Password changes
-- Privilege escalation
-- Sensitive data access
+| Event                        | Required |
+| ---------------------------- | -------- |
+| Login failures               | Yes      |
+| MFA failures                 | Yes      |
+| Token replay                 | Yes      |
+| Privilege escalation         | Yes      |
+| Cross-tenant access attempts | Yes      |
+
+---
+
+## 6.2 Security Severity Classification
+
+Security events must include severity:
+
+```text id="t5x1vp"
+LOW
+MEDIUM
+HIGH
+CRITICAL
 ```
 
 ---
 
-## 8.2 MFA Challenge Expiration Mandatory
+## 6.3 Incident Traceability
 
-Challenges must expire rapidly.
-
----
-
-## 8.3 MFA Replay Forbidden
-
-Verification codes must be single-use.
+Security investigations must support timeline reconstruction.
 
 ---
 
-## 8.4 MFA Brute Force Protection
+# 7. Compliance Security Rules
 
-Excessive invalid attempts require:
+## 7.1 Compliance Audit Protection
 
-* Temporary lockout
-* Risk escalation
-* Additional verification
+Compliance evidence requires enhanced protection.
 
 ---
 
-## 8.5 MFA Secrets Protection
+## 7.2 Legal Hold Protection
 
-TOTP secrets must be encrypted at rest.
+Legal holds override:
 
----
-
-# 9. Device Trust Security Rules
-
-## 9.1 Trusted Devices Are Not Absolute Trust
-
-Trusted devices reduce friction but do not bypass security entirely.
-
----
-
-## 9.2 Device Revocation Support Mandatory
-
-Compromised devices require immediate revocation.
-
----
-
-## 9.3 Device Fingerprint Protection
-
-Device metadata should avoid privacy violations.
-
----
-
-## 9.4 Suspicious Device Detection
-
-Examples:
-
-```text id="f6x1vp"
-- New country
-- Browser changes
-- Impossible travel
+```text id="y8m4wr"
+- Expiration
+- Archival cleanup
+- Retention deletion
 ```
 
 ---
 
-# 10. Account Protection Rules
+## 7.3 Regulatory Retention Enforcement
 
-## 10.1 Brute Force Protection Mandatory
+Retention periods must comply with:
 
-Required protections:
+* HIPAA
+* GDPR
+* SOC2
+* ISO27001
 
-* Rate limiting
-* Progressive delays
-* Lockout thresholds
+depending on business scope.
 
 ---
 
-## 10.2 Account Enumeration Prevention
+# 8. Integrity Validation Rules
 
-Authentication responses should avoid revealing:
+## 8.1 Integrity Proof Generation Mandatory
 
-```text id="w3n7xt"
-- User existence
-- Account status
+Critical audit evidence requires:
+
+* Hash generation
+* Tamper validation
+* Integrity verification
+
+---
+
+## 8.2 Integrity Algorithms
+
+Recommended algorithms:
+
+```text id="w1x9vt"
+SHA-256
+SHA-512
 ```
 
 ---
 
-## 10.3 Account Lockout Policies
+## 8.3 Tampering Detection Mandatory
 
-Recommended after repeated failures.
+Integrity mismatches must trigger:
 
----
-
-## 10.4 Password Reset Protection
-
-Password reset flows require:
-
-* Expiring tokens
-* Single-use tokens
-* Ownership validation
+```text id="c7m2xp"
+- Security escalation
+- Investigation workflow
+- Alert generation
+```
 
 ---
 
-# 11. API Security Rules
+# 9. Correlation Security Rules
 
-## 11.1 HTTPS Mandatory
+## 9.1 Correlation IDs Mandatory
 
-Authentication APIs must never use plaintext transport.
+Distributed operations should include:
 
----
-
-## 11.2 Internal APIs Require Strong Authentication
-
-Recommended:
-
-* mTLS
-* Signed JWT
-* Service identity validation
-
----
-
-## 11.3 Rate Limiting Mandatory
-
-Critical endpoints:
-
-| Endpoint       | Recommendation |
-| -------------- | -------------- |
-| Login          | Strict         |
-| MFA            | Strict         |
-| Password reset | Strict         |
-| Token refresh  | Medium         |
-
----
-
-## 11.4 Correlation IDs Required
-
-Security observability requires:
-
-```text id="j8v4wp"
+```text id="d4v8wr"
 X-Correlation-ID
 ```
 
 ---
 
-## 11.5 Secure Headers Recommended
+## 9.2 Distributed Trace Integrity
 
-| Header           | Purpose          |
-| ---------------- | ---------------- |
-| Authorization    | Identity         |
-| X-Tenant-ID      | Tenant isolation |
-| X-Correlation-ID | Tracing          |
+Correlation chains must remain consistent.
 
 ---
 
-# 12. OAuth2/OIDC Security Rules
+## 9.3 Cross-Service Traceability
 
-## 12.1 State Validation Mandatory
-
-Prevents CSRF attacks.
+Distributed audit reconstruction must remain reproducible.
 
 ---
 
-## 12.2 Provider Signature Validation Mandatory
+# 10. Access Control Rules
 
-Identity providers must be verified.
+## 10.1 Audit Access Requires Authorization
 
----
+Example permissions:
 
-## 12.3 Redirect URI Validation Mandatory
-
-Open redirects forbidden.
-
----
-
-## 12.4 External Identity Mapping Validation
-
-Prevent unauthorized account linking.
+| Permission            | Purpose                 |
+| --------------------- | ----------------------- |
+| VIEW_SECURITY_AUDIT   | Security investigations |
+| VIEW_COMPLIANCE_AUDIT | Compliance operations   |
+| EXPORT_AUDIT_DATA     | Export evidence         |
 
 ---
 
-# 13. Service Authentication Rules
+## 10.2 Sensitive Access Restrictions
 
-## 13.1 Internal Services Must Authenticate
-
-No implicit trust between services.
+Sensitive audit visibility restricted to authorized roles only.
 
 ---
 
-## 13.2 mTLS Strongly Recommended
+## 10.3 Export Authorization Mandatory
 
-Especially for:
-
-* Internal APIs
-* Critical services
-* Cross-region traffic
+Audit exports require explicit authorization.
 
 ---
 
-## 13.3 Service Credentials Must Rotate
+# 11. Audit Export Security Rules
 
-Static long-term secrets discouraged.
+## 11.1 Export Actions Must Be Audited
 
----
-
-## 13.4 Service Identity Isolation
-
-Each service requires unique identity.
+Audit export itself generates audit evidence.
 
 ---
 
-# 14. Audit Security Rules
+## 11.2 Export Filtering Mandatory
 
-## 14.1 Mandatory Authentication Auditing
-
-Audit required for:
-
-| Action             | Required |
-| ------------------ | -------- |
-| Login success      | Yes      |
-| Login failure      | Yes      |
-| MFA validation     | Yes      |
-| Password reset     | Yes      |
-| Session revocation | Yes      |
+Sensitive data masking supported when necessary.
 
 ---
 
-## 14.2 Audit Immutability
+## 11.3 Secure Export Delivery
 
-Audit evidence must not be mutable.
+Recommended protections:
 
----
-
-## 14.3 Sensitive Data Restrictions
-
-Audit logs must never contain:
-
-* Passwords
-* Secrets
-* Raw JWTs
-* MFA secrets
+| Protection     | Recommendation       |
+| -------------- | -------------------- |
+| Temporary URLs | Recommended          |
+| Encryption     | Strongly recommended |
+| Expiration     | Mandatory            |
 
 ---
 
-# 15. Cache Security Rules
+# 12. Archive Security Rules
 
-## 15.1 Session Cache Isolation
+## 12.1 Archived Evidence Protection
 
-Authentication caches must be tenant-aware.
+Archives require:
+
+* Encryption at rest
+* Restricted access
+* Integrity validation
 
 ---
 
-## 15.2 Cache Invalidation Mandatory
+## 12.2 Immutable Archival Recommended
 
-Required after:
+Preferred storage:
 
-```text id="z5m8vr"
-- Logout
-- Password reset
-- Session revocation
-- Token replay detection
+```text id="k9v3xp"
+WORM storage
 ```
 
----
-
-## 15.3 JWT Blacklist Synchronization
-
-Revoked tokens require synchronization.
+(Write Once Read Many)
 
 ---
 
-# 16. Reactive Security Rules
+## 12.3 Archive Restoration Auditable
 
-## 16.1 Immutable Security Context
-
-Reactive pipelines require immutable context propagation.
+Restoration operations must generate audit evidence.
 
 ---
 
-## 16.2 Context Leakage Prevention
+# 13. SIEM Integration Security Rules
 
-Tenant/security contexts must not leak across reactive chains.
+## 13.1 SIEM Delivery Protection
 
----
+Security events require:
 
-## 16.3 Non-Blocking Security Validation
-
-Blocking authentication logic discouraged.
-
----
-
-# 17. Distributed System Security Rules
-
-## 17.1 Stateless Authentication Preferred
-
-JWT preferred for scalability.
+* Secure transport
+* Authentication
+* Delivery validation
 
 ---
 
-## 17.2 Clock Synchronization Mandatory
-
-Required for:
-
-* JWT expiration
-* MFA expiration
-* Session expiration
-
----
-
-## 17.3 Distributed Revocation Support
-
-Revocations must propagate rapidly.
-
----
-
-## 17.4 Secure Inter-Service Communication
+## 13.2 External Integration Hardening
 
 Recommended:
 
-```text id="x2k9wt"
+```text id="u5m1vt"
 TLS everywhere
 mTLS internally
 ```
 
 ---
 
-# 18. Monitoring and Threat Detection Rules
+## 13.3 Delivery Failure Monitoring
 
-## 18.1 Suspicious Activity Monitoring
+SIEM forwarding failures require monitoring.
+
+---
+
+# 14. Reactive Security Rules
+
+## 14.1 Immutable Reactive Context
+
+Reactive audit pipelines require immutable context propagation.
+
+---
+
+## 14.2 Context Leakage Prevention
+
+Tenant/security contexts must never leak between reactive chains.
+
+---
+
+## 14.3 Non-Blocking Security Enforcement
+
+Blocking security validations discouraged.
+
+---
+
+# 15. Distributed System Security Rules
+
+## 15.1 Clock Synchronization Mandatory
+
+Required for:
+
+* Timeline reconstruction
+* Expiration validation
+* Correlation consistency
+
+---
+
+## 15.2 Distributed Integrity Validation
+
+Integrity verification must work across regions/services.
+
+---
+
+## 15.3 Event Delivery Durability
+
+Critical security events require durable persistence.
+
+---
+
+# 16. Search Security Rules
+
+## 16.1 Search Authorization Mandatory
+
+Audit searching requires authorization.
+
+---
+
+## 16.2 Search Scope Restrictions
+
+Users must only query:
+
+```text id="f3x7wr"
+authorized audit scope
+```
+
+---
+
+## 16.3 Search Metadata Protection
+
+Search responses should avoid overexposure of sensitive metadata.
+
+---
+
+# 17. Threat Detection Rules
+
+## 17.1 Suspicious Activity Monitoring
 
 Monitor:
 
-```text id="g7v3xp"
-- Excessive login failures
+```text id="v8m2xp"
+- Excessive failures
 - Token replay
-- Impossible travel
-- Suspicious devices
-- MFA abuse
+- Privilege escalation
+- Cross-tenant attempts
+- Suspicious exports
 ```
 
 ---
 
-## 18.2 High-Severity Security Alerts
+## 17.2 Critical Incident Escalation
 
-Examples:
+Critical incidents require:
 
-```text id="u4m8wr"
-- Refresh token replay
-- Session hijacking
-- OAuth tampering
+* Immediate alerts
+* Evidence preservation
+* Investigation workflows
+
+---
+
+# 18. Failure Handling Rules
+
+## 18.1 Fail Secure Principle
+
+Unexpected failures must preserve evidence integrity.
+
+---
+
+## 18.2 Integrity Validation Failure Handling
+
+If integrity verification fails:
+
+```text id="q4v9wt"
+ASSUME POSSIBLE TAMPERING
 ```
 
 ---
 
-## 18.3 Security Incident Persistence
+## 18.3 Archive Failure Handling
 
-Incidents must remain auditable.
-
----
-
-# 19. Failure Handling Rules
-
-## 19.1 Fail Closed Principle
-
-Unexpected failures:
-
-```text id="q1x6vt"
-AUTHENTICATION = DENIED
-```
+Archival failures require retry and investigation.
 
 ---
 
-## 19.2 Cache Failure Handling
-
-Fallback strategies required.
-
----
-
-## 19.3 Replay Uncertainty Handling
-
-Uncertain replay:
-
-```text id="n8v2wr"
-REVOKE SESSION
-```
-
----
-
-# 20. Compliance Considerations
-
-The module should support:
-
-* GDPR
-* HIPAA
-* SOC2
-* ISO 27001
-* OWASP ASVS
-* NIST authentication standards
-
-depending on business requirements.
-
----
-
-# 21. OWASP Security Alignment
-
-The module mitigates:
-
-| OWASP Risk                | Mitigation      |
-| ------------------------- | --------------- |
-| Broken Authentication     | MFA + rotation  |
-| Credential Stuffing       | Rate limiting   |
-| Session Hijacking         | Revocation      |
-| Replay Attacks            | Rotation        |
-| Security Misconfiguration | Secure defaults |
-
----
-
-# 22. Operational Security Recommendations
+# 19. Operational Security Recommendations
 
 Recommended practices:
 
-| Practice            | Recommendation |
-| ------------------- | -------------- |
-| Penetration testing | Periodic       |
-| Dependency scanning | Continuous     |
-| Secret rotation     | Automated      |
-| Audit reviews       | Continuous     |
-| MFA adoption        | Encouraged     |
+| Practice             | Recommendation |
+| -------------------- | -------------- |
+| Immutable backups    | Mandatory      |
+| SIEM monitoring      | Continuous     |
+| Penetration testing  | Periodic       |
+| Retention reviews    | Periodic       |
+| Integrity validation | Automated      |
 
 ---
 
-# 23. Future Security Extensions
+# 20. Compliance Security Alignment
+
+The module supports:
+
+| Standard | Usage                  |
+| -------- | ---------------------- |
+| HIPAA    | Medical traceability   |
+| GDPR     | Privacy accountability |
+| SOC2     | Operational governance |
+| ISO27001 | Security controls      |
+
+---
+
+# 21. OWASP Alignment
+
+The module mitigates:
+
+| OWASP Risk                | Mitigation            |
+| ------------------------- | --------------------- |
+| Insufficient Logging      | Immutable auditing    |
+| Broken Access Control     | Tenant isolation      |
+| Security Misconfiguration | Secure defaults       |
+| Sensitive Data Exposure   | Metadata sanitization |
+
+---
+
+# 22. Infrastructure Security Recommendations
+
+Recommended infrastructure protections:
+
+| Protection         | Recommendation |
+| ------------------ | -------------- |
+| Encryption at rest | Mandatory      |
+| TLS transport      | Mandatory      |
+| WORM archival      | Recommended    |
+| Network isolation  | Recommended    |
+| RBAC               | Mandatory      |
+
+---
+
+# 23. Security Monitoring Recommendations
+
+Recommended monitoring areas:
+
+| Area                  | Recommendation       |
+| --------------------- | -------------------- |
+| Integrity violations  | Critical alerts      |
+| Export activity       | Monitoring           |
+| Cross-tenant attempts | Immediate escalation |
+| Archive failures      | Operational alerts   |
+
+---
+
+# 24. Future Security Extensions
 
 Future security enhancements may include:
 
-* Passwordless authentication
-* WebAuthn
-* Continuous authentication
-* Adaptive authentication
-* Behavioral biometrics
-* Risk-based authentication
-* Hardware security keys
+* Blockchain-backed audit evidence
+* AI-driven anomaly detection
+* Continuous compliance monitoring
+* Behavioral threat analysis
+* Immutable distributed ledgers
 
 ---
 
-# 24. Security Checklist
+# 25. Security Checklist
 
 ## Mandatory Controls
 
-| Control                | Required |
-| ---------------------- | -------- |
-| Password hashing       | Yes      |
-| JWT validation         | Yes      |
-| Session revocation     | Yes      |
-| Refresh token rotation | Yes      |
-| MFA support            | Yes      |
-| Tenant isolation       | Yes      |
-| Audit logging          | Yes      |
-| Replay detection       | Yes      |
+| Control                     | Required |
+| --------------------------- | -------- |
+| Immutable audit persistence | Yes      |
+| Tenant isolation            | Yes      |
+| Integrity validation        | Yes      |
+| Correlation tracing         | Yes      |
+| Audit access authorization  | Yes      |
+| Export authorization        | Yes      |
+| Archive encryption          | Yes      |
+| Tamper detection            | Yes      |
 
 ---
 
-# 25. Summary
+# 26. Summary
 
-The Authentication Management security rules provide:
+The Audit Management security rules provide:
 
-* Enterprise-grade authentication protection
-* Strong credential security
-* Replay-resistant token management
-* MFA enforcement
-* Distributed authentication consistency
-* Zero Trust authentication foundations
-* Multi-tenant isolation
-* Immutable authentication auditability
+* Enterprise-grade audit protection
+* Immutable evidence enforcement
+* Tamper-resistant forensic traceability
+* Distributed audit integrity
+* Multi-tenant audit isolation
+* Compliance-grade security controls
+* Zero Trust audit access
+* Reactive audit security consistency
 
-These rules establish the security baseline of the authentication ecosystem.
+These rules establish the security baseline of the audit ecosystem.
 
 ```
 ```

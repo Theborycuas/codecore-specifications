@@ -1,32 +1,31 @@
-# 05-authentication-management/workflows.md
+# 06-audit-management/workflows.md
 
-````md id="p6x2vt"
-# Authentication Management Workflows
+````md id="m5x8vp"
+# Audit Management Workflows
 
 ## 1. Introduction
 
-This document defines the workflows of the Authentication Management module.
+This document defines the workflows of the Audit Management module.
 
-The workflows describe how authentication operations are executed across the platform, including:
+The workflows describe how audit evidence is:
 
-- Login flows
-- MFA orchestration
-- Session management
-- Token issuance
-- Token refresh
-- Logout handling
-- Device trust validation
-- OAuth2/OIDC authentication
-- Service authentication
-- Security incident handling
+- Generated
+- Persisted
+- Correlated
+- Archived
+- Exported
+- Protected
+- Queried
+- Investigated
 
 The workflows are designed following:
 
 - Domain-Driven Design (DDD)
-- Zero Trust principles
-- Secure-by-default architecture
+- Event-Driven Architecture (EDA)
+- Immutable evidence principles
 - Multi-tenant SaaS isolation
-- Enterprise authentication standards
+- Enterprise compliance standards
+- Security forensic requirements
 
 ---
 
@@ -34,661 +33,636 @@ The workflows are designed following:
 
 | Workflow | Purpose |
 |---|---|
-| Username/Password Authentication Workflow | Standard login |
-| MFA Authentication Workflow | Multi-factor verification |
-| JWT Issuance Workflow | Access token generation |
-| Refresh Token Rotation Workflow | Session continuation |
-| Session Revocation Workflow | Session invalidation |
-| Logout Workflow | Secure logout |
-| Trusted Device Workflow | Device trust management |
-| OAuth2/OIDC Authentication Workflow | Federated authentication |
-| API Key Authentication Workflow | API access validation |
-| Service Authentication Workflow | Internal service identity |
-| Suspicious Login Detection Workflow | Threat detection |
-| Password Reset Workflow | Credential recovery |
-| Account Lockout Workflow | Brute force protection |
+| Audit Event Ingestion Workflow | Capture audit evidence |
+| Security Audit Workflow | Persist security evidence |
+| Compliance Audit Workflow | Regulatory traceability |
+| Sensitive Access Audit Workflow | Sensitive resource tracking |
+| Distributed Correlation Workflow | Cross-service tracing |
+| Audit Retention Workflow | Lifecycle management |
+| Audit Archival Workflow | Long-term evidence preservation |
+| Audit Export Workflow | Compliance evidence delivery |
+| Audit Integrity Validation Workflow | Tamper detection |
+| Security Investigation Workflow | Forensic reconstruction |
+| SIEM Integration Workflow | Security observability |
+| Audit Search Workflow | Historical evidence querying |
 
 ---
 
-# 3. Username/Password Authentication Workflow
+# 3. Audit Event Ingestion Workflow
 
 ## Purpose
 
-Authenticates users using credentials.
+Captures and persists audit evidence from distributed systems.
 
 ---
 
 # Workflow Steps
 
-```text id="w8k4vp"
-1. Receive authentication request
-2. Resolve tenant context
-3. Resolve user identity
-4. Validate account existence
-5. Validate account status
-6. Validate password hash
-7. Evaluate MFA requirements
-8. Validate device trust
-9. Create authenticated session
-10. Generate JWT
-11. Generate refresh token
-12. Persist audit evidence
-13. Return authentication result
+```text id="u9v4wr"
+1. Receive domain/security event
+2. Validate tenant context
+3. Validate audit category
+4. Enrich metadata
+5. Generate correlation linkage
+6. Persist immutable audit record
+7. Generate integrity proof
+8. Publish downstream integrations
 ````
 
 ---
 
-## Validation Rules
+## Input Sources
 
-| Validation          | Description             |
-| ------------------- | ----------------------- |
-| Tenant validation   | Isolation               |
-| Password validation | Identity proof          |
-| Lockout validation  | Brute force prevention  |
-| MFA enforcement     | Additional verification |
-| Device validation   | Risk reduction          |
-
----
-
-## Failure Scenarios
-
-| Scenario            | Result               |
-| ------------------- | -------------------- |
-| Invalid credentials | Deny                 |
-| Locked account      | Deny                 |
-| Expired password    | Require reset        |
-| Suspicious login    | Step-up verification |
-
----
-
-# 4. MFA Authentication Workflow
-
-## Purpose
-
-Performs multi-factor verification.
-
----
-
-# Workflow Steps
-
-```text id="f3n7wx"
-1. Generate MFA challenge
-2. Deliver challenge
-3. Receive MFA response
-4. Validate challenge expiration
-5. Validate MFA code
-6. Track invalid attempts
-7. Complete authentication
-8. Persist audit evidence
-```
-
----
-
-## Supported MFA Types
-
-| Type      | Description         |
-| --------- | ------------------- |
-| TOTP      | Authenticator apps  |
-| Email OTP | Email delivery      |
-| SMS OTP   | Mobile verification |
-| Push MFA  | Future support      |
-| WebAuthn  | Future support      |
+| Source            | Example                   |
+| ----------------- | ------------------------- |
+| Authentication    | Login success             |
+| Authorization     | Permission denied         |
+| Clinical services | Record modification       |
+| Billing           | Subscription update       |
+| API Gateway       | Sensitive endpoint access |
 
 ---
 
 ## Security Rules
 
-* MFA challenges expire rapidly
-* MFA codes are single-use
-* Excessive failures trigger lockout
+* Immutable persistence mandatory
+* Tenant isolation enforced
+* Sensitive data sanitization required
 
 ---
 
-# 5. JWT Issuance Workflow
+# 4. Security Audit Workflow
 
 ## Purpose
 
-Generates stateless authentication tokens.
+Tracks security-critical operations.
 
 ---
 
 # Workflow Steps
 
-```text id="u9x2tr"
-1. Validate authenticated identity
-2. Build token claims
-3. Generate JWT signature
-4. Apply expiration policy
-5. Persist session linkage
-6. Return JWT
+```text id="r3x7vt"
+1. Receive security event
+2. Classify threat severity
+3. Enrich security metadata
+4. Correlate distributed context
+5. Persist security audit record
+6. Publish SIEM integration event
+7. Trigger alerts if critical
 ```
 
 ---
 
-## Recommended Claims
+## Example Security Events
 
-```text id="m4v8pk"
-- sub
-- tenantId
-- roles
-- permissions snapshot
-- sessionId
-- exp
-- iat
+```text id="g1m8xp"
+- MFA failure
+- Token replay
+- Privilege escalation
+- Cross-tenant attempt
 ```
 
 ---
 
-## Security Rules
+## Critical Actions
 
-| Rule                           | Description     |
-| ------------------------------ | --------------- |
-| Short-lived tokens             | Reduce exposure |
-| Signed tokens mandatory        | Integrity       |
-| Expiration validation required | Security        |
-| Tenant claims required         | Isolation       |
+| Severity | Action               |
+| -------- | -------------------- |
+| LOW      | Persist              |
+| MEDIUM   | Monitoring           |
+| HIGH     | Alert                |
+| CRITICAL | Immediate escalation |
 
 ---
 
-# 6. Refresh Token Rotation Workflow
+# 5. Compliance Audit Workflow
 
 ## Purpose
 
-Maintains secure session continuity.
-
-Critical security workflow.
+Tracks compliance-sensitive operations.
 
 ---
 
 # Workflow Steps
 
-```text id="x1n6vp"
-1. Receive refresh token
-2. Validate token existence
-3. Validate expiration
-4. Validate revocation state
-5. Detect replay attempts
-6. Revoke old token
-7. Generate replacement token
-8. Generate new JWT
-9. Persist rotation chain
-10. Return new tokens
+```text id="k8v2wr"
+1. Detect regulated operation
+2. Resolve compliance classification
+3. Validate legal basis
+4. Persist immutable evidence
+5. Associate retention policy
+6. Preserve forensic metadata
 ```
 
 ---
 
-## Replay Protection
+## Example Compliance Operations
 
-If reused token detected:
+```text id="p4x9wt"
+- Medical record access
+- Consent modification
+- Data export
+- Privacy request handling
+```
 
-```text id="k7w3tx"
-- Revoke entire session
-- Trigger security alert
-- Persist audit evidence
+---
+
+## Compliance Rules
+
+* Legal traceability mandatory
+* Long-term retention supported
+* Sensitive metadata protected
+
+---
+
+# 6. Sensitive Access Audit Workflow
+
+## Purpose
+
+Tracks access to highly sensitive resources.
+
+Critical for medical/legal systems.
+
+---
+
+# Workflow Steps
+
+```text id="w7m1vp"
+1. Detect sensitive resource access
+2. Resolve actor identity
+3. Capture access rationale
+4. Persist access evidence
+5. Associate distributed trace
+6. Trigger anomaly analysis
+```
+
+---
+
+## Sensitive Resources
+
+```text id="y2v8xr"
+- Clinical records
+- Psychological evaluations
+- Billing information
+- Consent documents
 ```
 
 ---
 
 ## Security Rules
 
-* Refresh token rotation mandatory
-* Old refresh tokens invalidated
-* Tokens stored hashed
+* Access reason required
+* Immutable evidence mandatory
+* Actor identity preserved
 
 ---
 
-# 7. Session Revocation Workflow
+# 7. Distributed Correlation Workflow
 
 ## Purpose
 
-Immediately invalidates authenticated sessions.
+Correlates distributed events across services.
 
 ---
 
 # Workflow Steps
 
-```text id="q5v9wr"
-1. Receive revocation request
-2. Validate session ownership
-3. Mark session revoked
-4. Revoke refresh tokens
-5. Publish revocation event
-6. Invalidate caches
-7. Persist audit evidence
+```text id="t5n4wp"
+1. Receive correlation identifier
+2. Associate trace segment
+3. Link distributed operations
+4. Build operation timeline
+5. Persist trace relationships
 ```
 
 ---
 
-## Revocation Triggers
+## Example Trace Flow
 
-| Trigger             | Description            |
-| ------------------- | ---------------------- |
-| User logout         | Manual termination     |
-| Password reset      | Security reset         |
-| Suspicious activity | Threat response        |
-| Admin action        | Administrative control |
-
----
-
-# 8. Logout Workflow
-
-## Purpose
-
-Securely terminates authentication state.
-
----
-
-# Workflow Steps
-
-```text id="t2x8vk"
-1. Receive logout request
-2. Resolve active session
-3. Revoke session
-4. Revoke refresh tokens
-5. Invalidate caches
-6. Persist logout audit
-7. Return success
-```
-
----
-
-## Security Rules
-
-* Logout must revoke refresh tokens
-* Revoked sessions unusable immediately
-
----
-
-# 9. Trusted Device Workflow
-
-## Purpose
-
-Registers and validates trusted devices.
-
----
-
-# Registration Flow
-
-```text id="g8m4wp"
-1. Validate successful authentication
-2. Collect device metadata
-3. Generate device fingerprint
-4. Persist trusted device
-5. Associate with user/session
-```
-
----
-
-# Validation Flow
-
-```text id="d5v1xr"
-1. Resolve device fingerprint
-2. Compare historical trust
-3. Evaluate anomaly indicators
-4. Produce trust decision
+```text id="f8x3vt"
+API Gateway
+    → Authentication Service
+        → Authorization Service
+            → Clinical Service
 ```
 
 ---
 
 ## Benefits
 
-Trusted devices may:
-
-* Reduce MFA frequency
-* Improve anomaly detection
-* Support adaptive authentication
+| Benefit                 | Description         |
+| ----------------------- | ------------------- |
+| Incident reconstruction | Security forensics  |
+| Workflow visibility     | Operations          |
+| Performance tracing     | Distributed systems |
 
 ---
 
-# 10. OAuth2/OIDC Authentication Workflow
+# 8. Audit Retention Workflow
 
 ## Purpose
 
-Authenticates users using external identity providers.
+Enforces audit lifecycle policies.
 
 ---
 
 # Workflow Steps
 
-```text id="n9k3vt"
-1. Redirect to provider
-2. User authenticates externally
-3. Receive authorization code
-4. Exchange code for tokens
-5. Validate provider signature
-6. Resolve external identity
-7. Link/create internal identity
-8. Create session
-9. Generate platform JWT
-10. Persist audit evidence
+```text id="n1v7wr"
+1. Resolve audit category
+2. Resolve retention policy
+3. Evaluate expiration date
+4. Check legal holds
+5. Archive or retain evidence
+6. Persist lifecycle actions
 ```
 
 ---
 
-## Supported Providers
+## Retention Examples
 
-```text id="w4x7pn"
-- Google
-- Microsoft
-- Okta
-- Auth0
-- Keycloak
+| Audit Type        | Retention  |
+| ----------------- | ---------- |
+| Security audit    | 7 years    |
+| Clinical audit    | Regulatory |
+| Operational audit | 1 year     |
+
+---
+
+## Critical Rules
+
+* Legal holds override expiration
+* Immutable archival preferred
+
+---
+
+# 9. Audit Archival Workflow
+
+## Purpose
+
+Preserves long-term audit evidence.
+
+---
+
+# Workflow Steps
+
+```text id="q6m2xp"
+1. Select archival candidates
+2. Generate archive package
+3. Validate integrity hashes
+4. Transfer to archival storage
+5. Persist archive references
+6. Validate restoration capability
+```
+
+---
+
+## Recommended Storage
+
+| Technology        | Purpose             |
+| ----------------- | ------------------- |
+| S3/Object Storage | Long-term retention |
+| Glacier           | Regulatory archival |
+| WORM storage      | Immutable evidence  |
+
+---
+
+# 10. Audit Export Workflow
+
+## Purpose
+
+Generates audit evidence exports.
+
+---
+
+# Workflow Steps
+
+```text id="h9v4xt"
+1. Receive export request
+2. Validate authorization
+3. Resolve export scope
+4. Apply sensitive filtering
+5. Generate export format
+6. Persist export evidence
+7. Deliver export
+```
+
+---
+
+## Supported Formats
+
+```text id="x2m8wr"
+CSV
+JSON
+PDF
+PARQUET
 ```
 
 ---
 
 ## Security Rules
 
-* Provider validation mandatory
-* Signature verification required
-* Tenant mapping enforced
+* Export authorization mandatory
+* Export actions auditable
+* Sensitive data masking supported
 
 ---
 
-# 11. API Key Authentication Workflow
+# 11. Audit Integrity Validation Workflow
 
 ## Purpose
 
-Validates API-based authentication.
+Validates tamper resistance.
 
 ---
 
 # Workflow Steps
 
-```text id="r7n2wy"
-1. Receive API key
-2. Resolve key prefix
-3. Validate key hash
-4. Validate expiration
-5. Validate scopes
-6. Validate tenant context
-7. Produce authentication result
+```text id="d5v1xp"
+1. Load audit evidence
+2. Resolve integrity proof
+3. Recompute hash
+4. Compare integrity chain
+5. Detect tampering
+6. Generate validation report
+```
+
+---
+
+## Integrity Strategies
+
+```text id="u8n3wt"
+- Hash chaining
+- Immutable append-only logs
+- Signed integrity proofs
+```
+
+---
+
+## Critical Rule
+
+Tampering detection must be reproducible.
+
+---
+
+# 12. Security Investigation Workflow
+
+## Purpose
+
+Supports forensic investigations.
+
+---
+
+# Workflow Steps
+
+```text id="j7m4vr"
+1. Receive investigation scope
+2. Query related audit records
+3. Correlate distributed traces
+4. Reconstruct operation timeline
+5. Detect threat indicators
+6. Generate investigation evidence
+```
+
+---
+
+## Example Investigations
+
+```text id="k3x9vp"
+- Unauthorized access
+- Suspicious MFA failures
+- Privilege escalation
+- Token replay incidents
+```
+
+---
+
+# 13. SIEM Integration Workflow
+
+## Purpose
+
+Streams audit/security evidence to monitoring platforms.
+
+---
+
+# Workflow Steps
+
+```text id="g6v2wr"
+1. Detect security audit event
+2. Normalize SIEM payload
+3. Apply severity classification
+4. Publish integration event
+5. Verify delivery
+```
+
+---
+
+## Example Integrations
+
+```text id="m1x7vt"
+- Splunk
+- ELK Stack
+- Sentinel
+- Datadog
+```
+
+---
+
+# 14. Audit Search Workflow
+
+## Purpose
+
+Provides historical audit querying.
+
+---
+
+# Workflow Steps
+
+```text id="r8n4wp"
+1. Receive search criteria
+2. Validate authorization scope
+3. Apply tenant filtering
+4. Execute indexed search
+5. Return paginated evidence
+```
+
+---
+
+## Example Queries
+
+```text id="f4x1vr"
+- Who modified patient X?
+- Who failed MFA repeatedly?
+- Which admin exported records?
 ```
 
 ---
 
 ## Security Rules
 
-* API keys stored hashed
-* Scopes mandatory
-* Revocation support required
+* Tenant isolation mandatory
+* Sensitive filtering enforced
 
 ---
 
-# 12. Service Authentication Workflow
+# 15. Reactive Audit Workflow
 
 ## Purpose
 
-Authenticates internal microservices.
-
----
-
-# Workflow Steps
-
-```text id="m1v6tp"
-1. Receive service credentials
-2. Validate service identity
-3. Validate trust policy
-4. Validate mTLS/session
-5. Produce authenticated service context
-```
-
----
-
-## Recommended Mechanisms
-
-| Mechanism       | Recommendation       |
-| --------------- | -------------------- |
-| mTLS            | Strongly recommended |
-| Signed JWT      | Internal identity    |
-| Service secrets | Secondary option     |
-
----
-
-# 13. Password Reset Workflow
-
-## Purpose
-
-Secure credential recovery.
-
----
-
-# Workflow Steps
-
-```text id="v8k4xr"
-1. Receive password reset request
-2. Validate identity ownership
-3. Generate reset token
-4. Deliver reset mechanism
-5. Validate reset token
-6. Validate new password policy
-7. Rotate password hash
-8. Revoke active sessions
-9. Persist audit evidence
-```
-
----
-
-## Security Rules
-
-* Reset tokens expire rapidly
-* Reset tokens single-use
-* Session revocation mandatory after reset
-
----
-
-# 14. Account Lockout Workflow
-
-## Purpose
-
-Protects against brute force attacks.
-
----
-
-# Workflow Steps
-
-```text id="f6x2vq"
-1. Track failed attempts
-2. Evaluate threshold
-3. Lock account temporarily
-4. Emit security event
-5. Require recovery/MFA
-```
-
----
-
-## Recommended Policies
-
-| Policy                    | Recommendation |
-| ------------------------- | -------------- |
-| Failed attempts threshold | 5–10           |
-| Lock duration             | Progressive    |
-| MFA escalation            | Recommended    |
-
----
-
-# 15. Suspicious Login Detection Workflow
-
-## Purpose
-
-Detects anomalous authentication behavior.
-
----
-
-# Detection Examples
-
-```text id="u3n8wp"
-- Impossible travel
-- New country/device
-- Excessive failures
-- Multiple IP changes
-- Token replay
-```
-
----
-
-# Workflow Steps
-
-```text id="j9v4xt"
-1. Consume authentication events
-2. Evaluate risk indicators
-3. Compute risk score
-4. Trigger additional verification
-5. Persist incident evidence
-6. Notify monitoring systems
-```
-
----
-
-# 16. Authentication Audit Workflow
-
-## Purpose
-
-Persists immutable authentication evidence.
-
----
-
-# Audit Data
-
-```text id="k5x1vr"
-- User
-- Tenant
-- IP
-- Device
-- Result
-- MFA usage
-- Session ID
-- Timestamp
-```
-
----
-
-# Workflow Steps
-
-```text id="p2w7tn"
-1. Capture authentication event
-2. Build audit record
-3. Persist immutable evidence
-4. Publish monitoring event
-```
-
----
-
-# 17. Distributed Authentication Workflow
-
-## Purpose
-
-Supports authentication across microservices.
-
----
-
-# Flow
-
-```text id="s7m3vx"
-API Gateway
-    └── Authentication Service
-            └── Session Store
-                    └── Authorization Service
-```
-
----
-
-## Requirements
-
-* Stateless JWT support
-* Distributed session validation
-* Central revocation support
-
----
-
-# 18. Reactive Authentication Workflow
-
-## Purpose
-
-Supports non-blocking authentication.
+Supports non-blocking audit processing.
 
 ---
 
 ## Characteristics
 
-| Characteristic               | Description            |
-| ---------------------------- | ---------------------- |
-| Non-blocking IO              | Scalability            |
-| Async MFA flows              | Reactive orchestration |
-| Reactive context propagation | Thread safety          |
+| Characteristic       | Description     |
+| -------------------- | --------------- |
+| Async ingestion      | High throughput |
+| Reactive pipelines   | Scalability     |
+| Backpressure support | Stability       |
 
 ---
 
 ## Example
 
-```text id="x4k8wp"
-Mono<AuthenticationResult>
+```text id="p2v9xt"
+Flux<AuditRecord>
+Mono<AuditExport>
 ```
 
 ---
 
-# 19. Failure Handling Rules
-
-## Fail Closed Principle
-
-Authentication failures:
-
-```text id="q8n5vr"
-AUTHENTICATION = DENIED
-```
-
----
-
-## Examples
-
-| Failure                   | Result |
-| ------------------------- | ------ |
-| JWT validation failure    | Deny   |
-| MFA timeout               | Deny   |
-| Session revoked           | Deny   |
-| Policy engine unavailable | Deny   |
-
----
-
-# 20. Cache and Token Synchronization Workflow
+# 16. Distributed Event Consumption Workflow
 
 ## Purpose
 
-Synchronizes authentication state.
+Consumes audit events from distributed modules.
 
 ---
 
-# Synchronization Triggers
+# Event Sources
 
-```text id="h1v7tx"
-- Logout
-- Password reset
-- Session revocation
-- Token replay detection
+```text id="c5m8wr"
+- Authentication Management
+- Authorization Management
+- User Management
+- Workflow Management
+- Billing Management
 ```
 
 ---
 
-## Actions
+# Workflow Steps
 
-```text id="g6m2wr"
-- Redis invalidation
-- Session synchronization
-- JWT blacklist update
+```text id="v7x3wp"
+1. Consume event stream
+2. Validate schema
+3. Resolve audit category
+4. Persist audit evidence
+5. Trigger downstream consumers
 ```
 
 ---
 
-# 21. Performance Considerations
+# 17. Failure Handling Workflow
+
+## Purpose
+
+Preserves evidence integrity during failures.
+
+---
+
+# Failure Rules
+
+| Failure            | Strategy             |
+| ------------------ | -------------------- |
+| DB unavailable     | Retry + queue        |
+| Integrity mismatch | Investigation        |
+| Archive failure    | Retry mandatory      |
+| SIEM failure       | Retry asynchronously |
+
+---
+
+## Fail Secure Principle
+
+Audit evidence loss must be minimized.
+
+---
+
+# 18. Cross-Tenant Access Detection Workflow
+
+## Purpose
+
+Detects tenant isolation violations.
+
+---
+
+# Workflow Steps
+
+```text id="n4v8xr"
+1. Detect tenant mismatch
+2. Generate security audit
+3. Escalate severity
+4. Trigger alert
+5. Preserve forensic evidence
+```
+
+---
+
+# 19. Audit Lifecycle Workflow
+
+## Purpose
+
+Manages full audit lifecycle.
+
+---
+
+# Lifecycle Stages
+
+```text id="t1m7vp"
+CREATED
+ACTIVE
+ARCHIVED
+UNDER_LEGAL_HOLD
+EXPIRED
+```
+
+---
+
+# Workflow Actions
+
+```text id="q8x2wt"
+- Persist
+- Archive
+- Retain
+- Restore
+- Expire
+```
+
+---
+
+# 20. Performance Considerations
 
 Critical performance areas:
 
-| Area              | Optimization           |
-| ----------------- | ---------------------- |
-| JWT validation    | Stateless verification |
-| Session lookup    | Redis                  |
-| MFA validation    | Async delivery         |
-| Audit persistence | Async eventing         |
+| Area            | Optimization            |
+| --------------- | ----------------------- |
+| Audit ingestion | Async streaming         |
+| Search          | Elasticsearch indexing  |
+| Correlation     | Indexed correlation IDs |
+| Archival        | Batch processing        |
+
+---
+
+# 21. Scalability Considerations
+
+The workflows support:
+
+* High-volume ingestion
+* Distributed microservices
+* Horizontal scaling
+* Multi-region deployments
+* Event-driven architectures
 
 ---
 
@@ -696,13 +670,13 @@ Critical performance areas:
 
 The workflows enforce:
 
-* Zero Trust authentication
-* Least privilege
-* Replay prevention
-* Session integrity
-* MFA enforcement
+* Immutable evidence
 * Tenant isolation
-* Immutable auditing
+* Zero Trust traceability
+* Distributed accountability
+* Tamper detection
+* Compliance retention
+* Security forensic integrity
 
 ---
 
@@ -710,28 +684,28 @@ The workflows enforce:
 
 Future workflows may include:
 
-* Passwordless login workflow
-* WebAuthn workflow
-* Adaptive authentication workflow
-* Continuous authentication workflow
-* Biometric authentication workflow
-* Risk-based MFA workflow
+* AI anomaly detection workflow
+* Behavioral audit workflow
+* Continuous compliance workflow
+* Blockchain audit workflow
+* Privacy investigation workflow
+* Risk scoring workflow
 
 ---
 
 # 24. Summary
 
-The Authentication Management workflows provide:
+The Audit Management workflows provide:
 
-* Secure identity validation
-* Enterprise-grade session handling
-* MFA orchestration
-* Replay-resistant token management
-* Distributed authentication support
-* Reactive authentication scalability
-* Immutable security auditing
+* Enterprise-grade audit ingestion
+* Immutable evidence persistence
+* Security forensic reconstruction
+* Distributed operational traceability
+* Compliance-grade retention
+* Reactive audit scalability
+* Tamper-resistant audit validation
 
-These workflows define the operational behavior of the authentication ecosystem.
+These workflows define the operational behavior of the audit ecosystem.
 
 ```
 ```

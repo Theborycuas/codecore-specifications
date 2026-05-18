@@ -1,46 +1,39 @@
-# 05-authentication-management/overview.md
+# 06-audit-management/overview.md
 
-````md id="h7k3vp"
-# Authentication Management Module Overview
+````md id="a7v3xp"
+# Audit Management Module Overview
 
 ## 1. Purpose
 
-The Authentication Management module is responsible for validating and establishing user identity across the platform.
+The Audit Management module is responsible for providing immutable traceability, security evidence, operational accountability, and compliance-grade auditing across the platform.
 
-This module handles:
+This module centralizes:
 
-- User authentication
-- Credential validation
-- Session management
-- JWT issuance
-- Refresh token management
-- Multi-factor authentication (MFA)
-- Device trust validation
-- OAuth2/OpenID Connect integration
-- API authentication
-- Service-to-service authentication
-- Authentication auditing
-- Account security protections
+- Security audit events
+- Functional audit trails
+- Compliance evidence
+- Distributed traceability
+- Forensic records
+- User activity tracking
+- Administrative change tracking
+- Authentication and authorization evidence
+- System integrity monitoring
 
-The module acts as the identity verification boundary of the platform and serves as the first security layer before authorization is evaluated.
+The module acts as the official source of truth for historical accountability and security traceability.
 
 ---
 
 # 2. Architectural Responsibility
 
-Authentication answers:
+The module answers questions such as:
 
-```text id="t4x8wp"
-Who is the user?
+```text id="u8n4wr"
+Who performed the action?
+What changed?
+When did it happen?
+Where did it happen from?
+Why did it happen?
 ````
-
-Authorization answers:
-
-```text id="f2m6zr"
-What can the user do?
-```
-
-These concerns must remain separated.
 
 ---
 
@@ -48,584 +41,546 @@ These concerns must remain separated.
 
 The module is designed to provide:
 
-* Enterprise-grade authentication
-* Strong identity validation
-* Stateless scalability
-* Secure token management
-* Multi-tenant authentication isolation
-* Zero Trust authentication foundations
-* MFA extensibility
-* OAuth2/OIDC compatibility
-* Distributed session support
-* Reactive authentication support
+* Immutable auditability
+* Enterprise-grade compliance support
+* Distributed trace correlation
+* Security forensic capabilities
+* Regulatory evidence retention
+* Multi-tenant audit isolation
+* Scalable event persistence
+* Real-time security observability
+* Event-driven traceability
+* Reactive audit ingestion
 
 ---
 
 # 4. Main Responsibilities
 
-| Responsibility          | Description                   |
-| ----------------------- | ----------------------------- |
-| Login Management        | Authenticate users            |
-| Session Management      | Track authenticated sessions  |
-| JWT Issuance            | Generate secure access tokens |
-| Refresh Token Rotation  | Maintain session continuity   |
-| Credential Validation   | Validate passwords/secrets    |
-| MFA Enforcement         | Multi-factor authentication   |
-| Account Protection      | Brute force prevention        |
-| Device Trust            | Trusted device validation     |
-| OAuth2/OIDC Support     | External identity integration |
-| Logout Handling         | Session invalidation          |
-| Authentication Auditing | Track login activity          |
-| Token Revocation        | Revoke compromised access     |
+| Responsibility           | Description                               |
+| ------------------------ | ----------------------------------------- |
+| Security Auditing        | Authentication and authorization evidence |
+| Functional Auditing      | Business activity tracking                |
+| Administrative Auditing  | Critical configuration changes            |
+| Compliance Auditing      | Regulatory traceability                   |
+| Event Persistence        | Immutable event storage                   |
+| Distributed Traceability | Correlation across services               |
+| Audit Search             | Query historical evidence                 |
+| Threat Investigation     | Security forensics                        |
+| Retention Enforcement    | Audit lifecycle management                |
+| Integrity Validation     | Tamper resistance                         |
 
 ---
 
-# 5. Core Authentication Model
+# 5. Audit Domain Philosophy
 
-The authentication flow follows:
+Audit Management is NOT:
 
-```text id="u8n2tv"
-Identity Verification
-        ↓
-Credential Validation
-        ↓
-Session Establishment
-        ↓
-Token Issuance
-        ↓
-Authorization Enablement
+```text id="q5m8vt"
+- application logging
+- debug tracing
+- infrastructure logging
+```
+
+Audit Management IS:
+
+```text id="r2x7wp"
+- legal traceability
+- compliance evidence
+- security evidence
+- historical accountability
 ```
 
 ---
 
-# 6. Authentication Types
+# 6. Audit Categories
 
-The module supports multiple authentication mechanisms.
-
-## Supported Authentication Types
-
-| Type                         | Purpose                  |
-| ---------------------------- | ------------------------ |
-| Username/Password            | Standard login           |
-| JWT Authentication           | Stateless authentication |
-| Refresh Token Authentication | Session continuity       |
-| MFA/TOTP                     | Additional verification  |
-| OAuth2                       | Third-party login        |
-| OpenID Connect               | Federated identity       |
-| API Keys                     | Service/API access       |
-| Service Tokens               | Internal microservices   |
-| Device Authentication        | Trusted devices          |
-| SSO                          | Enterprise login         |
+The module supports multiple audit categories.
 
 ---
 
-# 7. Multi-Tenant Authentication Model
+## 6.1 Security Audit
 
-Authentication is tenant-aware.
+Tracks:
 
-Every authentication request must consider:
-
-* Tenant identity
-* User tenant membership
-* Tenant authentication policies
-* Tenant MFA policies
-* Tenant session restrictions
-
----
-
-## Example
-
-```text id="w5k9rx"
-User:
-john@tenant-a.com
-
-Tenant:
-TENANT_A
-```
-
-Authentication context must never leak across tenants.
+* Login attempts
+* MFA events
+* Session revocations
+* Permission changes
+* Privilege escalations
+* Token replay attacks
+* Suspicious activities
 
 ---
 
-# 8. Authentication vs Authorization
+## 6.2 Functional Audit
 
-## Authentication Responsibilities
+Tracks:
 
-Managed here:
-
-* Login
-* Password validation
-* MFA
-* Sessions
-* JWT generation
-* Refresh tokens
-* OAuth2/OIDC
-* Device trust
+* Clinical record modifications
+* Patient updates
+* Appointment changes
+* Workflow execution
+* User operations
 
 ---
 
-## Authorization Responsibilities
+## 6.3 Administrative Audit
 
-Handled by Authorization Management:
+Tracks:
 
-* Permissions
-* Roles
-* Policies
-* Access decisions
-* Resource authorization
-
----
-
-# 9. Security Principles
-
-The module follows:
-
-| Principle              | Description                     |
-| ---------------------- | ------------------------------- |
-| Zero Trust             | Never trust requests implicitly |
-| Least Privilege        | Minimal authentication scope    |
-| Defense in Depth       | Layered protections             |
-| Fail Closed            | Failures deny authentication    |
-| Immutable Auditability | Authentication events traceable |
-| Short-Lived Access     | Minimize token exposure         |
-| Credential Protection  | Secure secret handling          |
+* Role changes
+* Policy updates
+* Tenant configuration changes
+* Billing configuration changes
+* Feature flag modifications
 
 ---
 
-# 10. Authentication Layers
+## 6.4 Compliance Audit
 
-## Layer 1 — Identity Resolution
+Tracks:
 
-Resolve:
-
-* Username
-* Email
-* External identity provider
-* API key owner
-
----
-
-## Layer 2 — Credential Validation
-
-Validate:
-
-* Password
-* MFA
-* Device trust
-* OAuth token
-* Service identity
+* Sensitive data access
+* Medical record access
+* Consent changes
+* Data exports
+* Privacy operations
 
 ---
 
-## Layer 3 — Account State Validation
+# 7. Multi-Tenant Audit Model
 
-Validate:
-
-* Account enabled
-* Account locked
-* Password expiration
-* MFA requirements
-* Tenant restrictions
+All audit records are tenant-aware.
 
 ---
 
-## Layer 4 — Session Establishment
+## Mandatory Audit Context
 
-Create:
-
-* Session context
-* Security context
-* Authentication metadata
-
----
-
-## Layer 5 — Token Issuance
-
-Generate:
-
-* JWT access token
-* Refresh token
-* Session identifiers
-
----
-
-# 11. JWT Strategy
-
-The module uses JWT for stateless authentication.
-
----
-
-## JWT Contents
-
-Recommended claims:
-
-```text id="r7x4pn"
-- sub
+```text id="n1v6xr"
 - tenantId
-- roles
-- permissions snapshot
-- sessionId
-- iat
-- exp
-- iss
+- actorId
+- correlationId
+- timestamp
+- resource
+- action
 ```
+
+---
+
+## Tenant Isolation Rule
+
+```text id="x7m2vp"
+Tenant A
+cannot access
+Tenant B audit records
+```
+
+---
+
+# 8. Immutable Audit Principle
+
+Audit records are immutable after persistence.
+
+---
+
+## Forbidden Operations
+
+```text id="p9w4xt"
+- Audit deletion
+- Audit modification
+- Audit overwriting
+```
+
+---
+
+## Allowed Operations
+
+```text id="g4x8vr"
+- Retention expiration
+- Legal archival
+- Compliance export
+```
+
+---
+
+# 9. Audit Event Model
+
+Audit Management is event-driven.
+
+Audit records originate from:
+
+| Source           | Example              |
+| ---------------- | -------------------- |
+| Authentication   | Login success        |
+| Authorization    | Permission denied    |
+| Clinical modules | Record modification  |
+| Billing          | Subscription updates |
+| Workflow engine  | State transitions    |
+| API Gateway      | Sensitive access     |
+
+---
+
+# 10. Core Audit Structure
+
+A typical audit record contains:
+
+| Field          | Description        |
+| -------------- | ------------------ |
+| Audit ID       | Unique identifier  |
+| Timestamp      | Event occurrence   |
+| Tenant ID      | Tenant context     |
+| Actor ID       | User/service actor |
+| Action         | Executed action    |
+| Resource       | Target resource    |
+| Result         | SUCCESS/FAILURE    |
+| Correlation ID | Distributed trace  |
+| Metadata       | Additional context |
+
+---
+
+# 11. Correlation and Distributed Tracing
+
+The module supports distributed observability.
+
+---
+
+## Correlation Requirements
+
+All critical operations should include:
+
+```text id="j8v3wp"
+X-Correlation-ID
+```
+
+---
+
+## Benefits
+
+| Benefit                 | Description             |
+| ----------------------- | ----------------------- |
+| Cross-service tracing   | Distributed systems     |
+| Forensic reconstruction | Security investigations |
+| Workflow tracking       | Operational visibility  |
+
+---
+
+# 12. Compliance Considerations
+
+The module is designed to support:
+
+| Compliance Standard | Usage                  |
+| ------------------- | ---------------------- |
+| HIPAA               | Medical traceability   |
+| GDPR                | Privacy accountability |
+| SOC2                | Operational security   |
+| ISO 27001           | Security governance    |
+| OWASP ASVS          | Security validation    |
+
+---
+
+# 13. Medical/Clinical Compliance Importance
+
+For systems like CognisoftOne:
+
+Audit Management is mandatory.
+
+---
+
+## Critical Audit Requirements
+
+| Requirement                  | Importance         |
+| ---------------------------- | ------------------ |
+| Who accessed records         | Legal              |
+| Who modified diagnoses       | Clinical integrity |
+| When data changed            | Traceability       |
+| Unauthorized access attempts | Security           |
+| Consent modifications        | Compliance         |
+
+---
+
+# 14. Security Audit Importance
+
+Security events are first-class citizens.
+
+---
+
+## Critical Security Events
+
+```text id="f6n2vr"
+- Login failures
+- MFA failures
+- Token replay
+- Privilege escalation
+- Cross-tenant attempts
+- Unauthorized access
+```
+
+---
+
+# 15. Audit Integrity Model
+
+The architecture should support:
+
+* Immutable persistence
+* Tamper evidence
+* Hash validation
+* Append-only storage
+* Archival protection
+
+---
+
+# 16. Separation of Concerns
+
+The architecture separates:
+
+| Type             | Purpose         |
+| ---------------- | --------------- |
+| Application Logs | Debugging       |
+| Metrics          | Monitoring      |
+| Audit Logs       | Compliance      |
+| Security Events  | Threat analysis |
 
 ---
 
 ## Important Rule
 
-JWT must never be trusted alone.
+Audit Management must never become:
 
-Runtime authorization validation remains mandatory.
-
----
-
-# 12. Refresh Token Strategy
-
-Refresh tokens support secure session continuation.
-
----
-
-## Requirements
-
-| Requirement           | Description            |
-| --------------------- | ---------------------- |
-| Rotation required     | Prevent replay         |
-| Revocable             | Immediate invalidation |
-| Expiration enforced   | Session security       |
-| Device-bound optional | Increased security     |
-
----
-
-# 13. MFA Support
-
-The module is designed for MFA extensibility.
-
----
-
-## Supported MFA Types
-
-| MFA Type  | Status    |
-| --------- | --------- |
-| TOTP      | Primary   |
-| Email OTP | Supported |
-| SMS OTP   | Optional  |
-| Push MFA  | Future    |
-| WebAuthn  | Future    |
-| Biometric | Future    |
-
----
-
-# 14. Session Management
-
-The module manages authenticated sessions.
-
----
-
-## Session Responsibilities
-
-* Session creation
-* Session expiration
-* Session revocation
-* Concurrent session control
-* Device tracking
-* Risk monitoring
-
----
-
-## Session Types
-
-```text id="k1v6yt"
-- Web sessions
-- Mobile sessions
-- API sessions
-- Service sessions
+```text id="v3m9xt"
+a generic logging platform
 ```
 
 ---
 
-# 15. Account Protection Features
+# 17. Audit Retention Strategy
 
-The module includes protections against:
+Retention policies depend on:
 
-| Threat              | Mitigation         |
-| ------------------- | ------------------ |
-| Brute force         | Rate limiting      |
-| Credential stuffing | Lockout detection  |
-| Token theft         | Revocation         |
-| Session hijacking   | Rotation           |
-| Replay attacks      | Token rotation     |
-| MFA bypass          | Step-up validation |
+* Regulations
+* Security policies
+* Tenant configuration
+* Legal obligations
 
 ---
 
-# 16. Device Trust Model
+## Example Policies
 
-The module supports trusted device validation.
+| Audit Type        | Retention   |
+| ----------------- | ----------- |
+| Security audit    | Long-term   |
+| Medical audit     | Regulatory  |
+| Operational audit | Medium-term |
+| Debug traces      | Short-term  |
 
 ---
 
-## Device Metadata
+# 18. Event-Driven Architecture Integration
 
-```text id="m9w2zr"
-- Device ID
-- Browser fingerprint
-- IP history
-- Geo location
-- Trust status
+The module consumes events from:
+
+```text id="t7x1wr"
+- Authentication Management
+- Authorization Management
+- User Management
+- Tenant Management
+- Billing Management
+- Workflow Management
 ```
 
 ---
 
-## Usage
+# 19. Search and Forensics
 
-Trusted devices may:
+The module supports:
 
-* Reduce MFA prompts
-* Enable adaptive authentication
-* Improve anomaly detection
-
----
-
-# 17. OAuth2 and OpenID Connect
-
-The architecture supports external identity federation.
+* Audit searching
+* Incident reconstruction
+* Timeline analysis
+* Threat investigations
+* Compliance exports
 
 ---
 
-## Supported Providers
+## Example Queries
 
-| Provider           | Example         |
-| ------------------ | --------------- |
-| Google             | OAuth2/OIDC     |
-| Microsoft Entra ID | Enterprise SSO  |
-| Okta               | Enterprise IAM  |
-| Auth0              | SaaS IAM        |
-| Keycloak           | Self-hosted IAM |
-
----
-
-# 18. Internal Service Authentication
-
-The module supports service-to-service authentication.
-
----
-
-## Recommended Mechanisms
-
-| Mechanism          | Recommendation       |
-| ------------------ | -------------------- |
-| mTLS               | Strongly recommended |
-| Signed JWT         | Internal services    |
-| Service identities | Mandatory            |
-| API keys           | Limited usage        |
-
----
-
-# 19. Authentication Auditing
-
-All critical authentication events must be auditable.
-
----
-
-## Audited Events
-
-```text id="y4r8tk"
-- Login success
-- Login failure
-- MFA validation
-- Password reset
-- Session revocation
-- Token refresh
-- Device registration
+```text id="k5v8wp"
+- Who accessed patient X?
+- Who modified diagnosis Y?
+- Which user failed MFA repeatedly?
 ```
 
 ---
 
-# 20. Authentication Engine
+# 20. Scalability Considerations
 
-The Authentication Engine is responsible for:
+Audit Management is designed for:
 
-* Credential validation
-* MFA orchestration
-* Session generation
-* Token issuance
-* Security policy enforcement
-
----
-
-## Input
-
-```text id="c6n1vp"
-- Credentials
-- Tenant
-- Device metadata
-- Request context
-```
-
----
-
-## Output
-
-```text id="p8x5wr"
-- Authenticated identity
-- Session
-- JWT
-- Refresh token
-```
-
----
-
-# 21. Scalability Considerations
-
-The module is designed for:
-
-* High authentication throughput
+* High-volume ingestion
 * Distributed systems
-* Stateless deployments
-* Multi-region scalability
-* Reactive applications
+* Event streaming
+* Horizontal scaling
+* Multi-region persistence
 
 ---
 
-## Strategies
+## Recommended Technologies
 
-| Strategy           | Purpose                   |
-| ------------------ | ------------------------- |
-| JWT                | Stateless authentication  |
-| Redis              | Distributed session state |
-| Token caching      | Performance               |
-| Horizontal scaling | Elasticity                |
-| Reactive pipelines | Concurrency               |
-
----
-
-# 22. Reactive Authentication Support
-
-The architecture supports:
-
-```text id="n5v2qy"
-Mono<AuthenticationResult>
-```
-
-and non-blocking authentication flows.
+| Technology        | Purpose                |
+| ----------------- | ---------------------- |
+| Kafka             | Event streaming        |
+| PostgreSQL        | Structured persistence |
+| Elasticsearch     | Audit search           |
+| S3/Object Storage | Long-term archival     |
 
 ---
 
-## Requirements
+# 21. Reactive Audit Architecture
 
-* Non-blocking credential validation
-* Reactive security context propagation
-* Async MFA workflows
+The module supports reactive processing.
 
 ---
 
-# 23. Security-Critical Constraints
+## Example
 
-## Credentials Never Stored in Plaintext
-
-Passwords require:
-
-```text id="g7r4xm"
-Argon2
-bcrypt
-PBKDF2
+```text id="m2n7vx"
+Flux<AuditRecord>
+Mono<AuditEvent>
 ```
 
 ---
 
-## Short-Lived Access Tokens
+## Benefits
 
-Recommended:
-
-| Token         | Recommended Lifetime |
-| ------------- | -------------------- |
-| Access token  | 5–30 minutes         |
-| Refresh token | Days/weeks           |
-| MFA challenge | Minutes              |
+| Benefit                  | Description         |
+| ------------------------ | ------------------- |
+| High throughput          | Event ingestion     |
+| Non-blocking IO          | Scalability         |
+| Reactive event pipelines | Distributed systems |
 
 ---
 
-## Session Revocation Required
+# 22. Security Principles
 
-Compromised sessions must support immediate revocation.
+The module follows:
 
----
-
-# 24. Integration with Other Modules
-
-| Module                   | Integration Purpose   |
-| ------------------------ | --------------------- |
-| Authorization Management | Access control        |
-| Identity Management      | User identity         |
-| Tenant Management        | Tenant resolution     |
-| Audit Management         | Security traceability |
-| Notification Management  | MFA delivery          |
-| User Management          | User lifecycle        |
-| Observability            | Monitoring and alerts |
+| Principle          | Description         |
+| ------------------ | ------------------- |
+| Immutable evidence | Tamper resistance   |
+| Least privilege    | Restricted access   |
+| Tenant isolation   | SaaS security       |
+| Zero Trust         | Explicit validation |
+| Fail secure        | Preserve evidence   |
 
 ---
 
-# 25. Event-Driven Authentication
+# 23. Access Control Model
 
-The module emits events including:
+Audit data access requires strict authorization.
 
-```text id="x2k9wt"
-- UserAuthenticated
-- AuthenticationFailed
-- SessionCreated
-- SessionRevoked
-- RefreshTokenRotated
-- MFAChallengeCompleted
-- SuspiciousLoginDetected
+---
+
+## Example Restrictions
+
+| Role             | Access                        |
+| ---------------- | ----------------------------- |
+| Tenant Admin     | Tenant-only audit             |
+| Security Auditor | Security audit                |
+| Platform Support | Restricted support visibility |
+| Clinical Staff   | Limited operational audit     |
+
+---
+
+# 24. Audit Sensitivity Classification
+
+Audit records may contain sensitive metadata.
+
+---
+
+## Sensitive Examples
+
+```text id="y9w4vr"
+- IP addresses
+- User identifiers
+- Device identifiers
+- Access patterns
+```
+
+---
+
+## Restrictions
+
+Sensitive audit metadata must:
+
+* Be protected
+* Be access-controlled
+* Avoid overexposure
+
+---
+
+# 25. Integration with Security Monitoring
+
+The module integrates with:
+
+* SIEM platforms
+* Threat detection systems
+* Observability platforms
+* Incident response tooling
+
+---
+
+## Example Integrations
+
+```text id="r4n8xt"
+- Splunk
+- ELK Stack
+- Datadog
+- Sentinel
 ```
 
 ---
 
 # 26. Future Evolution
 
-The architecture supports future extensions including:
+The architecture supports future capabilities including:
 
-* Passwordless authentication
-* WebAuthn
-* Adaptive authentication
-* Risk-based authentication
-* Continuous authentication
-* Behavioral biometrics
-* Identity federation
-* Hardware security keys
+* Real-time anomaly detection
+* AI-assisted threat analysis
+* Behavioral auditing
+* Continuous compliance monitoring
+* Immutable ledger storage
+* Blockchain-backed evidence
+* Risk scoring integration
 
 ---
 
-# 27. Compliance Considerations
+# 27. Operational Considerations
 
-The module should support:
+Recommended operational practices:
 
-* GDPR
-* HIPAA
-* SOC2
-* ISO 27001
-* OWASP ASVS
-* NIST authentication recommendations
-
-depending on business requirements.
+| Practice            | Recommendation |
+| ------------------- | -------------- |
+| Immutable backups   | Mandatory      |
+| Retention policies  | Automated      |
+| Audit reviews       | Periodic       |
+| Security monitoring | Continuous     |
+| Evidence archival   | Automated      |
 
 ---
 
 # 28. Summary
 
-The Authentication Management module provides:
+The Audit Management module provides:
 
-* Enterprise-grade identity validation
-* Secure session management
-* MFA extensibility
-* Distributed authentication support
-* Stateless JWT authentication
-* Multi-tenant authentication isolation
-* Reactive authentication architecture
-* Zero Trust security foundations
+* Enterprise-grade auditability
+* Immutable security evidence
+* Distributed traceability
+* Compliance-grade event persistence
+* Security forensic capabilities
+* Multi-tenant audit isolation
+* Reactive audit scalability
+* Event-driven accountability
 
-It acts as the identity verification foundation of the SaaS ecosystem.
+It acts as the compliance and accountability backbone of the SaaS ecosystem.
 
 ```
 ```

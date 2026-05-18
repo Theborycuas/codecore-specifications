@@ -1,32 +1,31 @@
-# 05-authentication-management/api-contracts.md
+# 06-audit-management/api-contracts.md
 
-````md id="x7v3wp"
-# Authentication Management API Contracts
+````md id="n4x8vp"
+# Audit Management API Contracts
 
 ## 1. Introduction
 
-This document defines the API contracts of the Authentication Management module.
+This document defines the API contracts of the Audit Management module.
 
-The APIs expose secure authentication capabilities including:
+The APIs expose audit capabilities including:
 
-- User authentication
-- Session management
-- JWT issuance
-- Refresh token rotation
-- MFA workflows
-- Password recovery
-- Device trust management
-- OAuth2/OIDC integration
-- API key management
-- Service authentication
+- Audit search
+- Security audit investigation
+- Compliance evidence retrieval
+- Distributed trace inspection
+- Audit exports
+- Retention management
+- Integrity validation
+- Forensic analysis
+- SIEM integrations
 
 The contracts are designed following:
 
 - RESTful principles
 - Secure-by-default architecture
-- Multi-tenant SaaS standards
+- Multi-tenant SaaS isolation
 - Zero Trust security principles
-- Enterprise authentication best practices
+- Enterprise compliance standards
 
 ---
 
@@ -34,20 +33,20 @@ The contracts are designed following:
 
 | Principle | Description |
 |---|---|
-| Stateless authentication | JWT-based access |
-| Tenant-aware operations | Tenant isolation mandatory |
-| Explicit authentication | No implicit trust |
-| Immutable auditability | Security actions tracked |
-| Secure defaults | Deny by default |
-| Idempotent security operations | Safe retries |
-| Versioned APIs | Backward compatibility |
+| Immutable audit evidence | No modification APIs |
+| Tenant-aware access | Isolation mandatory |
+| Least privilege | Restricted visibility |
+| Secure exports | Controlled evidence delivery |
+| Auditable access | Audit reads tracked |
+| Versioned contracts | Backward compatibility |
+| Reactive-friendly | High-throughput support |
 
 ---
 
 # 3. Base URL
 
-```text id="n2x8vt"
-/api/v1/authentication
+```text id="u7m2wr"
+/api/v1/audit
 ````
 
 ---
@@ -56,250 +55,66 @@ The contracts are designed following:
 
 | Header           | Required    | Description         |
 | ---------------- | ----------- | ------------------- |
-| Authorization    | Conditional | Bearer token        |
+| Authorization    | Yes         | Bearer JWT          |
 | X-Tenant-ID      | Yes         | Tenant context      |
 | X-Correlation-ID | Recommended | Distributed tracing |
 | Content-Type     | Yes         | application/json    |
 
 ---
 
-# 5. Authentication Endpoints
+# 5. Audit Search APIs
 
-# 5.1 Username/Password Login
+# 5.1 Search Audit Records
 
 ## Endpoint
 
-```text id="m7w3xr"
-POST /login
+```text id="r5x9vt"
+GET /records
 ```
 
 ---
 
 ## Purpose
 
-Authenticates user credentials.
+Searches immutable audit evidence.
 
 ---
 
-## Request
+## Query Parameters
 
-```json id="v4k8wp"
-{
-  "username": "john@example.com",
-  "password": "securePassword",
-  "deviceId": "device-123"
-}
+| Parameter     | Description             |
+| ------------- | ----------------------- |
+| category      | SECURITY/COMPLIANCE/etc |
+| actorId       | User/service actor      |
+| action        | Audited action          |
+| resourceType  | Target resource         |
+| resourceId    | Resource identifier     |
+| result        | SUCCESS/FAILURE         |
+| startDate     | Start timestamp         |
+| endDate       | End timestamp           |
+| correlationId | Distributed trace       |
+
+---
+
+## Example Request
+
+```text id="g2v8wr"
+/api/v1/audit/records?category=SECURITY
 ```
 
 ---
 
-## Response
+## Example Response
 
-```json id="t9n2vx"
-{
-  "success": true,
-  "data": {
-    "accessToken": "jwt-token",
-    "refreshToken": "refresh-token",
-    "expiresIn": 900,
-    "sessionId": "uuid"
-  }
-}
-```
-
----
-
-## Possible Responses
-
-| Status | Meaning                |
-| ------ | ---------------------- |
-| 200    | Authentication success |
-| 401    | Invalid credentials    |
-| 423    | Account locked         |
-| 428    | MFA required           |
-
----
-
-## Security Rules
-
-* Rate limiting mandatory
-* Audit logging mandatory
-* Passwords never logged
-
----
-
-# 5.2 MFA Verification
-
-## Endpoint
-
-```text id="r5x1vt"
-POST /mfa/verify
-```
-
----
-
-## Purpose
-
-Validates MFA challenge.
-
----
-
-## Request
-
-```json id="g8m4wp"
-{
-  "challengeId": "uuid",
-  "verificationCode": "123456"
-}
-```
-
----
-
-## Response
-
-```json id="y3v7xr"
-{
-  "success": true,
-  "data": {
-    "accessToken": "jwt-token",
-    "refreshToken": "refresh-token"
-  }
-}
-```
-
----
-
-## Validation Rules
-
-* Challenge expiration enforced
-* Single-use codes only
-* Brute force protection required
-
----
-
-# 5.3 Refresh Token Rotation
-
-## Endpoint
-
-```text id="u1k9vp"
-POST /token/refresh
-```
-
----
-
-## Purpose
-
-Rotates refresh token and issues new JWT.
-
----
-
-## Request
-
-```json id="f6w2xt"
-{
-  "refreshToken": "refresh-token"
-}
-```
-
----
-
-## Response
-
-```json id="p4n8vr"
-{
-  "success": true,
-  "data": {
-    "accessToken": "new-jwt",
-    "refreshToken": "new-refresh-token"
-  }
-}
-```
-
----
-
-## Security Rules
-
-| Rule                      | Description       |
-| ------------------------- | ----------------- |
-| Rotation mandatory        | Replay prevention |
-| Old token invalidated     | Security          |
-| Replay detection required | Threat protection |
-
----
-
-# 5.4 Logout
-
-## Endpoint
-
-```text id="x8m3wt"
-POST /logout
-```
-
----
-
-## Purpose
-
-Revokes active session.
-
----
-
-## Required Authentication
-
-```text id="j7v4xp"
-Bearer JWT
-```
-
----
-
-## Actions
-
-```text id="k2n9vr"
-- Revoke session
-- Revoke refresh token
-- Invalidate caches
-```
-
----
-
-## Response
-
-```json id="d5x1wp"
-{
-  "success": true
-}
-```
-
----
-
-# 6. Session Management APIs
-
-# 6.1 List Active Sessions
-
-## Endpoint
-
-```text id="m3v8xt"
-GET /sessions
-```
-
----
-
-## Purpose
-
-Returns active authenticated sessions.
-
----
-
-## Response
-
-```json id="v6n2wr"
+```json id="m8n4xp"
 {
   "success": true,
   "data": [
     {
-      "sessionId": "uuid",
-      "deviceId": "device-123",
-      "ipAddress": "192.168.1.1",
-      "createdAt": "2026-05-18T10:00:00Z"
+      "auditRecordId": "uuid",
+      "action": "LOGIN_SUCCESS",
+      "actorId": "uuid",
+      "occurredAt": "2026-05-18T10:00:00Z"
     }
   ]
 }
@@ -307,444 +122,552 @@ Returns active authenticated sessions.
 
 ---
 
-# 6.2 Revoke Session
+## Security Rules
+
+* Tenant filtering mandatory
+* Sensitive filtering required
+* Search access auditable
+
+---
+
+# 5.2 Retrieve Audit Record
 
 ## Endpoint
 
-```text id="q9x4vp"
-DELETE /sessions/{sessionId}
+```text id="p1x7vt"
+GET /records/{auditRecordId}
 ```
 
 ---
 
 ## Purpose
 
-Revokes specific session.
+Retrieves immutable audit evidence.
 
 ---
 
 ## Security Rules
 
-* Ownership validation mandatory
-* Audit logging mandatory
+* Tenant ownership validation mandatory
+* Sensitive metadata filtering required
 
 ---
 
-# 7. Password Management APIs
+# 6. Security Audit APIs
 
-# 7.1 Request Password Reset
+# 6.1 Search Security Audits
 
 ## Endpoint
 
-```text id="f2w7xn"
-POST /password/reset-request
-```
-
----
-
-## Request
-
-```json id="u8k3vt"
-{
-  "email": "john@example.com"
-}
-```
-
----
-
-## Security Rules
-
-* Avoid account enumeration
-* Generic responses recommended
-* Rate limiting mandatory
-
----
-
-## Example Response
-
-```json id="g4m9wr"
-{
-  "success": true,
-  "message": "If the account exists, reset instructions were sent."
-}
-```
-
----
-
-# 7.2 Complete Password Reset
-
-## Endpoint
-
-```text id="r1v6xp"
-POST /password/reset
-```
-
----
-
-## Request
-
-```json id="y7k2wt"
-{
-  "resetToken": "token",
-  "newPassword": "newPassword123!"
-}
-```
-
----
-
-## Actions
-
-```text id="n5x8vr"
-- Rotate password hash
-- Revoke sessions
-- Revoke refresh tokens
-```
-
----
-
-## Security Rules
-
-* Reset token expiration enforced
-* Password complexity validation mandatory
-
----
-
-# 7.3 Change Password
-
-## Endpoint
-
-```text id="w4n1xp"
-POST /password/change
-```
-
----
-
-## Required Authentication
-
-```text id="v9m3wt"
-Bearer JWT
-```
-
----
-
-## Request
-
-```json id="x2k7vr"
-{
-  "currentPassword": "oldPassword",
-  "newPassword": "newPassword"
-}
-```
-
----
-
-## Security Rules
-
-* Current password validation mandatory
-* Audit logging required
-
----
-
-# 8. Trusted Device APIs
-
-# 8.1 Register Trusted Device
-
-## Endpoint
-
-```text id="j6v8wp"
-POST /devices/trust
-```
-
----
-
-## Purpose
-
-Registers trusted device.
-
----
-
-## Request
-
-```json id="k1x4vr"
-{
-  "deviceFingerprint": "fingerprint"
-}
-```
-
----
-
-## Security Rules
-
-* Requires successful authentication
-* MFA recommended
-
----
-
-# 8.2 Revoke Trusted Device
-
-## Endpoint
-
-```text id="s3m9wt"
-DELETE /devices/{deviceId}
-```
-
----
-
-## Purpose
-
-Removes trusted device.
-
----
-
-## Side Effects
-
-```text id="p8n2vx"
-- Device trust invalidation
-- Future MFA enforcement
-```
-
----
-
-# 9. OAuth2/OIDC APIs
-
-# 9.1 OAuth Login Redirect
-
-## Endpoint
-
-```text id="t5v1xr"
-GET /oauth2/{provider}/authorize
-```
-
----
-
-## Supported Providers
-
-```text id="q7k4wp"
-google
-microsoft
-okta
-auth0
-keycloak
-```
-
----
-
-# 9.2 OAuth Callback
-
-## Endpoint
-
-```text id="g9x3vt"
-GET /oauth2/{provider}/callback
-```
-
----
-
-## Purpose
-
-Handles provider authentication callback.
-
----
-
-## Security Rules
-
-* State validation mandatory
-* Signature validation mandatory
-
----
-
-# 10. API Key APIs
-
-# 10.1 Create API Key
-
-## Endpoint
-
-```text id="d4m8wr"
-POST /api-keys
-```
-
----
-
-## Required Permission
-
-```text id="z6v2xp"
-CREATE_API_KEY
-```
-
----
-
-## Request
-
-```json id="u3n7wt"
-{
-  "name": "Billing Integration",
-  "scopes": [
-    "READ_PATIENT"
-  ]
-}
-```
-
----
-
-## Response
-
-```json id="m8x1vr"
-{
-  "success": true,
-  "data": {
-    "apiKey": "generated-secret",
-    "prefix": "pk_live"
-  }
-}
-```
-
----
-
-## Important Rule
-
-API key secret shown only once.
-
----
-
-# 10.2 Revoke API Key
-
-## Endpoint
-
-```text id="r5k9wp"
-DELETE /api-keys/{apiKeyId}
-```
-
----
-
-## Actions
-
-```text id="x1n4vt"
-- Revoke key
-- Invalidate access
-- Persist audit
-```
-
----
-
-# 11. Internal Service Authentication APIs
-
-# 11.1 Service Authentication
-
-## Endpoint
-
-```text id="n7v3xr"
-POST /internal/service-authenticate
-```
-
----
-
-## Purpose
-
-Authenticates internal services.
-
----
-
-## Security Requirements
-
-| Requirement                 | Description    |
-| --------------------------- | -------------- |
-| mTLS recommended            | Internal trust |
-| Service identity validation | Mandatory      |
-| Signed tokens recommended   | Security       |
-
----
-
-## Request
-
-```json id="p2x8wt"
-{
-  "clientId": "billing-service",
-  "clientSecret": "secret"
-}
-```
-
----
-
-# 12. Authentication Audit APIs
-
-# 12.1 List Authentication Audits
-
-## Endpoint
-
-```text id="w6m1vp"
-GET /audit
-```
-
----
-
-## Required Permission
-
-```text id="h8k4xr"
-VIEW_AUTHENTICATION_AUDIT
+```text id="w9m3xp"
+GET /security
 ```
 
 ---
 
 ## Query Parameters
 
-| Parameter | Description     |
-| --------- | --------------- |
-| userId    | Filter by user  |
-| result    | SUCCESS/FAILURE |
-| ipAddress | Filter by IP    |
-| startDate | Date range      |
-| endDate   | Date range      |
+| Parameter     | Description     |
+| ------------- | --------------- |
+| severity      | LOW/HIGH/etc    |
+| threatType    | Threat category |
+| actorId       | User/service    |
+| ipAddress     | Network origin  |
+| correlationId | Trace linkage   |
 
 ---
 
-## Security Restrictions
+## Example Threat Types
 
-* Tenant-scoped visibility mandatory
-* Sensitive metadata filtering required
-
----
-
-# 13. Security Monitoring APIs
-
-# 13.1 Suspicious Authentication Search
-
-## Endpoint
-
-```text id="c5v9wt"
-GET /security/suspicious-logins
+```text id="f6x2wr"
+TOKEN_REPLAY
+PRIVILEGE_ESCALATION
+MFA_FAILURE
 ```
 
 ---
 
 ## Required Permission
 
-```text id="y2n7xp"
-VIEW_SECURITY_ALERTS
+```text id="t4v8wp"
+VIEW_SECURITY_AUDIT
+```
+
+---
+
+# 6.2 Retrieve Security Investigation Timeline
+
+## Endpoint
+
+```text id="x7n1vr"
+GET /security/timeline/{correlationId}
+```
+
+---
+
+## Purpose
+
+Reconstructs distributed security timeline.
+
+---
+
+## Example Response
+
+```json id="k3m9xt"
+{
+  "success": true,
+  "data": {
+    "correlationId": "corr-123",
+    "events": []
+  }
+}
+```
+
+---
+
+## Usage
+
+Supports:
+
+* Incident response
+* Threat investigations
+* Forensic reconstruction
+
+---
+
+# 7. Compliance Audit APIs
+
+# 7.1 Search Compliance Audits
+
+## Endpoint
+
+```text id="d8v4xp"
+GET /compliance
+```
+
+---
+
+## Query Parameters
+
+| Parameter          | Description       |
+| ------------------ | ----------------- |
+| regulationType     | HIPAA/GDPR/etc    |
+| complianceCategory | Access/export/etc |
+| actorId            | Responsible actor |
+
+---
+
+## Required Permission
+
+```text id="q2x7wt"
+VIEW_COMPLIANCE_AUDIT
+```
+
+---
+
+# 7.2 Retrieve Sensitive Access History
+
+## Endpoint
+
+```text id="u5m1vr"
+GET /sensitive-access/{resourceId}
+```
+
+---
+
+## Purpose
+
+Retrieves access history for sensitive resources.
+
+---
+
+## Example Resources
+
+```text id="y8v3xp"
+- Patient records
+- Clinical evaluations
+- Consent forms
+```
+
+---
+
+## Security Rules
+
+* Strict authorization mandatory
+* Access reason visibility controlled
+
+---
+
+# 8. Correlation Trace APIs
+
+# 8.1 Retrieve Distributed Trace
+
+## Endpoint
+
+```text id="n6x9wr"
+GET /traces/{correlationId}
+```
+
+---
+
+## Purpose
+
+Retrieves distributed operational trace.
+
+---
+
+## Example Response
+
+```json id="h1v7xt"
+{
+  "success": true,
+  "data": {
+    "correlationId": "corr-123",
+    "segments": []
+  }
+}
+```
+
+---
+
+## Benefits
+
+| Benefit                  | Description         |
+| ------------------------ | ------------------- |
+| Cross-service visibility | Distributed tracing |
+| Timeline reconstruction  | Investigations      |
+| Operational diagnostics  | Observability       |
+
+---
+
+# 9. Audit Export APIs
+
+# 9.1 Generate Audit Export
+
+## Endpoint
+
+```text id="c5m8vp"
+POST /exports
+```
+
+---
+
+## Purpose
+
+Generates compliance-grade audit export.
+
+---
+
+## Request
+
+```json id="r3x4wt"
+{
+  "format": "PDF",
+  "category": "SECURITY",
+  "startDate": "2026-01-01",
+  "endDate": "2026-05-01"
+}
+```
+
+---
+
+## Response
+
+```json id="g7v2xr"
+{
+  "success": true,
+  "data": {
+    "exportId": "uuid",
+    "status": "PENDING"
+  }
+}
+```
+
+---
+
+## Security Rules
+
+* Export authorization mandatory
+* Export actions auditable
+* Sensitive filtering enforced
+
+---
+
+# 9.2 Download Audit Export
+
+## Endpoint
+
+```text id="m9x1vp"
+GET /exports/{exportId}/download
+```
+
+---
+
+## Purpose
+
+Downloads generated export.
+
+---
+
+## Security Rules
+
+* Ownership validation mandatory
+* Temporary signed URLs recommended
+
+---
+
+# 10. Retention APIs
+
+# 10.1 List Retention Policies
+
+## Endpoint
+
+```text id="t2v8wr"
+GET /retention-policies
+```
+
+---
+
+## Purpose
+
+Lists audit retention configurations.
+
+---
+
+## Required Permission
+
+```text id="p6n3xt"
+VIEW_RETENTION_POLICIES
+```
+
+---
+
+# 10.2 Create Retention Policy
+
+## Endpoint
+
+```text id="v4x7wp"
+POST /retention-policies
+```
+
+---
+
+## Request
+
+```json id="f1m9vr"
+{
+  "policyName": "Security Retention",
+  "retentionPeriodDays": 2555
+}
+```
+
+---
+
+## Security Rules
+
+* Administrative authorization mandatory
+* Policy changes auditable
+
+---
+
+# 11. Legal Hold APIs
+
+# 11.1 Apply Legal Hold
+
+## Endpoint
+
+```text id="x8n2vt"
+POST /legal-holds
+```
+
+---
+
+## Purpose
+
+Prevents audit expiration/deletion.
+
+---
+
+## Request
+
+```json id="j4v7wr"
+{
+  "reason": "Ongoing investigation",
+  "resourceId": "audit-123"
+}
+```
+
+---
+
+## Security Rules
+
+* Legal authorization mandatory
+* Hold actions immutable
+
+---
+
+# 11.2 Release Legal Hold
+
+## Endpoint
+
+```text id="q5x1vp"
+DELETE /legal-holds/{legalHoldId}
+```
+
+---
+
+## Security Rules
+
+* Strict authorization required
+* Release actions auditable
+
+---
+
+# 12. Integrity Validation APIs
+
+# 12.1 Validate Audit Integrity
+
+## Endpoint
+
+```text id="w7m4xt"
+POST /integrity/validate
+```
+
+---
+
+## Purpose
+
+Verifies tamper resistance.
+
+---
+
+## Request
+
+```json id="u3x9wr"
+{
+  "auditRecordId": "uuid"
+}
+```
+
+---
+
+## Response
+
+```json id="g6v2wp"
+{
+  "success": true,
+  "data": {
+    "valid": true
+  }
+}
+```
+
+---
+
+## Failure Example
+
+```json id="n1m8vr"
+{
+  "success": false,
+  "error": {
+    "code": "INTEGRITY_VIOLATION"
+  }
+}
+```
+
+---
+
+# 13. Archive APIs
+
+# 13.1 Retrieve Archived Audit Reference
+
+## Endpoint
+
+```text id="r9x4vt"
+GET /archives/{archiveReferenceId}
+```
+
+---
+
+## Purpose
+
+Retrieves archived evidence metadata.
+
+---
+
+## Security Rules
+
+* Compliance authorization required
+* Restoration actions auditable
+
+---
+
+# 14. SIEM Integration APIs
+
+# 14.1 Stream Security Events
+
+## Endpoint
+
+```text id="k2v7wr"
+GET /stream/security
+```
+
+---
+
+## Purpose
+
+Streams security audit events.
+
+---
+
+## Recommended Technologies
+
+| Technology   | Recommendation        |
+| ------------ | --------------------- |
+| SSE          | Lightweight streaming |
+| WebSocket    | Realtime integrations |
+| Kafka bridge | High-scale SIEM       |
+
+---
+
+## Security Rules
+
+* Restricted integration access
+* Token-based service authorization
+
+---
+
+# 15. Health and Monitoring APIs
+
+# 15.1 Audit Pipeline Health
+
+## Endpoint
+
+```text id="f8m3xp"
+GET /health
 ```
 
 ---
 
 ## Example Response
 
-```json id="g1m4vr"
+```json id="p5x9wr"
 {
-  "success": true,
-  "data": [
-    {
-      "severity": "HIGH",
-      "type": "TOKEN_REPLAY",
-      "detectedAt": "2026-05-18T12:00:00Z"
-    }
-  ]
+  "status": "UP",
+  "integrations": {
+    "siem": "UP",
+    "archive": "UP"
+  }
 }
 ```
 
 ---
 
-# 14. Common Response Structure
+# 16. Common Response Structure
 
 ## Success Response
 
-```json id="u7k2wr"
+```json id="y1v6xt"
 {
   "success": true,
   "timestamp": "2026-05-18T10:00:00Z",
@@ -756,21 +679,20 @@ VIEW_SECURITY_ALERTS
 
 ## Error Response
 
-```json id="f9x3vt"
+```json id="t4m8vp"
 {
   "success": false,
   "timestamp": "2026-05-18T10:00:00Z",
   "error": {
-    "code": "INVALID_CREDENTIALS",
-    "message": "Authentication failed",
-    "details": []
+    "code": "AUDIT_NOT_FOUND",
+    "message": "Audit record not found"
   }
 }
 ```
 
 ---
 
-# 15. HTTP Status Codes
+# 17. HTTP Status Codes
 
 | Status | Meaning             |
 | ------ | ------------------- |
@@ -782,75 +704,62 @@ VIEW_SECURITY_ALERTS
 | 403    | Unauthorized        |
 | 404    | Resource not found  |
 | 409    | Conflict            |
-| 423    | Account locked      |
-| 428    | MFA required        |
+| 422    | Validation error    |
 | 429    | Rate limit exceeded |
 | 500    | Internal error      |
 
 ---
 
-# 16. Pagination Standards
+# 18. Pagination Standards
 
 Paginated endpoints should return:
 
-```json id="q4v8wp"
+```json id="d7v2xr"
 {
   "success": true,
   "data": [],
   "pagination": {
     "page": 0,
     "size": 20,
-    "totalElements": 100,
-    "totalPages": 5
+    "totalElements": 100
   }
 }
 ```
 
 ---
 
-# 17. Sorting Standards
+# 19. Sorting Standards
 
 ## Example
 
-```text id="m1x6vr"
-?sort=createdAt,desc
+```text id="m3x8wr"
+?sort=occurredAt,desc
 ```
 
 ---
 
-# 18. Security Headers
+# 20. Security Headers
 
 Recommended headers:
 
-| Header             | Purpose           |
-| ------------------ | ----------------- |
-| X-Tenant-ID        | Tenant isolation  |
-| X-Correlation-ID   | Tracing           |
-| X-Request-ID       | Request tracking  |
-| X-Service-Identity | Internal services |
+| Header           | Purpose          |
+| ---------------- | ---------------- |
+| Authorization    | Identity         |
+| X-Tenant-ID      | Tenant isolation |
+| X-Correlation-ID | Traceability     |
+| X-Request-ID     | Request tracing  |
 
 ---
 
-# 19. Rate Limiting Recommendations
+# 21. API Security Rules
 
-| Endpoint Category | Recommendation |
-| ----------------- | -------------- |
-| Login             | Strict         |
-| MFA               | Strict         |
-| Token refresh     | Medium         |
-| Audit APIs        | Medium         |
-| Internal APIs     | Controlled     |
+## Immutable Audit Principle
 
----
+Forbidden operations:
 
-# 20. API Security Rules
-
-## Deny by Default
-
-Invalid authentication:
-
-```text id="v5n9xt"
-401 UNAUTHORIZED
+```text id="u6n1vp"
+- Audit modification
+- Audit deletion
 ```
 
 ---
@@ -859,7 +768,7 @@ Invalid authentication:
 
 Tenant mismatch:
 
-```text id="j8m2wr"
+```text id="q8v4xt"
 403 FORBIDDEN
 ```
 
@@ -870,18 +779,17 @@ Tenant mismatch:
 Never expose:
 
 * Passwords
-* JWT secrets
-* MFA secrets
-* Raw refresh tokens in logs
-* API secrets after creation
+* Secrets
+* Raw tokens
+* Sensitive credentials
 
 ---
 
-# 21. Reactive API Considerations
+# 22. Reactive API Considerations
 
 Reactive implementations should support:
 
-```text id="r3v7xp"
+```text id="w2m9vr"
 Mono<ResponseEntity<?>>
 Flux<ResponseEntity<?>>
 ```
@@ -890,82 +798,78 @@ Flux<ResponseEntity<?>>
 
 ## Requirements
 
-* Non-blocking authentication
-* Reactive security context propagation
-* Async MFA handling
+* Non-blocking search
+* Reactive export streaming
+* Async archival retrieval
 
 ---
 
-# 22. OpenAPI Recommendations
+# 23. OpenAPI Recommendations
 
 Recommended documentation:
 
 * OpenAPI 3.x
 * Swagger UI
 * Security scheme definitions
-* OAuth2/OpenID metadata
+* Audit schema examples
 
 ---
 
-# 23. API Versioning Strategy
+# 24. API Versioning Strategy
 
 Recommended:
 
-```text id="k7x4vt"
-/api/v1/authentication
+```text id="x5v7wp"
+/api/v1/audit
 ```
 
 Future evolution:
 
-```text id="u2m8wr"
-/api/v2/authentication
+```text id="c9n3xt"
+/api/v2/audit
 ```
 
 ---
 
-# 24. Error Codes
+# 25. Error Codes
 
-| Code                  | Description             |
-| --------------------- | ----------------------- |
-| INVALID_CREDENTIALS   | Login failed            |
-| ACCOUNT_LOCKED        | Locked account          |
-| MFA_REQUIRED          | MFA challenge pending   |
-| MFA_FAILED            | MFA verification failed |
-| TOKEN_EXPIRED         | Expired token           |
-| TOKEN_REVOKED         | Revoked token           |
-| TOKEN_REPLAY_DETECTED | Replay attempt          |
-| INVALID_SESSION       | Invalid session         |
-| TENANT_MISMATCH       | Cross-tenant violation  |
-| PASSWORD_EXPIRED      | Password expired        |
+| Code                     | Description               |
+| ------------------------ | ------------------------- |
+| AUDIT_NOT_FOUND          | Missing audit record      |
+| INTEGRITY_VIOLATION      | Tampering detected        |
+| EXPORT_FAILED            | Export generation failure |
+| LEGAL_HOLD_REQUIRED      | Resource protected        |
+| INVALID_RETENTION_POLICY | Invalid lifecycle         |
+| TENANT_MISMATCH          | Cross-tenant violation    |
+| UNAUTHORIZED_EXPORT      | Export denied             |
 
 ---
 
-# 25. Future API Extensions
+# 26. Future API Extensions
 
 Future APIs may include:
 
-* Passwordless authentication APIs
-* WebAuthn APIs
-* Biometric authentication APIs
-* Adaptive authentication APIs
-* Continuous authentication APIs
-* Risk-based MFA APIs
+* AI threat investigation APIs
+* Behavioral audit APIs
+* Continuous compliance APIs
+* Immutable ledger APIs
+* Privacy investigation APIs
 
 ---
 
-# 26. Summary
+# 27. Summary
 
-The Authentication Management API contracts provide:
+The Audit Management API contracts provide:
 
-* Secure authentication operations
-* Enterprise-grade session handling
-* MFA orchestration
-* Distributed authentication support
-* Reactive authentication scalability
-* Multi-tenant authentication isolation
-* Zero Trust authentication foundations
+* Enterprise-grade audit querying
+* Immutable evidence retrieval
+* Distributed forensic tracing
+* Compliance-grade export management
+* Reactive audit scalability
+* Multi-tenant audit isolation
+* Tamper-resistant audit validation
 
-These APIs form the external contract layer of the authentication ecosystem.
+These APIs form the external contract layer of the audit ecosystem.
 
 ```
 ```

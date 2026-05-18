@@ -1,26 +1,28 @@
-# 05-authentication-management/entities.md
+# 06-audit-management/entities.md
 
-````md id="v8k3wp"
-# Authentication Management Entities
+````md id="w9x3vp"
+# Audit Management Entities
 
 ## 1. Introduction
 
-This document defines the entities of the Authentication Management module.
+This document defines the entities of the Audit Management module.
 
 Entities represent domain objects that:
 
 - Possess identity
 - Maintain lifecycle continuity
-- Encapsulate authentication behaviors
-- Enforce security constraints
-- Participate in authentication workflows
+- Preserve immutable evidence
+- Support distributed traceability
+- Enable compliance auditing
+- Facilitate forensic reconstruction
 
 The entities are designed following:
 
 - Domain-Driven Design (DDD)
-- Security-first architecture
-- Multi-tenant SaaS principles
-- Zero Trust authentication models
+- Immutable evidence principles
+- Event-driven architecture
+- Multi-tenant SaaS isolation
+- Enterprise compliance standards
 
 ---
 
@@ -28,450 +30,286 @@ The entities are designed following:
 
 | Entity | Purpose |
 |---|---|
-| Authentication | Represents an authentication attempt/result |
-| AuthenticatedSession | Represents an authenticated user session |
-| RefreshToken | Represents refresh token lifecycle |
-| MFAChallenge | Represents MFA verification process |
-| TrustedDevice | Represents a trusted user device |
-| APIKey | Represents API authentication credentials |
-| ServiceIdentity | Represents internal service identity |
-| AuthenticationAuditRecord | Represents immutable authentication evidence |
-| LoginAttempt | Represents authentication attempt tracking |
-| SessionSecurityState | Represents runtime session security |
-| OAuthIdentity | Represents external identity provider linkage |
-| PasswordCredential | Represents protected password credentials |
+| AuditRecord | Core immutable audit evidence |
+| SecurityAuditRecord | Security-related audit evidence |
+| ComplianceAuditRecord | Regulatory traceability evidence |
+| SensitiveAccessRecord | Sensitive resource access tracking |
+| CorrelationTrace | Distributed operation trace |
+| TraceSegment | Individual distributed trace step |
+| AuditRetentionPolicy | Audit lifecycle rules |
+| AuditExport | Compliance export lifecycle |
+| AuditIntegrityProof | Tamper evidence validation |
+| AuditMetadata | Extended operational metadata |
+| ThreatIndicator | Security risk indicators |
+| AuditAttachment | Supplemental evidence references |
+| LegalHold | Retention override protection |
+| AuditArchiveReference | Archived evidence locator |
 
 ---
 
-# 3. Authentication Entity
+# 3. AuditRecord Entity
 
 ## Purpose
 
-Represents the authentication process and result.
-
-Coordinates:
-
-- Credential validation
-- MFA enforcement
-- Account validation
-- Session establishment
+Represents the foundational immutable audit event.
 
 ---
 
 ## Identity
 
-```text id="m5x9vr"
-authenticationId
+```text id="p4n8wr"
+auditRecordId
 ````
 
 ---
 
 ## Attributes
 
-| Attribute          | Type    | Description               |
-| ------------------ | ------- | ------------------------- |
-| authenticationId   | UUID    | Authentication identifier |
-| userId             | UUID    | Authenticated user        |
-| tenantId           | String  | Tenant context            |
-| authenticationType | Enum    | Authentication method     |
-| authenticated      | Boolean | Authentication result     |
-| authenticatedAt    | Instant | Authentication timestamp  |
-| ipAddress          | String  | Request origin            |
-| deviceId           | String  | Device identifier         |
-| failureReason      | String  | Failure explanation       |
+| Attribute     | Type    | Description             |
+| ------------- | ------- | ----------------------- |
+| auditRecordId | UUID    | Unique audit identifier |
+| tenantId      | String  | Tenant context          |
+| actorId       | UUID    | User/service actor      |
+| action        | String  | Executed action         |
+| resourceType  | String  | Target resource         |
+| resourceId    | String  | Resource identifier     |
+| result        | Enum    | SUCCESS/FAILURE         |
+| occurredAt    | Instant | Event timestamp         |
+| correlationId | String  | Distributed trace       |
+| metadata      | Object  | Additional context      |
 
 ---
 
 ## Behaviors
 
-| Behavior         | Description                |
-| ---------------- | -------------------------- |
-| authenticate()   | Performs authentication    |
-| fail()           | Registers failure          |
-| complete()       | Finalizes authentication   |
-| validateTenant() | Verifies tenant membership |
+| Behavior            | Description                 |
+| ------------------- | --------------------------- |
+| persist()           | Stores immutable evidence   |
+| validateIntegrity() | Validates audit consistency |
+| enrichMetadata()    | Adds operational context    |
 
 ---
 
 ## Business Rules
 
-* Authentication requires valid credentials
-* Tenant validation mandatory
-* Suspicious attempts tracked
-* MFA enforced when required
+* Immutable after persistence
+* Tenant context mandatory
+* Correlation ID preserved
+* Timestamp immutable
 
 ---
 
-# 4. AuthenticatedSession Entity
+# 4. SecurityAuditRecord Entity
 
 ## Purpose
 
-Represents an authenticated session.
-
-Supports:
-
-* Session continuity
-* Session revocation
-* Device tracking
-* Security monitoring
+Represents security-focused audit evidence.
 
 ---
 
 ## Identity
 
-```text id="q1v7pk"
-sessionId
+```text id="x7m2vt"
+securityAuditRecordId
 ```
 
 ---
 
 ## Attributes
 
-| Attribute | Type    | Description          |
-| --------- | ------- | -------------------- |
-| sessionId | UUID    | Session identifier   |
-| userId    | UUID    | Session owner        |
-| tenantId  | String  | Tenant context       |
-| createdAt | Instant | Creation timestamp   |
-| expiresAt | Instant | Expiration timestamp |
-| revoked   | Boolean | Revocation status    |
-| revokedAt | Instant | Revocation timestamp |
-| deviceId  | String  | Device identifier    |
-| ipAddress | String  | Origin IP            |
-| userAgent | String  | Client metadata      |
+| Attribute             | Type   | Description              |
+| --------------------- | ------ | ------------------------ |
+| securityAuditRecordId | UUID   | Security audit ID        |
+| severity              | Enum   | LOW/MEDIUM/HIGH/CRITICAL |
+| threatType            | String | Security event category  |
+| ipAddress             | String | Origin IP                |
+| deviceId              | String | Device identifier        |
+| detectionSource       | String | Detection mechanism      |
+| evidence              | Object | Supporting evidence      |
 
 ---
 
 ## Behaviors
 
-| Behavior   | Description              |
-| ---------- | ------------------------ |
-| revoke()   | Revokes session          |
-| extend()   | Extends expiration       |
-| validate() | Validates active session |
-| expire()   | Marks expired            |
+| Behavior               | Description             |
+| ---------------------- | ----------------------- |
+| classifySeverity()     | Assigns risk severity   |
+| appendThreatEvidence() | Adds indicators         |
+| escalate()             | Marks critical incident |
+
+---
+
+## Example Events
+
+```text id="g5v9xp"
+- MFA failure
+- Token replay
+- Unauthorized access
+- Cross-tenant attempt
+```
 
 ---
 
 ## Business Rules
 
-* Revoked sessions invalid
-* Expired sessions unusable
-* Tenant context immutable
-* Session ownership immutable
+* Severity mandatory
+* Immutable evidence required
+* Threat indicators preserved
 
 ---
 
-# 5. RefreshToken Entity
+# 5. ComplianceAuditRecord Entity
 
 ## Purpose
 
-Represents refresh token lifecycle.
-
-Supports secure token rotation.
+Represents compliance-related evidence.
 
 ---
 
 ## Identity
 
-```text id="x6n2wt"
-refreshTokenId
+```text id="u3x8wr"
+complianceAuditRecordId
 ```
 
 ---
 
 ## Attributes
 
-| Attribute      | Type    | Description          |
-| -------------- | ------- | -------------------- |
-| refreshTokenId | UUID    | Token identifier     |
-| sessionId      | UUID    | Associated session   |
-| tokenHash      | String  | Hashed token         |
-| issuedAt       | Instant | Issuance timestamp   |
-| expiresAt      | Instant | Expiration timestamp |
-| revoked        | Boolean | Revocation status    |
-| rotated        | Boolean | Rotation status      |
-| replacedBy     | UUID    | Replacement token    |
+| Attribute               | Type   | Description           |
+| ----------------------- | ------ | --------------------- |
+| complianceAuditRecordId | UUID   | Compliance audit ID   |
+| regulationType          | String | HIPAA/GDPR/etc        |
+| complianceCategory      | String | Privacy/access/export |
+| legalBasis              | String | Compliance rationale  |
+| retentionPolicyId       | UUID   | Retention linkage     |
 
 ---
 
 ## Behaviors
 
-| Behavior       | Description            |
-| -------------- | ---------------------- |
-| rotate()       | Rotates token          |
-| revoke()       | Revokes token          |
-| validate()     | Validates token        |
-| detectReplay() | Detects replay attacks |
+| Behavior                  | Description             |
+| ------------------------- | ----------------------- |
+| validateComplianceScope() | Validates context       |
+| enforceRetention()        | Applies retention rules |
 
 ---
 
 ## Business Rules
 
-* Refresh tokens expire
-* Rotated tokens invalid
-* Replay attempts denied
-* Tokens stored hashed
+* Regulatory context required
+* Legal traceability mandatory
+* Retention linkage mandatory
 
 ---
 
-# 6. MFAChallenge Entity
+# 6. SensitiveAccessRecord Entity
 
 ## Purpose
 
-Represents a multi-factor authentication challenge.
+Tracks access to sensitive resources.
+
+Critical for medical systems.
 
 ---
 
 ## Identity
 
-```text id="r9w4vx"
-challengeId
+```text id="k8v4wp"
+sensitiveAccessRecordId
 ```
 
 ---
 
 ## Attributes
 
-| Attribute      | Type    | Description          |
-| -------------- | ------- | -------------------- |
-| challengeId    | UUID    | Challenge identifier |
-| userId         | UUID    | User owner           |
-| tenantId       | String  | Tenant context       |
-| challengeType  | Enum    | MFA method           |
-| challengeCode  | String  | Verification code    |
-| expiresAt      | Instant | Expiration timestamp |
-| verified       | Boolean | Verification result  |
-| failedAttempts | Integer | Invalid attempts     |
+| Attribute               | Type    | Description        |
+| ----------------------- | ------- | ------------------ |
+| sensitiveAccessRecordId | UUID    | Access record ID   |
+| actorId                 | UUID    | Accessing user     |
+| accessedResource        | String  | Sensitive resource |
+| accessReason            | String  | Declared reason    |
+| accessType              | Enum    | VIEW/EXPORT/MODIFY |
+| occurredAt              | Instant | Access timestamp   |
 
 ---
 
 ## Behaviors
 
-| Behavior            | Description        |
-| ------------------- | ------------------ |
-| verify()            | Validates MFA code |
-| expire()            | Expires challenge  |
-| incrementFailures() | Tracks failures    |
+| Behavior                | Description       |
+| ----------------------- | ----------------- |
+| validateAccessContext() | Verifies access   |
+| registerAccess()        | Persists evidence |
+
+---
+
+## Example Sensitive Resources
+
+```text id="f2m7vr"
+- Medical records
+- Psychological evaluations
+- Consent forms
+```
 
 ---
 
 ## Business Rules
 
-* MFA challenges expire quickly
-* Verification codes single-use
-* Excessive failures trigger lockout
+* Actor identity mandatory
+* Resource identity mandatory
+* Immutable evidence required
 
 ---
 
-# 7. TrustedDevice Entity
+# 7. CorrelationTrace Entity
 
 ## Purpose
 
-Represents a trusted device relationship.
-
-Supports adaptive authentication.
+Represents distributed operational tracing.
 
 ---
 
 ## Identity
 
-```text id="k4x8tp"
-deviceTrustId
+```text id="r1x6vt"
+correlationTraceId
 ```
 
 ---
 
 ## Attributes
 
-| Attribute         | Type    | Description                |
-| ----------------- | ------- | -------------------------- |
-| deviceTrustId     | UUID    | Device trust identifier    |
-| userId            | UUID    | Device owner               |
-| tenantId          | String  | Tenant context             |
-| deviceFingerprint | String  | Browser/device fingerprint |
-| trusted           | Boolean | Trust status               |
-| registeredAt      | Instant | Registration timestamp     |
-| lastUsedAt        | Instant | Last usage timestamp       |
-| revokedAt         | Instant | Revocation timestamp       |
+| Attribute          | Type    | Description           |
+| ------------------ | ------- | --------------------- |
+| correlationTraceId | UUID    | Trace identifier      |
+| correlationId      | String  | Distributed trace key |
+| initiatedAt        | Instant | Trace start           |
+| completedAt        | Instant | Trace end             |
+| status             | Enum    | ACTIVE/COMPLETED      |
 
 ---
 
 ## Behaviors
 
-| Behavior        | Description           |
-| --------------- | --------------------- |
-| trust()         | Marks trusted         |
-| revokeTrust()   | Removes trust         |
-| validateTrust() | Validates trust state |
+| Behavior              | Description           |
+| --------------------- | --------------------- |
+| appendSegment()       | Adds service step     |
+| reconstructTimeline() | Builds operation flow |
 
 ---
 
-## Business Rules
-
-* Device ownership immutable
-* Revoked devices invalid
-* Tenant isolation mandatory
-
----
-
-# 8. APIKey Entity
+# 8. TraceSegment Entity
 
 ## Purpose
 
-Represents API authentication credentials.
+Represents individual distributed service hops.
 
 ---
 
 ## Identity
 
-```text id="n2m7wr"
-apiKeyId
-```
-
----
-
-## Attributes
-
-| Attribute | Type         | Description        |
-| --------- | ------------ | ------------------ |
-| apiKeyId  | UUID         | API key identifier |
-| tenantId  | String       | Tenant context     |
-| keyHash   | String       | Hashed secret      |
-| keyPrefix | String       | Public prefix      |
-| scopes    | List<String> | Allowed scopes     |
-| expiresAt | Instant      | Expiration         |
-| revoked   | Boolean      | Revocation state   |
-| createdAt | Instant      | Creation timestamp |
-
----
-
-## Behaviors
-
-| Behavior   | Description     |
-| ---------- | --------------- |
-| revoke()   | Revokes API key |
-| validate() | Validates key   |
-| rotate()   | Rotates secret  |
-
----
-
-## Business Rules
-
-* API secrets never retrievable
-* Revoked keys unusable
-* Expired keys denied
-
----
-
-# 9. ServiceIdentity Entity
-
-## Purpose
-
-Represents internal service authentication identity.
-
----
-
-## Identity
-
-```text id="w5v1zx"
-serviceIdentityId
-```
-
----
-
-## Attributes
-
-| Attribute         | Type    | Description            |
-| ----------------- | ------- | ---------------------- |
-| serviceIdentityId | UUID    | Service identifier     |
-| serviceName       | String  | Unique service name    |
-| clientId          | String  | Service client ID      |
-| secretHash        | String  | Service secret         |
-| active            | Boolean | Activation state       |
-| createdAt         | Instant | Registration timestamp |
-
----
-
-## Behaviors
-
-| Behavior              | Description       |
-| --------------------- | ----------------- |
-| activate()            | Enables identity  |
-| deactivate()          | Disables identity |
-| validateCredentials() | Validates secret  |
-
----
-
-## Business Rules
-
-* Service names unique
-* Internal identities protected
-* Secrets stored hashed
-
----
-
-# 10. AuthenticationAuditRecord Entity
-
-## Purpose
-
-Represents immutable authentication evidence.
-
----
-
-## Identity
-
-```text id="p8k4vr"
-auditRecordId
-```
-
----
-
-## Attributes
-
-| Attribute     | Type    | Description          |
-| ------------- | ------- | -------------------- |
-| auditRecordId | UUID    | Audit identifier     |
-| userId        | UUID    | User                 |
-| tenantId      | String  | Tenant               |
-| eventType     | String  | Authentication event |
-| result        | String  | SUCCESS/FAILURE      |
-| ipAddress     | String  | Origin               |
-| deviceId      | String  | Device               |
-| occurredAt    | Instant | Timestamp            |
-| metadata      | Object  | Additional evidence  |
-
----
-
-## Behaviors
-
-| Behavior         | Description     |
-| ---------------- | --------------- |
-| persist()        | Stores evidence |
-| appendMetadata() | Adds details    |
-
----
-
-## Business Rules
-
-* Audit evidence immutable
-* Sensitive data forbidden
-* Retention policies enforced
-
----
-
-# 11. LoginAttempt Entity
-
-## Purpose
-
-Tracks login attempts for security analysis.
-
----
-
-## Identity
-
-```text id="t7n3wp"
-loginAttemptId
+```text id="d6n3xp"
+traceSegmentId
 ```
 
 ---
@@ -480,146 +318,49 @@ loginAttemptId
 
 | Attribute      | Type    | Description        |
 | -------------- | ------- | ------------------ |
-| loginAttemptId | UUID    | Attempt identifier |
-| username       | String  | Attempted identity |
-| tenantId       | String  | Tenant             |
-| success        | Boolean | Result             |
-| ipAddress      | String  | Origin             |
-| attemptedAt    | Instant | Timestamp          |
+| traceSegmentId | UUID    | Segment ID         |
+| serviceName    | String  | Origin service     |
+| operation      | String  | Executed operation |
+| startedAt      | Instant | Start timestamp    |
+| completedAt    | Instant | End timestamp      |
+| result         | Enum    | SUCCESS/FAILURE    |
 
 ---
 
 ## Behaviors
 
-| Behavior      | Description     |
-| ------------- | --------------- |
-| markSuccess() | Records success |
-| markFailure() | Records failure |
+| Behavior            | Description       |
+| ------------------- | ----------------- |
+| complete()          | Finalizes segment |
+| calculateDuration() | Computes latency  |
 
 ---
 
-## Usage
-
-Supports:
-
-* Brute force detection
-* Threat analysis
-* Lockout policies
-
----
-
-# 12. SessionSecurityState Entity
+# 9. AuditRetentionPolicy Entity
 
 ## Purpose
 
-Represents runtime session security state.
+Defines retention lifecycle rules.
 
 ---
 
 ## Identity
 
-```text id="g3x9vk"
-securityStateId
+```text id="y9v2wr"
+retentionPolicyId
 ```
 
 ---
 
 ## Attributes
 
-| Attribute       | Type    | Description      |
-| --------------- | ------- | ---------------- |
-| securityStateId | UUID    | State identifier |
-| sessionId       | UUID    | Session          |
-| suspicious      | Boolean | Risk state       |
-| riskScore       | Integer | Risk evaluation  |
-| lastValidatedAt | Instant | Last validation  |
-
----
-
-## Behaviors
-
-| Behavior          | Description   |
-| ----------------- | ------------- |
-| markSuspicious()  | Flags session |
-| updateRiskScore() | Updates score |
-
----
-
-# 13. OAuthIdentity Entity
-
-## Purpose
-
-Represents linkage to external identity providers.
-
----
-
-## Identity
-
-```text id="v1m5tr"
-oauthIdentityId
-```
-
----
-
-## Attributes
-
-| Attribute       | Type    | Description       |
-| --------------- | ------- | ----------------- |
-| oauthIdentityId | UUID    | Identity link ID  |
-| provider        | String  | OAuth provider    |
-| providerUserId  | String  | External identity |
-| userId          | UUID    | Internal user     |
-| linkedAt        | Instant | Link timestamp    |
-
----
-
-## Behaviors
-
-| Behavior | Description             |
-| -------- | ----------------------- |
-| link()   | Links external identity |
-| unlink() | Removes linkage         |
-
----
-
-## Supported Providers
-
-```text id="y8k2xp"
-Google
-Microsoft
-Okta
-Auth0
-Keycloak
-```
-
----
-
-# 14. PasswordCredential Entity
-
-## Purpose
-
-Represents protected password credentials.
-
----
-
-## Identity
-
-```text id="c4v7wn"
-credentialId
-```
-
----
-
-## Attributes
-
-| Attribute         | Type    | Description           |
-| ----------------- | ------- | --------------------- |
-| credentialId      | UUID    | Credential identifier |
-| userId            | UUID    | Owner                 |
-| passwordHash      | String  | Hashed password       |
-| algorithm         | String  | Hash algorithm        |
-| passwordChangedAt | Instant | Rotation timestamp    |
-| expiresAt         | Instant | Expiration            |
+| Attribute          | Type     | Description           |
+| ------------------ | -------- | --------------------- |
+| retentionPolicyId  | UUID     | Policy identifier     |
+| policyName         | String   | Policy name           |
+| retentionPeriod    | Duration | Retention duration    |
+| archiveRequired    | Boolean  | Archive requirement   |
+| legalHoldSupported | Boolean  | Legal hold capability |
 
 ---
 
@@ -627,136 +368,399 @@ credentialId
 
 | Behavior             | Description       |
 | -------------------- | ----------------- |
-| validatePassword()   | Verifies secret   |
-| rotatePassword()     | Changes password  |
+| applyRetention()     | Applies lifecycle |
 | validateExpiration() | Checks expiration |
 
 ---
 
 ## Business Rules
 
-* Plaintext passwords forbidden
-* Strong hashing required
-* Password rotation supported
+* Legal hold overrides expiration
+* Retention immutable after activation
 
 ---
 
-# 15. Entity Relationships
+# 10. AuditExport Entity
 
-```text id="h6w2vt"
-Authentication
-    ├── creates -> AuthenticatedSession
-    ├── generates -> RefreshToken
-    ├── validates -> MFAChallenge
-    └── validates -> TrustedDevice
+## Purpose
 
-AuthenticatedSession
-    └── tracked by -> SessionSecurityState
+Represents audit export operations.
 
-OAuthIdentity
-    └── linked to -> User
+---
+
+## Identity
+
+```text id="v4k8xt"
+auditExportId
 ```
 
 ---
 
-# 16. Multi-Tenant Considerations
+## Attributes
+
+| Attribute     | Type    | Description       |
+| ------------- | ------- | ----------------- |
+| auditExportId | UUID    | Export ID         |
+| requestedBy   | UUID    | Requesting actor  |
+| exportFormat  | Enum    | CSV/JSON/PDF      |
+| exportedAt    | Instant | Export timestamp  |
+| exportReason  | String  | Export purpose    |
+| exportStatus  | Enum    | PENDING/COMPLETED |
+
+---
+
+## Behaviors
+
+| Behavior                | Description          |
+| ----------------------- | -------------------- |
+| generateExport()        | Produces export      |
+| validateAuthorization() | Verifies permissions |
+
+---
+
+## Business Rules
+
+* Export authorization mandatory
+* Export evidence retained
+
+---
+
+# 11. AuditIntegrityProof Entity
+
+## Purpose
+
+Represents tamper evidence validation.
+
+---
+
+## Identity
+
+```text id="m7x1vp"
+integrityProofId
+```
+
+---
+
+## Attributes
+
+| Attribute        | Type    | Description          |
+| ---------------- | ------- | -------------------- |
+| integrityProofId | UUID    | Proof identifier     |
+| auditRecordId    | UUID    | Protected audit      |
+| hashValue        | String  | Integrity hash       |
+| generatedAt      | Instant | Generation timestamp |
+| algorithm        | String  | Hash algorithm       |
+
+---
+
+## Behaviors
+
+| Behavior          | Description              |
+| ----------------- | ------------------------ |
+| verifyIntegrity() | Validates hash           |
+| generateProof()   | Produces integrity proof |
+
+---
+
+## Business Rules
+
+* Hash immutable
+* Tampering detectable
+* Verification reproducible
+
+---
+
+# 12. AuditMetadata Entity
+
+## Purpose
+
+Represents extended operational metadata.
+
+---
+
+## Identity
+
+```text id="q5v9wr"
+metadataId
+```
+
+---
+
+## Attributes
+
+| Attribute   | Type   | Description         |
+| ----------- | ------ | ------------------- |
+| metadataId  | UUID   | Metadata identifier |
+| userAgent   | String | Client metadata     |
+| ipAddress   | String | Network origin      |
+| geoLocation | String | Optional location   |
+| serviceName | String | Origin service      |
+
+---
+
+## Behaviors
+
+| Behavior   | Description              |
+| ---------- | ------------------------ |
+| sanitize() | Removes unsafe metadata  |
+| enrich()   | Adds operational details |
+
+---
+
+# 13. ThreatIndicator Entity
+
+## Purpose
+
+Represents security risk indicators.
+
+---
+
+## Identity
+
+```text id="h8n4xt"
+threatIndicatorId
+```
+
+---
+
+## Attributes
+
+| Attribute         | Type    | Description         |
+| ----------------- | ------- | ------------------- |
+| threatIndicatorId | UUID    | Threat identifier   |
+| indicatorType     | String  | Threat category     |
+| severity          | Enum    | LOW/HIGH/etc        |
+| detectedAt        | Instant | Detection timestamp |
+| evidence          | Object  | Supporting data     |
+
+---
+
+## Behaviors
+
+| Behavior           | Description     |
+| ------------------ | --------------- |
+| escalate()         | Raises severity |
+| correlateThreats() | Links incidents |
+
+---
+
+# 14. AuditAttachment Entity
+
+## Purpose
+
+Represents supplemental audit evidence.
+
+---
+
+## Identity
+
+```text id="n2v7xp"
+attachmentId
+```
+
+---
+
+## Attributes
+
+| Attribute        | Type   | Description           |
+| ---------------- | ------ | --------------------- |
+| attachmentId     | UUID   | Attachment identifier |
+| auditRecordId    | UUID   | Linked audit          |
+| attachmentType   | String | Evidence category     |
+| storageReference | String | Storage location      |
+
+---
+
+## Example Attachments
+
+```text id="x6m3wr"
+- Exported reports
+- Signed evidence
+- Investigation artifacts
+```
+
+---
+
+# 15. LegalHold Entity
+
+## Purpose
+
+Represents regulatory preservation holds.
+
+---
+
+## Identity
+
+```text id="g1x8vt"
+legalHoldId
+```
+
+---
+
+## Attributes
+
+| Attribute   | Type    | Description         |
+| ----------- | ------- | ------------------- |
+| legalHoldId | UUID    | Hold identifier     |
+| holdReason  | String  | Legal rationale     |
+| appliedAt   | Instant | Hold timestamp      |
+| expiresAt   | Instant | Optional expiration |
+
+---
+
+## Behaviors
+
+| Behavior      | Description    |
+| ------------- | -------------- |
+| applyHold()   | Activates hold |
+| releaseHold() | Removes hold   |
+
+---
+
+## Business Rules
+
+* Legal hold overrides deletion
+* Hold actions auditable
+
+---
+
+# 16. AuditArchiveReference Entity
+
+## Purpose
+
+Represents archived audit storage references.
+
+---
+
+## Identity
+
+```text id="p9m4wr"
+archiveReferenceId
+```
+
+---
+
+## Attributes
+
+| Attribute          | Type    | Description         |
+| ------------------ | ------- | ------------------- |
+| archiveReferenceId | UUID    | Archive identifier  |
+| archiveLocation    | String  | Storage reference   |
+| archivedAt         | Instant | Archive timestamp   |
+| retrievalStatus    | Enum    | AVAILABLE/RESTORING |
+
+---
+
+## Behaviors
+
+| Behavior  | Description             |
+| --------- | ----------------------- |
+| archive() | Moves evidence          |
+| restore() | Retrieves archived data |
+
+---
+
+# 17. Entity Relationships
+
+```text id="u7v2xp"
+AuditRecord
+    ├── contains -> AuditMetadata
+    ├── linked by -> CorrelationTrace
+    ├── protected by -> AuditIntegrityProof
+    └── extended by -> AuditAttachment
+
+SecurityAuditRecord
+    └── contains -> ThreatIndicator
+
+ComplianceAuditRecord
+    └── governed by -> AuditRetentionPolicy
+```
+
+---
+
+# 18. Multi-Tenant Considerations
 
 Tenant-scoped entities:
 
-```text id="j9x4rp"
-- Authentication
-- AuthenticatedSession
-- RefreshToken
-- MFAChallenge
-- TrustedDevice
-- APIKey
-- AuthenticationAuditRecord
+```text id="r3x9wt"
+- AuditRecord
+- SecurityAuditRecord
+- ComplianceAuditRecord
+- SensitiveAccessRecord
+- AuditExport
 ```
 
 ---
 
-# 17. Security-Critical Rules
+# 19. Security-Critical Rules
 
-## Immutable Tenant Context
+## Immutable Audit Evidence
 
-Authentication state cannot cross tenants.
+After persistence:
 
----
-
-## Secret Protection
-
-Sensitive values must be:
-
-```text id="s2n8vx"
-- Hashed
-- Encrypted
-- Non-retrievable
+```text id="c6n1vr"
+NO MODIFICATION
 ```
 
 ---
 
-## Fail Closed Principle
+## Sensitive Data Restrictions
 
-Authentication validation failures:
+Audit entities must never expose:
 
-```text id="d5k1wr"
-AUTHENTICATION = DENIED
+```text id="w5m8xp"
+- Passwords
+- Secrets
+- Raw tokens
+- Sensitive credentials
 ```
 
 ---
 
-# 18. Auditing Requirements
+## Fail Secure Principle
 
-Mandatory audit actions:
-
-| Action             | Audit Required |
-| ------------------ | -------------- |
-| Login success      | Yes            |
-| Login failure      | Yes            |
-| MFA validation     | Yes            |
-| Session revocation | Yes            |
-| Password rotation  | Yes            |
+Audit persistence failures must preserve evidence consistency.
 
 ---
 
-# 19. Lifecycle Considerations
+# 20. Lifecycle Considerations
 
-| Entity                    | Lifecycle        |
-| ------------------------- | ---------------- |
-| Authentication            | Short-lived      |
-| AuthenticatedSession      | Session duration |
-| RefreshToken              | Rotation chain   |
-| MFAChallenge              | Ephemeral        |
-| AuthenticationAuditRecord | Long retention   |
+| Entity              | Lifecycle           |
+| ------------------- | ------------------- |
+| AuditRecord         | Long-term           |
+| SecurityAuditRecord | Long-term           |
+| CorrelationTrace    | Medium-term         |
+| AuditExport         | Short-medium        |
+| LegalHold           | Regulatory duration |
 
 ---
 
-# 20. Future Entity Extensions
+# 21. Future Entity Extensions
 
 Future entities may include:
 
-* WebAuthnCredential
-* BiometricCredential
-* RiskAssessment
-* AdaptiveAuthenticationProfile
-* PasswordlessChallenge
-* HardwareSecurityKey
+* BehavioralAuditProfile
+* AIThreatPrediction
+* ContinuousComplianceSnapshot
+* ImmutableLedgerEntry
+* PrivacyInvestigationRecord
+* DataLineageRecord
 
 ---
 
-# 21. Summary
+# 22. Summary
 
-The Authentication Management entities provide:
+The Audit Management entities provide:
 
-* Secure identity modeling
-* Strong session integrity
-* MFA orchestration
-* Token lifecycle protection
-* Trusted device management
-* Distributed authentication support
-* Enterprise-grade authentication enforcement
+* Immutable audit modeling
+* Enterprise-grade traceability
+* Security forensic evidence
+* Distributed operational tracing
+* Compliance-grade retention
+* Multi-tenant audit isolation
+* Tamper-resistant evidence management
 
-These entities form the operational foundation of the authentication ecosystem.
+These entities form the operational foundation of the audit ecosystem.
 
 ```
 ```

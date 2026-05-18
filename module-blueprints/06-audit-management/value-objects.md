@@ -1,27 +1,28 @@
-# 05-authentication-management/value-objects.md
+# 06-audit-management/value-objects.md
 
-````md id="n7v4xp"
-# Authentication Management Value Objects
+````md id="x4v8wp"
+# Audit Management Value Objects
 
 ## 1. Introduction
 
-This document defines the Value Objects used in the Authentication Management module.
+This document defines the Value Objects used in the Audit Management module.
 
 Value Objects represent immutable conceptual elements that:
 
 - Have no identity
 - Are compared by value
-- Encapsulate validation logic
+- Encapsulate validation rules
 - Improve domain expressiveness
-- Enforce authentication consistency
-- Strengthen security guarantees
+- Enforce audit consistency
+- Protect forensic integrity
 
 The Value Objects are designed following:
 
 - Domain-Driven Design (DDD)
 - Immutable modeling principles
-- Security-first architecture
-- Multi-tenant SaaS authentication standards
+- Enterprise auditability standards
+- Multi-tenant SaaS isolation
+- Security and compliance best practices
 
 ---
 
@@ -29,540 +30,111 @@ The Value Objects are designed following:
 
 | Value Object | Purpose |
 |---|---|
-| EmailAddress | Represents validated email identities |
-| Username | Represents login usernames |
-| PasswordHash | Represents protected password hashes |
-| PlainPassword | Represents transient password input |
-| JWTToken | Represents access token structure |
-| RefreshTokenValue | Represents refresh token value |
-| SessionIdentifier | Represents secure session identifiers |
-| MFAChallengeCode | Represents MFA verification codes |
-| DeviceFingerprint | Represents trusted device fingerprints |
-| TenantAuthenticationContext | Represents tenant-aware authentication context |
-| AuthenticationResult | Represents authentication outcome |
-| TokenExpiration | Represents token/session expiration |
-| AuthenticationMethod | Represents authentication type |
-| IPAddress | Represents validated network origins |
-| UserAgent | Represents client metadata |
-| OAuthProvider | Represents external identity providers |
-| SecurityRiskLevel | Represents authentication risk classification |
-| AuthenticationFailureReason | Represents authentication failure explanations |
+| AuditAction | Represents audited actions |
+| AuditResult | Represents operation outcomes |
+| AuditCategory | Represents audit classification |
+| AuditSeverity | Represents audit criticality |
+| CorrelationIdentifier | Represents distributed trace identifiers |
+| ResourceIdentifier | Represents audited resources |
+| ActorIdentifier | Represents initiating actors |
+| TenantAuditContext | Represents tenant-scoped audit context |
+| AuditTimestamp | Represents immutable occurrence timestamps |
+| ThreatClassification | Represents security threat types |
+| RetentionPeriod | Represents retention lifecycle duration |
+| ComplianceClassification | Represents regulatory categories |
+| AuditMetadataPayload | Represents structured metadata |
+| AuditEvidenceHash | Represents tamper-proof hashes |
+| ExportFormat | Represents audit export types |
+| LegalBasis | Represents regulatory/legal justification |
+| GeoLocation | Represents optional geographic metadata |
+| AccessReason | Represents declared access rationale |
+| TraceStatus | Represents distributed trace lifecycle |
+| ServiceOrigin | Represents originating service identity |
 
 ---
 
-# 3. EmailAddress
+# 3. AuditAction
 
 ## Purpose
 
-Represents a validated email identity.
-
-Used for:
-
-- Login
-- Notifications
-- MFA delivery
-- Identity verification
+Represents the audited operation/action.
 
 ---
 
 ## Examples
 
-```text id="m5x2wr"
-john@example.com
-admin@tenant-a.com
+```text id="p6n2vr"
+LOGIN_SUCCESS
+PATIENT_RECORD_UPDATED
+ROLE_ASSIGNED
+CONSENT_EXPORTED
 ````
 
 ---
 
 ## Validation Rules
 
-| Rule                                    | Description       |
-| --------------------------------------- | ----------------- |
-| RFC-compliant format                    | Email correctness |
-| Lowercase normalization                 | Consistency       |
-| Max length enforced                     | Security          |
-| Disposable domains optional restriction | Fraud prevention  |
+| Rule                            | Description     |
+| ------------------------------- | --------------- |
+| Non-empty                       | Mandatory       |
+| Uppercase normalized            | Consistency     |
+| Controlled vocabulary preferred | Standardization |
 
 ---
 
 ## Behaviors
 
-| Behavior         | Description          |
-| ---------------- | -------------------- |
-| normalize()      | Lowercases email     |
-| validateFormat() | Validates structure  |
-| extractDomain()  | Returns email domain |
+| Behavior    | Description         |
+| ----------- | ------------------- |
+| normalize() | Standardizes naming |
+| classify()  | Determines category |
 
 ---
 
-# 4. Username
+# 4. AuditResult
 
 ## Purpose
 
-Represents authentication usernames.
-
----
-
-## Examples
-
-```text id="t8n4vp"
-john.doe
-admin_user
-psychologist01
-```
-
----
-
-## Validation Rules
-
-| Rule                         | Description   |
-| ---------------------------- | ------------- |
-| Minimum length               | Security      |
-| Maximum length               | Prevent abuse |
-| Reserved names forbidden     | Protection    |
-| Unsafe characters restricted | Security      |
-
----
-
-## Forbidden Examples
-
-```text id="v3k7xt"
-root
-system
-administrator
-```
-
----
-
-## Behaviors
-
-| Behavior                | Description               |
-| ----------------------- | ------------------------- |
-| normalize()             | Standardizes value        |
-| validateReservedWords() | Prevents restricted names |
-
----
-
-# 5. PasswordHash
-
-## Purpose
-
-Represents securely hashed passwords.
-
-Plaintext passwords must never persist.
-
----
-
-## Supported Algorithms
-
-```text id="q1w9zr"
-Argon2
-bcrypt
-PBKDF2
-```
-
----
-
-## Validation Rules
-
-| Rule                     | Description       |
-| ------------------------ | ----------------- |
-| Plaintext forbidden      | Security          |
-| Approved algorithms only | Hardening         |
-| Salt required            | Replay protection |
-
----
-
-## Behaviors
-
-| Behavior           | Description           |
-| ------------------ | --------------------- |
-| verify()           | Verifies password     |
-| extractAlgorithm() | Returns algorithm     |
-| requiresRehash()   | Detects outdated hash |
-
----
-
-# 6. PlainPassword
-
-## Purpose
-
-Represents transient password input.
-
-Exists only during validation.
-
----
-
-## Validation Rules
-
-| Rule                                 | Description    |
-| ------------------------------------ | -------------- |
-| Minimum complexity                   | Security       |
-| Maximum length                       | DOS protection |
-| Breached password detection optional | Hardening      |
-| Short-lived memory presence          | Protection     |
-
----
-
-## Complexity Requirements
-
-Recommended:
-
-```text id="w6m2ty"
-- Uppercase
-- Lowercase
-- Numbers
-- Special characters
-- Minimum 12 characters
-```
-
----
-
-## Important Rule
-
-PlainPassword must never be:
-
-* Logged
-* Persisted
-* Published in events
-* Cached
-
----
-
-# 7. JWTToken
-
-## Purpose
-
-Represents JWT access tokens.
-
----
-
-## Recommended Claims
-
-```text id="r9x4pk"
-sub
-tenantId
-roles
-permissions
-sessionId
-iat
-exp
-iss
-aud
-```
-
----
-
-## Behaviors
-
-| Behavior             | Description         |
-| -------------------- | ------------------- |
-| validateSignature()  | Validates integrity |
-| validateExpiration() | Checks expiration   |
-| extractClaims()      | Returns claims      |
-
----
-
-## Validation Rules
-
-| Rule                            | Description |
-| ------------------------------- | ----------- |
-| Signature validation mandatory  | Integrity   |
-| Expiration enforced             | Security    |
-| Issuer validation required      | Trust       |
-| Audience validation recommended | Isolation   |
-
----
-
-# 8. RefreshTokenValue
-
-## Purpose
-
-Represents refresh token values.
-
----
-
-## Characteristics
-
-| Characteristic           | Description       |
-| ------------------------ | ----------------- |
-| Cryptographically secure | Entropy           |
-| Long random value        | Replay resistance |
-| Stored hashed            | Secret protection |
-
----
-
-## Behaviors
-
-| Behavior         | Description     |
-| ---------------- | --------------- |
-| hash()           | Produces hash   |
-| validateFormat() | Validates token |
-
----
-
-# 9. SessionIdentifier
-
-## Purpose
-
-Represents secure session identifiers.
-
----
-
-## Requirements
-
-| Requirement     | Description          |
-| --------------- | -------------------- |
-| Globally unique | Collision prevention |
-| Non-guessable   | Session security     |
-| Immutable       | Integrity            |
-
----
-
-## Behaviors
-
-| Behavior   | Description          |
-| ---------- | -------------------- |
-| generate() | Generates identifier |
-| validate() | Validates structure  |
-
----
-
-# 10. MFAChallengeCode
-
-## Purpose
-
-Represents MFA verification codes.
-
----
-
-## Examples
-
-```text id="g4k8vn"
-123456
-845921
-```
-
----
-
-## Validation Rules
-
-| Rule                    | Description        |
-| ----------------------- | ------------------ |
-| Numeric or alphanumeric | MFA type dependent |
-| Short expiration        | Security           |
-| Single-use              | Replay prevention  |
-
----
-
-## Behaviors
-
-| Behavior   | Description           |
-| ---------- | --------------------- |
-| validate() | Verifies challenge    |
-| expire()   | Invalidates challenge |
-
----
-
-# 11. DeviceFingerprint
-
-## Purpose
-
-Represents trusted device identity.
-
----
-
-## Components
-
-```text id="f7v2wr"
-- Browser metadata
-- OS metadata
-- Device characteristics
-- IP heuristics
-```
-
----
-
-## Behaviors
-
-| Behavior              | Description        |
-| --------------------- | ------------------ |
-| compare()             | Detects similarity |
-| generateFingerprint() | Builds identifier  |
-
----
-
-## Usage
-
-Supports:
-
-* Trusted devices
-* Risk analysis
-* Adaptive authentication
-
----
-
-# 12. TenantAuthenticationContext
-
-## Purpose
-
-Represents tenant-aware authentication context.
-
-Critical for SaaS isolation.
-
----
-
-## Included Data
-
-```text id="j1x6tp"
-- Tenant ID
-- Tenant policies
-- MFA requirements
-- Session policies
-```
-
----
-
-## Behaviors
-
-| Behavior         | Description        |
-| ---------------- | ------------------ |
-| validateTenant() | Enforces isolation |
-| requiresMFA()    | Checks policy      |
-
----
-
-# 13. AuthenticationResult
-
-## Purpose
-
-Represents authentication outcome.
-
----
-
-## Possible Results
-
-```text id="u5w9rx"
-SUCCESS
-FAILURE
-MFA_REQUIRED
-ACCOUNT_LOCKED
-PASSWORD_EXPIRED
-```
-
----
-
-## Behaviors
-
-| Behavior                       | Description    |
-| ------------------------------ | -------------- |
-| isSuccessful()                 | Checks success |
-| requiresAdditionalValidation() | MFA detection  |
-
----
-
-# 14. TokenExpiration
-
-## Purpose
-
-Represents expiration policies.
-
----
-
-## Examples
-
-```text id="x8n3vq"
-5 minutes
-15 minutes
-7 days
-30 days
-```
-
----
-
-## Behaviors
-
-| Behavior        | Description                   |
-| --------------- | ----------------------------- |
-| isExpired()     | Validates expiration          |
-| remainingTime() | Calculates remaining duration |
-
----
-
-# 15. AuthenticationMethod
-
-## Purpose
-
-Represents authentication type.
+Represents the outcome of an audited operation.
 
 ---
 
 ## Supported Values
 
-```text id="m2v7wr"
-PASSWORD
-JWT
-MFA
-OAUTH2
-OIDC
-API_KEY
-SERVICE_TOKEN
+```text id="m8x4wt"
+SUCCESS
+FAILURE
+PARTIAL_SUCCESS
+DENIED
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior        | Description              |
-| --------------- | ------------------------ |
-| requiresMFA()   | Determines MFA necessity |
-| isInteractive() | Detects user interaction |
+| Behavior                | Description            |
+| ----------------------- | ---------------------- |
+| isSuccessful()          | Checks positive result |
+| requiresInvestigation() | Flags risky outcomes   |
 
 ---
 
-# 16. IPAddress
+# 5. AuditCategory
 
 ## Purpose
 
-Represents validated network origins.
+Represents audit classification type.
 
 ---
 
-## Validation Rules
+## Categories
 
-| Rule                          | Description |
-| ----------------------------- | ----------- |
-| IPv4/IPv6 validation          | Correctness |
-| Reserved ranges detection     | Security    |
-| Private/public classification | Analysis    |
-
----
-
-## Behaviors
-
-| Behavior     | Description         |
-| ------------ | ------------------- |
-| isPrivate()  | Detects private IP  |
-| isLoopback() | Detects loopback    |
-| validate()   | Validates structure |
-
----
-
-# 17. UserAgent
-
-## Purpose
-
-Represents client metadata.
-
----
-
-## Included Information
-
-```text id="k6x1vp"
-- Browser
-- OS
-- Device type
-- Client application
+```text id="u3v9xp"
+SECURITY
+FUNCTIONAL
+COMPLIANCE
+ADMINISTRATIVE
+SYSTEM
 ```
 
 ---
@@ -571,51 +143,24 @@ Represents client metadata.
 
 Supports:
 
-* Device trust
-* Security analytics
-* Session monitoring
+* Retention policies
+* SIEM routing
+* Search optimization
+* Compliance reporting
 
 ---
 
-# 18. OAuthProvider
+# 6. AuditSeverity
 
 ## Purpose
 
-Represents external identity providers.
-
----
-
-## Supported Providers
-
-```text id="r4n9wt"
-GOOGLE
-MICROSOFT
-OKTA
-AUTH0
-KEYCLOAK
-```
-
----
-
-## Behaviors
-
-| Behavior           | Description                |
-| ------------------ | -------------------------- |
-| validateProvider() | Ensures supported provider |
-
----
-
-# 19. SecurityRiskLevel
-
-## Purpose
-
-Represents authentication risk classification.
+Represents audit criticality.
 
 ---
 
 ## Levels
 
-```text id="p8w3vx"
+```text id="f1m7wr"
 LOW
 MEDIUM
 HIGH
@@ -628,49 +173,497 @@ CRITICAL
 
 Supports:
 
-* Adaptive authentication
-* Step-up MFA
-* Threat analysis
+* Alert escalation
+* Incident response
+* Threat prioritization
 
 ---
 
 ## Behaviors
 
-| Behavior                         | Description               |
-| -------------------------------- | ------------------------- |
-| requiresAdditionalVerification() | Determines MFA escalation |
+| Behavior     | Description                |
+| ------------ | -------------------------- |
+| escalate()   | Increases severity         |
+| isCritical() | Detects critical incidents |
 
 ---
 
-# 20. AuthenticationFailureReason
+# 7. CorrelationIdentifier
 
 ## Purpose
 
-Represents authentication denial explanations.
+Represents distributed trace identifiers.
+
+Critical for microservices.
+
+---
+
+## Example
+
+```text id="r5x2vt"
+X-Correlation-ID
+```
+
+---
+
+## Validation Rules
+
+| Rule             | Description            |
+| ---------------- | ---------------------- |
+| Globally unique  | Trace integrity        |
+| Immutable        | Historical correctness |
+| Distributed-safe | Cross-service support  |
+
+---
+
+## Behaviors
+
+| Behavior   | Description         |
+| ---------- | ------------------- |
+| generate() | Produces identifier |
+| validate() | Validates format    |
+
+---
+
+# 8. ResourceIdentifier
+
+## Purpose
+
+Represents audited resource identity.
 
 ---
 
 ## Examples
 
-```text id="z7m2tr"
-INVALID_CREDENTIALS
-ACCOUNT_LOCKED
-TOKEN_EXPIRED
-MFA_FAILED
-TENANT_MISMATCH
+```text id="g9v4wr"
+patient:123
+appointment:456
+invoice:789
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior              | Description                    |
-| --------------------- | ------------------------------ |
-| isSecuritySensitive() | Determines logging sensitivity |
+| Behavior      | Description              |
+| ------------- | ------------------------ |
+| extractType() | Gets resource type       |
+| extractId()   | Gets resource identifier |
 
 ---
 
-# 21. Equality Rules
+# 9. ActorIdentifier
+
+## Purpose
+
+Represents the initiating actor.
+
+---
+
+## Supported Actor Types
+
+```text id="t2n8xp"
+USER
+SYSTEM
+SERVICE
+ADMINISTRATOR
+```
+
+---
+
+## Behaviors
+
+| Behavior        | Description            |
+| --------------- | ---------------------- |
+| isHumanActor()  | Detects user           |
+| isSystemActor() | Detects service/system |
+
+---
+
+# 10. TenantAuditContext
+
+## Purpose
+
+Represents tenant-scoped audit context.
+
+Critical for SaaS isolation.
+
+---
+
+## Included Data
+
+```text id="w6m1vr"
+- tenantId
+- tenantName
+- retentionPolicy
+- complianceLevel
+```
+
+---
+
+## Behaviors
+
+| Behavior                 | Description        |
+| ------------------------ | ------------------ |
+| validateTenant()         | Enforces isolation |
+| resolveComplianceRules() | Loads policies     |
+
+---
+
+# 11. AuditTimestamp
+
+## Purpose
+
+Represents immutable audit occurrence time.
+
+---
+
+## Validation Rules
+
+| Rule                           | Description             |
+| ------------------------------ | ----------------------- |
+| UTC recommended                | Distributed consistency |
+| Immutable                      | Historical correctness  |
+| Clock synchronization required | Cross-region integrity  |
+
+---
+
+## Behaviors
+
+| Behavior   | Description     |
+| ---------- | --------------- |
+| isBefore() | Time comparison |
+| isAfter()  | Time comparison |
+
+---
+
+# 12. ThreatClassification
+
+## Purpose
+
+Represents security threat types.
+
+---
+
+## Examples
+
+```text id="k4v7wt"
+TOKEN_REPLAY
+BRUTE_FORCE
+PRIVILEGE_ESCALATION
+CROSS_TENANT_ACCESS
+```
+
+---
+
+## Usage
+
+Supports:
+
+* Threat analytics
+* SIEM integrations
+* Incident escalation
+
+---
+
+# 13. RetentionPeriod
+
+## Purpose
+
+Represents audit retention lifecycle.
+
+---
+
+## Examples
+
+```text id="y1x8vp"
+30 days
+1 year
+7 years
+indefinite
+```
+
+---
+
+## Behaviors
+
+| Behavior              | Description            |
+| --------------------- | ---------------------- |
+| calculateExpiration() | Computes expiration    |
+| isExpired()           | Checks retention state |
+
+---
+
+## Business Rules
+
+* Legal holds override expiration
+* Compliance categories may enforce minimums
+
+---
+
+# 14. ComplianceClassification
+
+## Purpose
+
+Represents regulatory classification.
+
+---
+
+## Supported Values
+
+```text id="h5m2wr"
+HIPAA
+GDPR
+SOC2
+ISO27001
+PCI
+```
+
+---
+
+## Behaviors
+
+| Behavior                    | Description          |
+| --------------------------- | -------------------- |
+| requiresLongRetention()     | Regulatory retention |
+| requiresSensitiveHandling() | Privacy enforcement  |
+
+---
+
+# 15. AuditMetadataPayload
+
+## Purpose
+
+Represents structured audit metadata.
+
+---
+
+## Example Metadata
+
+```json id="d8v4xt"
+{
+  "ipAddress": "192.168.1.1",
+  "userAgent": "Chrome",
+  "service": "authentication-service"
+}
+```
+
+---
+
+## Behaviors
+
+| Behavior   | Description              |
+| ---------- | ------------------------ |
+| sanitize() | Removes unsafe values    |
+| enrich()   | Adds operational details |
+
+---
+
+## Restrictions
+
+Must not contain:
+
+* Passwords
+* Secrets
+* Raw tokens
+
+---
+
+# 16. AuditEvidenceHash
+
+## Purpose
+
+Represents tamper-evidence hashes.
+
+---
+
+## Recommended Algorithms
+
+```text id="n3x9vp"
+SHA-256
+SHA-512
+```
+
+---
+
+## Behaviors
+
+| Behavior          | Description        |
+| ----------------- | ------------------ |
+| verifyIntegrity() | Validates evidence |
+| generateHash()    | Produces hash      |
+
+---
+
+## Usage
+
+Supports:
+
+* Tamper detection
+* Immutable evidence
+* Forensic validation
+
+---
+
+# 17. ExportFormat
+
+## Purpose
+
+Represents audit export types.
+
+---
+
+## Supported Formats
+
+```text id="u7m1wr"
+CSV
+JSON
+PDF
+PARQUET
+```
+
+---
+
+## Usage
+
+Supports:
+
+* Compliance exports
+* SIEM integrations
+* Forensic investigations
+
+---
+
+# 18. LegalBasis
+
+## Purpose
+
+Represents legal/compliance rationale.
+
+---
+
+## Examples
+
+```text id="q2v8xt"
+PATIENT_CONSENT
+REGULATORY_REQUIREMENT
+SECURITY_INVESTIGATION
+LEGAL_REQUEST
+```
+
+---
+
+## Behaviors
+
+| Behavior                  | Description               |
+| ------------------------- | ------------------------- |
+| validateComplianceScope() | Ensures legal correctness |
+
+---
+
+# 19. GeoLocation
+
+## Purpose
+
+Represents optional geographic metadata.
+
+---
+
+## Usage
+
+Supports:
+
+* Threat analysis
+* Compliance auditing
+* Suspicious access detection
+
+---
+
+## Restrictions
+
+Geo metadata must comply with privacy rules.
+
+---
+
+# 20. AccessReason
+
+## Purpose
+
+Represents declared rationale for sensitive access.
+
+---
+
+## Examples
+
+```text id="m6x3vr"
+PATIENT_TREATMENT
+SUPPORT_INVESTIGATION
+SECURITY_ANALYSIS
+```
+
+---
+
+## Usage
+
+Critical for medical/legal auditing.
+
+---
+
+# 21. TraceStatus
+
+## Purpose
+
+Represents distributed trace lifecycle state.
+
+---
+
+## Supported States
+
+```text id="v9n2wp"
+ACTIVE
+COMPLETED
+FAILED
+PARTIAL
+```
+
+---
+
+## Behaviors
+
+| Behavior   | Description        |
+| ---------- | ------------------ |
+| complete() | Finalizes trace    |
+| fail()     | Marks failed trace |
+
+---
+
+# 22. ServiceOrigin
+
+## Purpose
+
+Represents originating service identity.
+
+---
+
+## Examples
+
+```text id="c5v7xt"
+authentication-service
+authorization-service
+billing-service
+```
+
+---
+
+## Behaviors
+
+| Behavior                  | Description              |
+| ------------------------- | ------------------------ |
+| validateServiceIdentity() | Validates service origin |
+
+---
+
+# 23. Equality Rules
 
 All Value Objects compare by value.
 
@@ -678,15 +671,15 @@ All Value Objects compare by value.
 
 ## Example
 
-```text id="h5v8pk"
-EmailAddress("john@example.com")
+```text id="g8m4wr"
+AuditSeverity(HIGH)
 ==
-EmailAddress("john@example.com")
+AuditSeverity(HIGH)
 ```
 
 ---
 
-# 22. Immutability Requirements
+# 24. Immutability Requirements
 
 All Value Objects must be:
 
@@ -697,87 +690,83 @@ All Value Objects must be:
 
 ---
 
-# 23. Serialization Considerations
+# 25. Serialization Considerations
 
 Value Objects must support:
 
 * JSON serialization
-* JWT embedding
-* Event publishing
-* Redis caching
+* Kafka event streaming
 * Reactive pipelines
+* Elasticsearch indexing
+* Archival exports
 
 ---
 
-# 24. Security-Critical Rules
+# 26. Security-Critical Rules
 
-## Secret Protection
+## Sensitive Data Restrictions
 
-The following must never be exposed:
+Audit Value Objects must never expose:
 
-```text id="y9k4wx"
-- PlainPassword
-- Raw refresh tokens
-- API secrets
-- MFA secrets
+```text id="t1x9vp"
+- Passwords
+- Secrets
+- MFA tokens
+- Raw JWTs
 ```
 
 ---
 
-## Fail Closed Principle
+## Immutable Evidence Principle
 
-Validation failures:
-
-```text id="n3x7vp"
-AUTHENTICATION = DENIED
-```
+Audit evidence must remain tamper-resistant.
 
 ---
 
-## Strong Validation
+## Tenant Isolation Enforcement
 
-Malformed authentication values must never exist in memory.
+Cross-tenant audit references forbidden.
 
 ---
 
-# 25. Validation Strategy
+# 27. Validation Strategy
 
-Validation occurs:
+Validation occurs at:
 
 | Stage           | Responsibility        |
 | --------------- | --------------------- |
 | Constructor     | Structural validation |
 | Factory methods | Controlled creation   |
-| Domain services | Complex validation    |
+| Domain services | Advanced validation   |
 
 ---
 
-# 26. Future Value Object Extensions
+# 28. Future Value Object Extensions
 
 Future Value Objects may include:
 
-* WebAuthnCredentialId
-* BiometricSignature
 * RiskScore
-* DeviceTrustScore
-* GeoLocationRestriction
-* PasswordlessChallengeToken
-* HardwareKeyIdentifier
+* BehavioralFingerprint
+* AIThreatProbability
+* ImmutableLedgerHash
+* PrivacyClassification
+* ComplianceScope
 
 ---
 
-# 27. Summary
+# 29. Summary
 
-The Authentication Management Value Objects provide:
+The Audit Management Value Objects provide:
 
-* Strong domain expressiveness
-* Immutable authentication modeling
-* Secure credential handling
-* Multi-tenant authentication safety
-* Consistent validation logic
-* Enterprise-grade security foundations
+* Immutable audit modeling
+* Enterprise-grade traceability
+* Security forensic consistency
+* Compliance-aware validation
+* Distributed trace safety
+* Multi-tenant audit isolation
+* Tamper-resistant evidence representation
 
-These Value Objects are critical to maintaining authentication correctness and security consistency across the platform.
+These Value Objects are fundamental to maintaining audit integrity and forensic correctness across the platform.
 
 ```
 ```

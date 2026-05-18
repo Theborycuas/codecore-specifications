@@ -1,53 +1,55 @@
-# 05-authentication-management/events.md
+# 06-audit-management/events.md
 
-````md id="r5x8vp"
-# Authentication Management Domain Events
+````md id="q7x4vp"
+# Audit Management Domain Events
 
 ## 1. Introduction
 
-This document defines the domain events emitted by the Authentication Management module.
+This document defines the domain events emitted and consumed by the Audit Management module.
 
-Authentication events represent important business and security occurrences related to:
+Audit events represent important occurrences related to:
 
-- Identity verification
-- Session lifecycle
-- Token management
-- MFA operations
-- Device trust validation
-- Security incidents
-- Authentication auditing
+- Audit evidence creation
+- Security investigations
+- Compliance traceability
+- Distributed correlation
+- Retention lifecycle management
+- Audit archival
+- Tamper detection
+- Export generation
+- Threat analysis
 
 These events are fundamental for:
 
 - Event-Driven Architecture (EDA)
-- Distributed consistency
-- Security monitoring
-- Auditability
-- Threat detection
-- Cache synchronization
-- Compliance reporting
+- Distributed observability
+- Compliance traceability
+- Security forensics
+- SIEM integrations
+- Incident response
+- Reactive audit pipelines
 
 The events are designed following:
 
 - Domain-Driven Design (DDD)
 - Immutable event principles
-- Security-first architecture
-- Multi-tenant SaaS standards
+- Multi-tenant SaaS isolation
+- Enterprise auditability standards
 
 ---
 
 # 2. Event Design Principles
 
-All authentication events must follow:
+All audit events must follow:
 
 | Principle | Description |
 |---|---|
 | Immutable | Events cannot change |
 | Auditable | Full traceability |
-| Tenant-aware | Tenant context mandatory |
+| Tenant-aware | Tenant isolation mandatory |
 | Serializable | Messaging compatibility |
-| Security-safe | Sensitive data excluded |
-| Explicit | Clear business meaning |
+| Security-safe | Sensitive data restricted |
+| Correlated | Distributed trace support |
 
 ---
 
@@ -55,557 +57,36 @@ All authentication events must follow:
 
 | Category | Purpose |
 |---|---|
-| Authentication Events | Login/authentication lifecycle |
-| Session Events | Session management |
-| Token Events | JWT/refresh token lifecycle |
-| MFA Events | MFA verification |
-| Device Trust Events | Trusted device management |
-| Security Events | Threat detection |
-| Audit Events | Compliance evidence |
-| Integration Events | External system synchronization |
+| Audit Events | Core audit lifecycle |
+| Security Audit Events | Threat and security evidence |
+| Compliance Events | Regulatory operations |
+| Retention Events | Lifecycle management |
+| Correlation Events | Distributed tracing |
+| Export Events | Compliance exports |
+| Integrity Events | Tamper detection |
+| Integration Events | SIEM/observability integrations |
 
 ---
 
 # 4. Common Event Metadata
 
-All authentication events should include:
+All audit events should include:
 
 | Field | Type | Description |
 |---|---|---|
 | eventId | UUID | Unique identifier |
 | eventType | String | Event name |
-| occurredAt | Instant | Timestamp |
+| occurredAt | Instant | Event timestamp |
 | tenantId | String | Tenant context |
 | actorId | UUID | User/service actor |
-| correlationId | String | Distributed tracing |
+| correlationId | String | Distributed trace |
 | aggregateId | UUID | Aggregate identifier |
 | aggregateType | String | Aggregate type |
 | version | Integer | Event schema version |
 
 ---
 
-# 5. UserAuthenticated Event
-
-## Purpose
-
-Published after successful authentication.
-
----
-
-## Trigger
-
-```text id="w4n8xp"
-Successful login/authentication
-````
-
----
-
-## Payload
-
-| Field                | Type   | Description        |
-| -------------------- | ------ | ------------------ |
-| userId               | UUID   | Authenticated user |
-| sessionId            | UUID   | Session identifier |
-| authenticationMethod | String | Login method       |
-| ipAddress            | String | Origin             |
-| deviceId             | String | Device             |
-
----
-
-## Consumers
-
-* Audit Service
-* Authorization Service
-* Notification Service
-* Security Monitoring
-* Session Cache
-
----
-
-# 6. AuthenticationFailed Event
-
-## Purpose
-
-Published when authentication fails.
-
-Critical security event.
-
----
-
-## Payload
-
-| Field             | Type   | Description         |
-| ----------------- | ------ | ------------------- |
-| username          | String | Attempted identity  |
-| tenantId          | String | Tenant              |
-| failureReason     | String | Failure explanation |
-| ipAddress         | String | Origin              |
-| deviceFingerprint | String | Device metadata     |
-
----
-
-## Usage
-
-Supports:
-
-* Brute force detection
-* Threat analysis
-* Risk scoring
-
----
-
-# 7. MFAChallengeGenerated Event
-
-## Purpose
-
-Published when MFA challenge is created.
-
----
-
-## Payload
-
-| Field         | Type    | Description   |
-| ------------- | ------- | ------------- |
-| challengeId   | UUID    | MFA challenge |
-| userId        | UUID    | User          |
-| challengeType | String  | MFA type      |
-| expiresAt     | Instant | Expiration    |
-
----
-
-## Consumers
-
-* Notification Service
-* Audit Service
-
----
-
-# 8. MFAChallengeCompleted Event
-
-## Purpose
-
-Published after successful MFA verification.
-
----
-
-## Payload
-
-| Field       | Type    | Description          |
-| ----------- | ------- | -------------------- |
-| challengeId | UUID    | Challenge            |
-| userId      | UUID    | User                 |
-| completedAt | Instant | Completion timestamp |
-
----
-
-## Importance
-
-Confirms elevated identity assurance.
-
----
-
-# 9. MFAChallengeFailed Event
-
-## Purpose
-
-Published after invalid MFA attempt.
-
----
-
-## Usage
-
-Supports:
-
-* Brute force detection
-* Account lockout workflows
-* Threat monitoring
-
----
-
-# 10. SessionCreated Event
-
-## Purpose
-
-Published after session establishment.
-
----
-
-## Payload
-
-| Field     | Type    | Description   |
-| --------- | ------- | ------------- |
-| sessionId | UUID    | Session       |
-| userId    | UUID    | Session owner |
-| expiresAt | Instant | Expiration    |
-| deviceId  | String  | Device        |
-
----
-
-## Side Effects
-
-```text id="m7x3vr"
-- Cache population
-- Session indexing
-- Security monitoring
-```
-
----
-
-# 11. SessionRevoked Event
-
-## Purpose
-
-Published when a session becomes invalid.
-
----
-
-## Revocation Triggers
-
-```text id="f2v8wt"
-- Logout
-- Password reset
-- Suspicious activity
-- Administrative action
-```
-
----
-
-## Payload
-
-| Field            | Type   | Description     |
-| ---------------- | ------ | --------------- |
-| sessionId        | UUID   | Revoked session |
-| revokedBy        | UUID   | Actor           |
-| revocationReason | String | Reason          |
-
----
-
-## Critical Side Effects
-
-```text id="k9n4xp"
-- Refresh token invalidation
-- Cache invalidation
-- JWT revocation synchronization
-```
-
----
-
-# 12. RefreshTokenIssued Event
-
-## Purpose
-
-Published when a refresh token is created.
-
----
-
-## Payload
-
-| Field          | Type    | Description        |
-| -------------- | ------- | ------------------ |
-| refreshTokenId | UUID    | Token identifier   |
-| sessionId      | UUID    | Associated session |
-| expiresAt      | Instant | Expiration         |
-
----
-
-# 13. RefreshTokenRotated Event
-
-## Purpose
-
-Published after refresh token rotation.
-
-Critical security event.
-
----
-
-## Payload
-
-| Field             | Type | Description       |
-| ----------------- | ---- | ----------------- |
-| oldRefreshTokenId | UUID | Previous token    |
-| newRefreshTokenId | UUID | Replacement token |
-| sessionId         | UUID | Session           |
-
----
-
-## Security Importance
-
-Supports replay detection and secure rotation chains.
-
----
-
-# 14. RefreshTokenReplayDetected Event
-
-## Purpose
-
-Published when refresh token reuse is detected.
-
-High-severity security event.
-
----
-
-## Example
-
-```text id="x1w7pk"
-Previously rotated refresh token reused
-```
-
----
-
-## Recommended Actions
-
-```text id="g5m2vx"
-- Revoke entire session
-- Trigger security alert
-- Require re-authentication
-```
-
----
-
-# 15. JWTIssued Event
-
-## Purpose
-
-Published after JWT generation.
-
----
-
-## Usage
-
-Supports:
-
-* Distributed session synchronization
-* Monitoring
-* Audit correlation
-
----
-
-## Important Restriction
-
-JWT payload must never expose secrets.
-
----
-
-# 16. PasswordResetRequested Event
-
-## Purpose
-
-Published when password reset starts.
-
----
-
-## Payload
-
-| Field       | Type    | Description |
-| ----------- | ------- | ----------- |
-| userId      | UUID    | User        |
-| tenantId    | String  | Tenant      |
-| requestedAt | Instant | Timestamp   |
-
----
-
-## Consumers
-
-* Notification Service
-* Audit Service
-* Security Monitoring
-
----
-
-# 17. PasswordChanged Event
-
-## Purpose
-
-Published after successful password rotation.
-
----
-
-## Critical Side Effects
-
-```text id="t6v9wr"
-- Revoke sessions
-- Revoke refresh tokens
-- Force re-authentication
-```
-
----
-
-## Security Importance
-
-Potential compromise response workflow.
-
----
-
-# 18. TrustedDeviceRegistered Event
-
-## Purpose
-
-Published when a device becomes trusted.
-
----
-
-## Payload
-
-| Field         | Type   | Description        |
-| ------------- | ------ | ------------------ |
-| deviceTrustId | UUID   | Trusted device     |
-| userId        | UUID   | Owner              |
-| fingerprint   | String | Device fingerprint |
-
----
-
-# 19. TrustedDeviceRevoked Event
-
-## Purpose
-
-Published when trust is removed.
-
----
-
-## Example Triggers
-
-```text id="r4x8vn"
-- Suspicious activity
-- User revocation
-- Security policy changes
-```
-
----
-
-# 20. SuspiciousLoginDetected Event
-
-## Purpose
-
-Published when anomalous authentication behavior is detected.
-
----
-
-## Detection Examples
-
-```text id="p7n2wt"
-- Impossible travel
-- Unknown device
-- Excessive failures
-- Token replay
-- Geo anomalies
-```
-
----
-
-## Payload
-
-| Field         | Type   | Description         |
-| ------------- | ------ | ------------------- |
-| userId        | UUID   | Affected user       |
-| severity      | String | LOW/MEDIUM/HIGH     |
-| detectionType | String | Threat category     |
-| evidence      | Object | Supporting evidence |
-
----
-
-# 21. AccountLocked Event
-
-## Purpose
-
-Published after account lockout.
-
----
-
-## Trigger Examples
-
-```text id="n8v4xp"
-- Excessive failures
-- Credential stuffing
-- Security policy enforcement
-```
-
----
-
-## Usage
-
-Supports:
-
-* User notification
-* Security response
-* Threat analytics
-
----
-
-# 22. OAuthIdentityLinked Event
-
-## Purpose
-
-Published when external identity is linked.
-
----
-
-## Example Providers
-
-```text id="j3m7wr"
-Google
-Microsoft
-Okta
-```
-
----
-
-## Usage
-
-Supports identity federation auditing.
-
----
-
-# 23. APIKeyCreated Event
-
-## Purpose
-
-Published after API key generation.
-
----
-
-## Important Restriction
-
-API secrets must never appear in events.
-
----
-
-# 24. APIKeyRevoked Event
-
-## Purpose
-
-Published after API key invalidation.
-
----
-
-## Side Effects
-
-```text id="u1x6vt"
-- Access invalidation
-- Cache refresh
-- Integration synchronization
-```
-
----
-
-# 25. ServiceAuthenticated Event
-
-## Purpose
-
-Published after successful service authentication.
-
----
-
-## Usage
-
-Supports:
-
-* Internal auditability
-* Service tracing
-* Zero Trust observability
-
----
-
-# 26. AuthenticationAuditRecorded Event
+# 5. AuditRecordCreated Event
 
 ## Purpose
 
@@ -613,42 +94,539 @@ Published after immutable audit persistence.
 
 ---
 
+## Trigger
+
+```text id="m2v8wr"
+New audit evidence persisted
+````
+
+---
+
+## Payload
+
+| Field         | Type   | Description      |
+| ------------- | ------ | ---------------- |
+| auditRecordId | UUID   | Audit identifier |
+| category      | String | Audit category   |
+| action        | String | Audited action   |
+| resourceType  | String | Target resource  |
+| result        | String | SUCCESS/FAILURE  |
+
+---
+
 ## Consumers
 
 * SIEM systems
-* Compliance tooling
-* Security analytics
+* Analytics engines
+* Compliance monitoring
+* Threat analysis pipelines
 
 ---
 
-# 27. TenantAuthenticationPolicyChanged Event
+# 6. SecurityAuditRecorded Event
 
 ## Purpose
 
-Published after tenant authentication policy updates.
+Published after security audit creation.
 
 ---
 
-## Example Policy Changes
+## Payload
 
-```text id="y9k4wp"
-- MFA required
-- Session duration changes
-- Password policy updates
+| Field                 | Type   | Description         |
+| --------------------- | ------ | ------------------- |
+| securityAuditRecordId | UUID   | Security audit ID   |
+| severity              | String | LOW/HIGH/etc        |
+| threatType            | String | Threat category     |
+| evidence              | Object | Supporting metadata |
+
+---
+
+## Example Threats
+
+```text id="x7n3vp"
+- TOKEN_REPLAY
+- MFA_FAILURE
+- CROSS_TENANT_ACCESS
+```
+
+---
+
+## Critical Consumers
+
+* SIEM
+* Threat detection engines
+* Incident response systems
+
+---
+
+# 7. ComplianceAuditRecorded Event
+
+## Purpose
+
+Published after compliance evidence persistence.
+
+---
+
+## Payload
+
+| Field                   | Type   | Description          |
+| ----------------------- | ------ | -------------------- |
+| complianceAuditRecordId | UUID   | Compliance audit ID  |
+| regulationType          | String | HIPAA/GDPR/etc       |
+| complianceCategory      | String | Audit classification |
+
+---
+
+## Example Use Cases
+
+```text id="u5m9xt"
+- Medical record access
+- Consent export
+- Privacy request handling
+```
+
+---
+
+# 8. SensitiveAccessDetected Event
+
+## Purpose
+
+Published when sensitive resources are accessed.
+
+Critical medical/legal event.
+
+---
+
+## Payload
+
+| Field          | Type   | Description        |
+| -------------- | ------ | ------------------ |
+| accessRecordId | UUID   | Access audit ID    |
+| actorId        | UUID   | Accessing user     |
+| resourceType   | String | Sensitive resource |
+| accessReason   | String | Declared rationale |
+
+---
+
+## Example Resources
+
+```text id="r1x6wr"
+- Medical records
+- Psychological evaluations
+- Consent forms
+```
+
+---
+
+# 9. DistributedTraceLinked Event
+
+## Purpose
+
+Published when distributed trace segments are correlated.
+
+---
+
+## Payload
+
+| Field         | Type   | Description       |
+| ------------- | ------ | ----------------- |
+| correlationId | String | Distributed trace |
+| serviceName   | String | Origin service    |
+| operation     | String | Trace operation   |
+
+---
+
+## Usage
+
+Supports:
+
+* Timeline reconstruction
+* Cross-service tracing
+* Incident forensics
+
+---
+
+# 10. ThreatIndicatorDetected Event
+
+## Purpose
+
+Published when threat indicators are identified.
+
+---
+
+## Example Threats
+
+```text id="v4k8wp"
+- Impossible travel
+- Token replay
+- Excessive failures
+- Privilege escalation
+```
+
+---
+
+## Payload
+
+| Field             | Type   | Description         |
+| ----------------- | ------ | ------------------- |
+| threatIndicatorId | UUID   | Threat ID           |
+| severity          | String | Risk severity       |
+| detectionSource   | String | Detection mechanism |
+
+---
+
+## Side Effects
+
+```text id="j9m2vr"
+- Alert generation
+- Incident escalation
+- SIEM forwarding
+```
+
+---
+
+# 11. AuditIntegrityProofGenerated Event
+
+## Purpose
+
+Published after integrity proof generation.
+
+---
+
+## Payload
+
+| Field            | Type   | Description      |
+| ---------------- | ------ | ---------------- |
+| integrityProofId | UUID   | Proof identifier |
+| auditRecordId    | UUID   | Protected audit  |
+| algorithm        | String | Hash algorithm   |
+
+---
+
+## Importance
+
+Supports tamper-resistant evidence validation.
+
+---
+
+# 12. AuditIntegrityViolationDetected Event
+
+## Purpose
+
+Published when tampering is detected.
+
+High-severity event.
+
+---
+
+## Trigger Examples
+
+```text id="g6x1vt"
+- Hash mismatch
+- Missing audit segment
+- Integrity chain corruption
+```
+
+---
+
+## Recommended Actions
+
+```text id="p3v9wr"
+- Immediate investigation
+- Evidence preservation
+- Security escalation
+```
+
+---
+
+# 13. AuditRetentionExpired Event
+
+## Purpose
+
+Published when audit retention expires.
+
+---
+
+## Payload
+
+| Field             | Type | Description    |
+| ----------------- | ---- | -------------- |
+| auditRecordId     | UUID | Expired audit  |
+| retentionPolicyId | UUID | Applied policy |
+
+---
+
+## Restrictions
+
+Legal holds override expiration.
+
+---
+
+# 14. LegalHoldApplied Event
+
+## Purpose
+
+Published after legal hold activation.
+
+---
+
+## Payload
+
+| Field       | Type   | Description       |
+| ----------- | ------ | ----------------- |
+| legalHoldId | UUID   | Hold identifier   |
+| holdReason  | String | Legal rationale   |
+| appliedBy   | UUID   | Responsible actor |
+
+---
+
+## Importance
+
+Prevents evidence expiration/deletion.
+
+---
+
+# 15. LegalHoldReleased Event
+
+## Purpose
+
+Published after legal hold removal.
+
+---
+
+## Side Effects
+
+```text id="n8m4xp"
+Retention lifecycle resumes
+```
+
+---
+
+# 16. AuditArchived Event
+
+## Purpose
+
+Published after archival completion.
+
+---
+
+## Payload
+
+| Field              | Type   | Description       |
+| ------------------ | ------ | ----------------- |
+| archiveReferenceId | UUID   | Archive reference |
+| archiveLocation    | String | Storage location  |
+
+---
+
+## Usage
+
+Supports:
+
+* Long-term retention
+* Compliance preservation
+* Disaster recovery
+
+---
+
+# 17. AuditRestored Event
+
+## Purpose
+
+Published after archived evidence restoration.
+
+---
+
+## Usage
+
+Supports:
+
+* Investigations
+* Compliance requests
+* Legal review
+
+---
+
+# 18. AuditExportRequested Event
+
+## Purpose
+
+Published when audit export begins.
+
+---
+
+## Payload
+
+| Field        | Type   | Description       |
+| ------------ | ------ | ----------------- |
+| exportId     | UUID   | Export identifier |
+| exportFormat | String | CSV/PDF/etc       |
+| requestedBy  | UUID   | Requesting actor  |
+
+---
+
+## Security Rules
+
+* Authorization mandatory
+* Export operations auditable
+
+---
+
+# 19. AuditExportCompleted Event
+
+## Purpose
+
+Published after successful export generation.
+
+---
+
+## Side Effects
+
+```text id="t2x7wr"
+- Compliance evidence
+- Export audit persistence
+- Delivery notifications
+```
+
+---
+
+# 20. AuditExportFailed Event
+
+## Purpose
+
+Published when export generation fails.
+
+---
+
+## Usage
+
+Supports:
+
+* Operational monitoring
+* Retry orchestration
+* Incident tracking
+
+---
+
+# 21. CrossTenantAccessDetected Event
+
+## Purpose
+
+Published after tenant isolation violation attempts.
+
+Critical security event.
+
+---
+
+## Payload
+
+| Field        | Type   | Description       |
+| ------------ | ------ | ----------------- |
+| sourceTenant | String | Origin tenant     |
+| targetTenant | String | Attempted tenant  |
+| actorId      | UUID   | Responsible actor |
+
+---
+
+## Recommended Actions
+
+```text id="f5v1xp"
+- Immediate escalation
+- Security investigation
+- Threat analysis
+```
+
+---
+
+# 22. SIEMForwardingFailed Event
+
+## Purpose
+
+Published when SIEM delivery fails.
+
+---
+
+## Usage
+
+Supports:
+
+* Retry orchestration
+* Monitoring alerts
+* Observability resilience
+
+---
+
+# 23. CorrelationTimelineReconstructed Event
+
+## Purpose
+
+Published after successful forensic reconstruction.
+
+---
+
+## Usage
+
+Supports:
+
+* Incident analysis
+* Operational tracing
+* Investigation reporting
+
+---
+
+# 24. AuditSearchExecuted Event
+
+## Purpose
+
+Published after audit search execution.
+
+---
+
+## Usage
+
+Supports:
+
+* Monitoring
+* Search analytics
+* Compliance traceability
+
+---
+
+## Important Restriction
+
+Search metadata must avoid sensitive overexposure.
+
+---
+
+# 25. AuditPolicyChanged Event
+
+## Purpose
+
+Published after retention/compliance policy updates.
+
+---
+
+## Example Changes
+
+```text id="w9m3vt"
+- Retention duration changes
+- Compliance scope updates
+- Archival policy modifications
 ```
 
 ---
 
 ## Side Effects
 
-```text id="v2n8xr"
-- Session revalidation
-- Policy cache invalidation
+```text id="d4x8wr"
+- Lifecycle recalculation
+- Archival reevaluation
 ```
 
 ---
 
-# 28. Event Ordering Considerations
+# 26. Event Ordering Considerations
 
 Certain events require ordering guarantees.
 
@@ -656,135 +634,134 @@ Certain events require ordering guarantees.
 
 ## Example
 
-```text id="q6m1vt"
-SessionCreated
+```text id="u7n2vp"
+AuditRecordCreated
     before
-JWTIssued
+AuditIntegrityProofGenerated
 ```
 
 ---
 
 ## Recommended Strategies
 
-| Strategy           | Purpose             |
-| ------------------ | ------------------- |
-| Aggregate ordering | Session consistency |
-| Kafka partitioning | Tenant ordering     |
-| Outbox pattern     | Reliable publishing |
+| Strategy           | Purpose              |
+| ------------------ | -------------------- |
+| Kafka partitioning | Tenant ordering      |
+| Outbox pattern     | Reliable publishing  |
+| Aggregate ordering | Evidence consistency |
 
 ---
 
-# 29. Event Delivery Guarantees
+# 27. Event Delivery Guarantees
 
 Recommended semantics:
 
-| Event Type        | Guarantee                    |
-| ----------------- | ---------------------------- |
-| Security events   | At least once                |
-| Audit events      | Durable delivery             |
-| Cache sync events | Best effort acceptable       |
-| Session events    | Strong consistency preferred |
+| Event Type            | Guarantee              |
+| --------------------- | ---------------------- |
+| Security audit events | At least once          |
+| Compliance events     | Durable delivery       |
+| SIEM integrations     | Retry mandatory        |
+| Export notifications  | Best effort acceptable |
 
 ---
 
-# 30. Sensitive Data Restrictions
+# 28. Sensitive Data Restrictions
 
-Authentication events must NEVER expose:
+Audit events must NEVER expose:
 
-* Plain passwords
-* JWT secrets
-* API secrets
-* MFA secrets
-* Refresh token values
-* Raw credentials
+* Passwords
+* Secrets
+* MFA tokens
+* Raw JWTs
+* Sensitive credentials
 
 ---
 
-# 31. Recommended Messaging Infrastructure
+# 29. Recommended Messaging Infrastructure
 
 | Technology    | Suitability                |
 | ------------- | -------------------------- |
 | Kafka         | High-scale event streaming |
-| RabbitMQ      | Flexible routing           |
-| Redis Streams | Lightweight eventing       |
-| AWS SNS/SQS   | Cloud-native integration   |
+| RabbitMQ      | Routing flexibility        |
+| Redis Streams | Lightweight streaming      |
+| AWS SNS/SQS   | Cloud-native eventing      |
 
 ---
 
-# 32. Event Replay Considerations
+# 30. Replay and Reconstruction Considerations
 
 Replay-compatible events:
 
-| Event                | Reason                 |
-| -------------------- | ---------------------- |
-| SessionCreated       | Session reconstruction |
-| PasswordChanged      | Security auditing      |
-| AuthenticationFailed | Threat analytics       |
+| Event                  | Purpose                 |
+| ---------------------- | ----------------------- |
+| AuditRecordCreated     | Timeline reconstruction |
+| SecurityAuditRecorded  | Threat analysis         |
+| DistributedTraceLinked | Cross-service tracing   |
 
 ---
 
-# 33. CQRS Integration
+# 31. CQRS Integration
 
 Events may update projections including:
 
-* Active session views
 * Security dashboards
-* Login analytics
-* Device trust views
-* Threat monitoring dashboards
+* Compliance dashboards
+* Threat analytics
+* Audit search indexes
+* Timeline reconstruction views
 
 ---
 
-# 34. Distributed System Considerations
+# 32. Distributed System Considerations
 
 Events support:
 
 * Multi-region deployments
 * Horizontal scaling
-* Reactive systems
-* Distributed cache synchronization
+* Reactive architectures
+* Distributed observability
 * Eventual consistency
 
 ---
 
-# 35. Failure Handling Rules
+# 33. Failure Handling Rules
 
-If publication fails:
+If event publication fails:
 
-| Event Type         | Strategy                     |
-| ------------------ | ---------------------------- |
-| Security-critical  | Retry mandatory              |
-| Audit              | Durable persistence required |
-| Cache invalidation | Retry recommended            |
+| Event Type        | Strategy                     |
+| ----------------- | ---------------------------- |
+| Security events   | Retry mandatory              |
+| Compliance events | Durable persistence required |
+| Search analytics  | Retry optional               |
 
 ---
 
-# 36. Future Event Extensions
+# 34. Future Event Extensions
 
 Future events may include:
 
-* PasswordlessLoginCompleted
-* WebAuthnChallengeCompleted
-* BiometricAuthenticationCompleted
-* AdaptiveAuthenticationTriggered
-* ContinuousAuthenticationFailed
-* HardwareSecurityKeyRegistered
+* AIThreatDetected
+* BehavioralAnomalyDetected
+* ContinuousComplianceViolationDetected
+* ImmutableLedgerCommitted
+* PrivacyInvestigationStarted
+* DataLineageCorrelated
 
 ---
 
-# 37. Summary
+# 35. Summary
 
-The Authentication Management events provide:
+The Audit Management events provide:
 
-* Enterprise-grade authentication auditability
-* Distributed authentication synchronization
-* Security monitoring integration
-* Threat detection support
-* Session consistency
-* Reactive authentication communication
-* Scalable event-driven authentication architecture
+* Enterprise-grade audit traceability
+* Security forensic observability
+* Distributed correlation support
+* Compliance-grade evidence streaming
+* Reactive audit integrations
+* Multi-tenant audit isolation
+* Tamper-resistant event-driven accountability
 
-These events form the integration backbone of the authentication ecosystem.
+These events form the integration backbone of the audit ecosystem.
 
 ```
 ```

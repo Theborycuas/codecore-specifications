@@ -1,30 +1,32 @@
-# 05-authentication-management/repositories.md
+# 06-audit-management/repositories.md
 
-````md id="m8v2xp"
-# Authentication Management Repositories
+````md id="y7x3vp"
+# Audit Management Repositories
 
 ## 1. Introduction
 
-This document defines the repository contracts and persistence responsibilities of the Authentication Management module.
+This document defines the repository contracts and persistence responsibilities of the Audit Management module.
 
 Repositories are responsible for:
 
-- Authentication persistence
-- Session lifecycle storage
-- Token management
-- MFA persistence
-- Device trust persistence
-- Authentication auditing
-- Security event storage
-- Distributed authentication state management
+- Immutable audit persistence
+- Security evidence storage
+- Compliance traceability
+- Distributed trace persistence
+- Audit archival
+- Retention lifecycle management
+- Integrity validation persistence
+- Search optimization
+- SIEM integration support
 
 The repository layer is designed following:
 
 - Domain-Driven Design (DDD)
 - Repository Pattern
 - Hexagonal Architecture
-- Multi-tenant SaaS security principles
-- Zero Trust authentication architecture
+- Immutable evidence principles
+- Multi-tenant SaaS isolation
+- Enterprise compliance standards
 
 ---
 
@@ -32,13 +34,13 @@ The repository layer is designed following:
 
 | Principle | Description |
 |---|---|
-| Aggregate-oriented | One repository per aggregate root |
-| Tenant-aware | Tenant isolation mandatory |
+| Immutable persistence | Audit evidence cannot change |
+| Tenant-aware | Isolation mandatory |
+| Append-only preferred | Tamper resistance |
+| CQRS-friendly | Optimized read/search |
 | Persistence ignorance | Domain isolation |
-| Security-first | Authentication integrity |
-| Explicit querying | Avoid ambiguous access |
-| Immutable auditing | Preserve security evidence |
-| CQRS-friendly | Optimized read projections |
+| High-throughput optimized | Scalable ingestion |
+| Security-first | Sensitive evidence protection |
 
 ---
 
@@ -46,115 +48,105 @@ The repository layer is designed following:
 
 | Repository | Responsibility |
 |---|---|
-| AuthenticationRepository | Authentication persistence |
-| SessionRepository | Session lifecycle management |
-| RefreshTokenRepository | Refresh token persistence |
-| MFAChallengeRepository | MFA workflow persistence |
-| TrustedDeviceRepository | Device trust management |
-| APIKeyRepository | API authentication persistence |
-| ServiceIdentityRepository | Internal service authentication |
-| AuthenticationAuditRepository | Authentication evidence |
-| LoginAttemptRepository | Failed/suspicious login tracking |
-| SessionSecurityStateRepository | Runtime security state |
-| OAuthIdentityRepository | External identity linkage |
-| PasswordCredentialRepository | Password credential persistence |
-| AuthenticationCacheRepository | Distributed auth caching |
-| EffectiveSessionProjectionRepository | Session read optimization |
+| AuditRecordRepository | Core immutable audit persistence |
+| SecurityAuditRepository | Security evidence persistence |
+| ComplianceAuditRepository | Regulatory audit persistence |
+| SensitiveAccessRepository | Sensitive access tracking |
+| CorrelationTraceRepository | Distributed trace persistence |
+| TraceSegmentRepository | Trace segment storage |
+| AuditRetentionRepository | Retention lifecycle policies |
+| AuditExportRepository | Export lifecycle persistence |
+| AuditIntegrityRepository | Tamper-proof validation |
+| ThreatIndicatorRepository | Threat evidence persistence |
+| LegalHoldRepository | Legal hold lifecycle |
+| AuditArchiveRepository | Archive references |
+| AuditSearchProjectionRepository | Optimized audit querying |
+| SIEMDeliveryRepository | SIEM delivery state tracking |
 
 ---
 
-# 4. AuthenticationRepository
+# 4. AuditRecordRepository
 
 ## Purpose
 
-Persists authentication attempts and results.
+Persists immutable audit evidence.
+
+Core repository of the audit domain.
 
 ---
 
 ## Responsibilities
 
-- Store authentication outcomes
-- Query authentication history
-- Support authentication analytics
-- Track authentication methods
+- Store immutable audit records
+- Support audit querying
+- Preserve distributed traceability
+- Enforce tenant isolation
 
 ---
 
 ## Example Contract
 
-```java id="x3n8vt"
-public interface AuthenticationRepository {
+```java id="m4v8wr"
+public interface AuditRecordRepository {
 
-    Mono<Authentication> save(
-        Authentication authentication
+    Mono<AuditRecord> save(
+        AuditRecord auditRecord
     );
 
-    Mono<Authentication> findById(
-        AuthenticationId authenticationId
+    Mono<AuditRecord> findById(
+        AuditRecordId auditRecordId
     );
 
-    Flux<Authentication> findByUserId(
-        UserId userId
-    );
-
-    Flux<Authentication> findFailedAttempts(
-        TenantId tenantId
+    Flux<AuditRecord> search(
+        AuditSearchCriteria criteria
     );
 }
 ````
 
 ---
 
-## Security Rules
+## Critical Rules
 
-| Rule                        | Description  |
-| --------------------------- | ------------ |
-| Tenant filtering mandatory  | Isolation    |
-| Sensitive data forbidden    | Security     |
-| Immutable history preferred | Auditability |
+| Rule                       | Description        |
+| -------------------------- | ------------------ |
+| Updates forbidden          | Immutable evidence |
+| Tenant filtering mandatory | SaaS isolation     |
+| Append-only preferred      | Tamper resistance  |
 
 ---
 
-# 5. SessionRepository
+# 5. SecurityAuditRepository
 
 ## Purpose
 
-Manages authenticated sessions.
-
-Critical repository.
+Persists security-related audit evidence.
 
 ---
 
 ## Responsibilities
 
-* Persist sessions
-* Validate active sessions
-* Revoke sessions
-* Query user sessions
-* Support distributed session management
+* Persist threat evidence
+* Support incident investigations
+* Enable SIEM integrations
+* Track suspicious activities
 
 ---
 
 ## Example Contract
 
-```java id="f7w2xr"
-public interface SessionRepository {
+```java id="u7x2vt"
+public interface SecurityAuditRepository {
 
-    Mono<AuthenticatedSession> save(
-        AuthenticatedSession session
+    Mono<SecurityAuditRecord> save(
+        SecurityAuditRecord record
     );
 
-    Mono<AuthenticatedSession> findById(
-        SessionId sessionId
+    Flux<SecurityAuditRecord> findBySeverity(
+        AuditSeverity severity
     );
 
-    Flux<AuthenticatedSession> findActiveByUser(
-        UserId userId,
-        TenantId tenantId
-    );
-
-    Mono<Void> revoke(
-        SessionId sessionId
+    Flux<SecurityAuditRecord> findByCorrelationId(
+        CorrelationIdentifier correlationId
     );
 }
 ```
@@ -163,411 +155,82 @@ public interface SessionRepository {
 
 ## Important Constraints
 
-| Constraint                 | Description   |
-| -------------------------- | ------------- |
-| Revoked sessions unusable  | Security      |
-| Expired sessions invalid   | Integrity     |
-| Tenant isolation mandatory | SaaS security |
+| Constraint                         | Description     |
+| ---------------------------------- | --------------- |
+| Security evidence immutable        | Forensics       |
+| High-severity indexing recommended | Threat response |
 
 ---
 
-# 6. RefreshTokenRepository
+# 6. ComplianceAuditRepository
 
 ## Purpose
 
-Persists refresh token lifecycle.
-
-Critical for replay protection.
+Persists compliance-grade audit evidence.
 
 ---
 
 ## Responsibilities
 
-* Store refresh tokens
-* Rotate refresh tokens
-* Detect replay attempts
-* Revoke compromised tokens
+* Track regulatory operations
+* Support compliance reporting
+* Enforce retention linkage
 
 ---
 
 ## Example Contract
 
-```java id="u9m4wp"
-public interface RefreshTokenRepository {
+```java id="r2m9xp"
+public interface ComplianceAuditRepository {
 
-    Mono<RefreshToken> save(
-        RefreshToken refreshToken
+    Mono<ComplianceAuditRecord> save(
+        ComplianceAuditRecord record
     );
 
-    Mono<RefreshToken> findByHash(
-        String tokenHash
-    );
-
-    Mono<Void> revoke(
-        RefreshTokenId tokenId
-    );
-
-    Flux<RefreshToken> findBySession(
-        SessionId sessionId
+    Flux<ComplianceAuditRecord> findByRegulation(
+        ComplianceClassification regulation
     );
 }
 ```
 
 ---
 
-## Security Rules
+## Compliance Rules
 
-| Rule                              | Description       |
-| --------------------------------- | ----------------- |
-| Tokens stored hashed              | Secret protection |
-| Replay detection mandatory        | Threat prevention |
-| Rotation chain integrity required | Security          |
+* Long-term retention supported
+* Legal evidence immutable
 
 ---
 
-# 7. MFAChallengeRepository
+# 7. SensitiveAccessRepository
 
 ## Purpose
 
-Manages MFA challenges.
+Tracks sensitive resource access.
+
+Critical for medical/legal systems.
 
 ---
 
 ## Responsibilities
 
-* Persist MFA challenges
-* Validate active challenges
-* Expire challenges
-* Track invalid attempts
+* Persist sensitive access records
+* Support privacy investigations
+* Enable access reconstruction
 
 ---
 
 ## Example Contract
 
-```java id="q5v8xt"
-public interface MFAChallengeRepository {
+```java id="g8v4wr"
+public interface SensitiveAccessRepository {
 
-    Mono<MFAChallenge> save(
-        MFAChallenge challenge
+    Mono<SensitiveAccessRecord> save(
+        SensitiveAccessRecord record
     );
 
-    Mono<MFAChallenge> findActiveChallenge(
-        UserId userId
-    );
-
-    Mono<Void> expire(
-        MFAChallengeId challengeId
-    );
-}
-```
-
----
-
-## Important Rules
-
-* Expired challenges invalid
-* Single-use challenges only
-* Brute force tracking required
-
----
-
-# 8. TrustedDeviceRepository
-
-## Purpose
-
-Persists trusted device relationships.
-
----
-
-## Responsibilities
-
-* Store trusted devices
-* Validate trust state
-* Revoke trusted devices
-* Support adaptive authentication
-
----
-
-## Example Contract
-
-```java id="r2n7vp"
-public interface TrustedDeviceRepository {
-
-    Mono<TrustedDevice> save(
-        TrustedDevice device
-    );
-
-    Mono<TrustedDevice> findByFingerprint(
-        DeviceFingerprint fingerprint
-    );
-
-    Flux<TrustedDevice> findByUser(
-        UserId userId
-    );
-
-    Mono<Void> revoke(
-        DeviceTrustId deviceTrustId
-    );
-}
-```
-
----
-
-# 9. APIKeyRepository
-
-## Purpose
-
-Persists API authentication credentials.
-
----
-
-## Responsibilities
-
-* Store API keys
-* Validate scopes
-* Revoke keys
-* Rotate secrets
-
----
-
-## Example Contract
-
-```java id="v8x3wr"
-public interface APIKeyRepository {
-
-    Mono<APIKey> save(
-        APIKey apiKey
-    );
-
-    Mono<APIKey> findByPrefix(
-        String prefix
-    );
-
-    Mono<Void> revoke(
-        APIKeyId apiKeyId
-    );
-}
-```
-
----
-
-## Security Rules
-
-* Secrets stored hashed
-* Revocation support mandatory
-* Expiration enforcement required
-
----
-
-# 10. ServiceIdentityRepository
-
-## Purpose
-
-Persists internal service authentication identities.
-
----
-
-## Responsibilities
-
-* Store service credentials
-* Validate internal identities
-* Rotate secrets
-* Support Zero Trust service validation
-
----
-
-## Example Contract
-
-```java id="g1k6xt"
-public interface ServiceIdentityRepository {
-
-    Mono<ServiceIdentity> save(
-        ServiceIdentity identity
-    );
-
-    Mono<ServiceIdentity> findByClientId(
-        String clientId
-    );
-}
-```
-
----
-
-# 11. AuthenticationAuditRepository
-
-## Purpose
-
-Stores immutable authentication evidence.
-
-Critical compliance repository.
-
----
-
-## Responsibilities
-
-* Persist audit records
-* Support security analytics
-* Support forensic investigation
-* Provide compliance exports
-
----
-
-## Example Contract
-
-```java id="w4n9vp"
-public interface AuthenticationAuditRepository {
-
-    Mono<AuthenticationAuditRecord> save(
-        AuthenticationAuditRecord record
-    );
-
-    Flux<AuthenticationAuditRecord> search(
-        AuthenticationAuditCriteria criteria
-    );
-}
-```
-
----
-
-## Characteristics
-
-| Characteristic           | Description            |
-| ------------------------ | ---------------------- |
-| Append-only preferred    | Immutable evidence     |
-| High-volume writes       | Authentication traffic |
-| Partitioning recommended | Scalability            |
-
----
-
-# 12. LoginAttemptRepository
-
-## Purpose
-
-Tracks authentication attempts.
-
-Supports:
-
-* Brute force protection
-* Threat analysis
-* Lockout workflows
-
----
-
-## Example Contract
-
-```java id="t7m2wr"
-public interface LoginAttemptRepository {
-
-    Mono<LoginAttempt> save(
-        LoginAttempt attempt
-    );
-
-    Flux<LoginAttempt> findRecentFailures(
-        Username username
-    );
-
-    Mono<Long> countRecentFailures(
-        Username username
-    );
-}
-```
-
----
-
-# 13. SessionSecurityStateRepository
-
-## Purpose
-
-Persists runtime security evaluation state.
-
----
-
-## Responsibilities
-
-* Risk scoring
-* Suspicious session tracking
-* Adaptive authentication support
-
----
-
-## Example Contract
-
-```java id="k5x8vt"
-public interface SessionSecurityStateRepository {
-
-    Mono<SessionSecurityState> save(
-        SessionSecurityState state
-    );
-
-    Mono<SessionSecurityState> findBySession(
-        SessionId sessionId
-    );
-}
-```
-
----
-
-# 14. OAuthIdentityRepository
-
-## Purpose
-
-Persists external identity provider linkages.
-
----
-
-## Responsibilities
-
-* Link provider identities
-* Resolve external users
-* Manage federation mappings
-
----
-
-## Example Contract
-
-```java id="d3v7xp"
-public interface OAuthIdentityRepository {
-
-    Mono<OAuthIdentity> save(
-        OAuthIdentity identity
-    );
-
-    Mono<OAuthIdentity> findByProviderAndExternalId(
-        OAuthProvider provider,
-        String externalId
-    );
-}
-```
-
----
-
-# 15. PasswordCredentialRepository
-
-## Purpose
-
-Persists password credentials securely.
-
----
-
-## Responsibilities
-
-* Store password hashes
-* Rotate password credentials
-* Validate expiration policies
-
----
-
-## Example Contract
-
-```java id="j9n4wr"
-public interface PasswordCredentialRepository {
-
-    Mono<PasswordCredential> save(
-        PasswordCredential credential
-    );
-
-    Mono<PasswordCredential> findByUser(
-        UserId userId
+    Flux<SensitiveAccessRecord> findByResource(
+        ResourceIdentifier resource
     );
 }
 ```
@@ -578,46 +241,337 @@ public interface PasswordCredentialRepository {
 
 | Rule                      | Description |
 | ------------------------- | ----------- |
-| Plaintext forbidden       | Security    |
-| Strong hashing mandatory  | Hardening   |
-| Rotation support required | Compliance  |
+| Strict tenant isolation   | Privacy     |
+| Immutable access evidence | Compliance  |
 
 ---
 
-# 16. AuthenticationCacheRepository
+# 8. CorrelationTraceRepository
 
 ## Purpose
 
-Provides distributed authentication caching.
+Persists distributed trace structures.
 
 ---
 
-## Cached Elements
+## Responsibilities
 
-```text id="m2x7vt"
-- Active sessions
-- JWT revocation state
-- Device trust state
-- MFA validation state
-```
+* Store distributed traces
+* Support timeline reconstruction
+* Correlate cross-service events
 
 ---
 
 ## Example Contract
 
-```java id="f6w1xp"
-public interface AuthenticationCacheRepository {
+```java id="p5x1vt"
+public interface CorrelationTraceRepository {
 
-    Mono<AuthenticatedSession> getSession(
-        SessionId sessionId
+    Mono<CorrelationTrace> save(
+        CorrelationTrace trace
     );
 
-    Mono<Void> putSession(
-        AuthenticatedSession session
+    Mono<CorrelationTrace> findByCorrelationId(
+        CorrelationIdentifier correlationId
+    );
+}
+```
+
+---
+
+## Recommended Optimization
+
+Index:
+
+```text id="f9m7wr"
+correlationId
+```
+
+for forensic performance.
+
+---
+
+# 9. TraceSegmentRepository
+
+## Purpose
+
+Stores distributed service segments.
+
+---
+
+## Responsibilities
+
+* Persist service hops
+* Support distributed diagnostics
+* Reconstruct operational timelines
+
+---
+
+## Example Contract
+
+```java id="t3v8xp"
+public interface TraceSegmentRepository {
+
+    Mono<TraceSegment> save(
+        TraceSegment segment
     );
 
-    Mono<Void> invalidateSession(
-        SessionId sessionId
+    Flux<TraceSegment> findByTrace(
+        CorrelationTraceId traceId
+    );
+}
+```
+
+---
+
+# 10. AuditRetentionRepository
+
+## Purpose
+
+Persists retention lifecycle rules.
+
+---
+
+## Responsibilities
+
+* Store retention policies
+* Resolve expiration logic
+* Support archival workflows
+
+---
+
+## Example Contract
+
+```java id="x6m2wr"
+public interface AuditRetentionRepository {
+
+    Mono<AuditRetentionPolicy> save(
+        AuditRetentionPolicy policy
+    );
+
+    Flux<AuditRetentionPolicy> findActivePolicies();
+}
+```
+
+---
+
+## Important Rules
+
+* Retention policy changes auditable
+* Legal holds override expiration
+
+---
+
+# 11. AuditExportRepository
+
+## Purpose
+
+Persists export lifecycle evidence.
+
+---
+
+## Responsibilities
+
+* Track exports
+* Persist export metadata
+* Support compliance evidence
+
+---
+
+## Example Contract
+
+```java id="d1x9vt"
+public interface AuditExportRepository {
+
+    Mono<AuditExport> save(
+        AuditExport export
+    );
+
+    Mono<AuditExport> findById(
+        AuditExportId exportId
+    );
+}
+```
+
+---
+
+## Security Rules
+
+* Exports auditable
+* Export authorization mandatory
+
+---
+
+# 12. AuditIntegrityRepository
+
+## Purpose
+
+Persists integrity validation evidence.
+
+---
+
+## Responsibilities
+
+* Store integrity hashes
+* Validate tamper resistance
+* Support forensic verification
+
+---
+
+## Example Contract
+
+```java id="n7v3wr"
+public interface AuditIntegrityRepository {
+
+    Mono<AuditIntegrityProof> save(
+        AuditIntegrityProof proof
+    );
+
+    Mono<AuditIntegrityProof> findByAuditRecord(
+        AuditRecordId auditRecordId
+    );
+}
+```
+
+---
+
+## Critical Constraints
+
+| Constraint                 | Description       |
+| -------------------------- | ----------------- |
+| Integrity proofs immutable | Tamper resistance |
+| Verification reproducible  | Forensics         |
+
+---
+
+# 13. ThreatIndicatorRepository
+
+## Purpose
+
+Persists threat detection evidence.
+
+---
+
+## Responsibilities
+
+* Store threat indicators
+* Support threat analytics
+* Enable incident escalation
+
+---
+
+## Example Contract
+
+```java id="v2m8xp"
+public interface ThreatIndicatorRepository {
+
+    Mono<ThreatIndicator> save(
+        ThreatIndicator indicator
+    );
+
+    Flux<ThreatIndicator> findHighSeverityThreats();
+}
+```
+
+---
+
+# 14. LegalHoldRepository
+
+## Purpose
+
+Persists legal retention holds.
+
+---
+
+## Responsibilities
+
+* Apply legal holds
+* Prevent expiration
+* Support legal investigations
+
+---
+
+## Example Contract
+
+```java id="k5x1wr"
+public interface LegalHoldRepository {
+
+    Mono<LegalHold> save(
+        LegalHold hold
+    );
+
+    Flux<LegalHold> findActiveHolds();
+}
+```
+
+---
+
+## Important Rules
+
+* Holds override deletion/expiration
+* Hold lifecycle auditable
+
+---
+
+# 15. AuditArchiveRepository
+
+## Purpose
+
+Persists archival references.
+
+---
+
+## Responsibilities
+
+* Store archive references
+* Support restoration
+* Track archive lifecycle
+
+---
+
+## Example Contract
+
+```java id="q9v4xt"
+public interface AuditArchiveRepository {
+
+    Mono<AuditArchiveReference> save(
+        AuditArchiveReference archive
+    );
+
+    Mono<AuditArchiveReference> findById(
+        ArchiveReferenceId archiveId
+    );
+}
+```
+
+---
+
+# 16. AuditSearchProjectionRepository
+
+## Purpose
+
+Provides optimized search/read models.
+
+CQRS-oriented repository.
+
+---
+
+## Responsibilities
+
+* Audit search optimization
+* Full-text indexing
+* Timeline querying
+* Dashboard projections
+
+---
+
+## Example Contract
+
+```java id="w3m7vp"
+public interface AuditSearchProjectionRepository {
+
+    Flux<AuditSearchProjection> search(
+        AuditSearchCriteria criteria
     );
 }
 ```
@@ -626,42 +580,39 @@ public interface AuthenticationCacheRepository {
 
 ## Recommended Technologies
 
-| Technology | Suitability                      |
-| ---------- | -------------------------------- |
-| Redis      | Distributed authentication state |
-| Caffeine   | Local cache                      |
-| Hazelcast  | Clustered caching                |
+| Technology    | Suitability            |
+| ------------- | ---------------------- |
+| Elasticsearch | Full-text audit search |
+| OpenSearch    | Distributed querying   |
 
 ---
 
-# 17. EffectiveSessionProjectionRepository
+# 17. SIEMDeliveryRepository
 
 ## Purpose
 
-Provides optimized session read models.
-
-CQRS-oriented repository.
+Tracks SIEM integration delivery state.
 
 ---
 
 ## Responsibilities
 
-* Active session views
-* User device views
-* Security dashboards
-* Session analytics
+* Track delivery attempts
+* Support retry orchestration
+* Persist delivery failures
 
 ---
 
 ## Example Contract
 
-```java id="q8v3wr"
-public interface EffectiveSessionProjectionRepository {
+```java id="f8x2wr"
+public interface SIEMDeliveryRepository {
 
-    Flux<SessionProjection> findActiveSessions(
-        UserId userId,
-        TenantId tenantId
+    Mono<SIEMDeliveryState> save(
+        SIEMDeliveryState state
     );
+
+    Flux<SIEMDeliveryState> findFailedDeliveries();
 }
 ```
 
@@ -673,7 +624,7 @@ public interface EffectiveSessionProjectionRepository {
 
 Repositories must enforce:
 
-```sql id="y4k9vp"
+```sql id="m1v9xt"
 WHERE tenant_id = :tenantId
 ```
 
@@ -681,32 +632,33 @@ WHERE tenant_id = :tenantId
 
 ## Forbidden Behavior
 
-```text id="u7m2xt"
-Cross-tenant authentication access
+```text id="r6x4wp"
+Cross-tenant audit visibility
 ```
 
 ---
 
 # 19. Persistence Strategies
 
-| Aggregate                    | Strategy                   |
-| ---------------------------- | -------------------------- |
-| AuthenticationAggregate      | Relational persistence     |
-| SessionAggregate             | Relational + Redis         |
-| RefreshTokenAggregate        | Relational secure storage  |
-| MFAAggregate                 | Short-lived persistence    |
-| AuthenticationAuditAggregate | Append-only/event-oriented |
+| Aggregate                 | Strategy                  |
+| ------------------------- | ------------------------- |
+| AuditRecordAggregate      | Append-only relational    |
+| SecurityAuditAggregate    | Indexed relational/search |
+| CorrelationTraceAggregate | Distributed indexing      |
+| AuditExportAggregate      | Relational tracking       |
+| AuditArchiveAggregate     | Object storage references |
 
 ---
 
 # 20. Recommended Database Technologies
 
-| Technology    | Use Case                       |
-| ------------- | ------------------------------ |
-| PostgreSQL    | Core authentication data       |
-| Redis         | Session/token caching          |
-| Elasticsearch | Security audit search          |
-| Kafka         | Authentication event streaming |
+| Technology        | Use Case                    |
+| ----------------- | --------------------------- |
+| PostgreSQL        | Immutable audit persistence |
+| Elasticsearch     | Search and forensics        |
+| Kafka             | Event streaming             |
+| S3/Object Storage | Long-term archival          |
+| Redis             | Hot trace caching           |
 
 ---
 
@@ -716,17 +668,18 @@ Recommended separation:
 
 ## Write Side
 
-* Authentication consistency
-* Session integrity
-* Security enforcement
+* Immutable persistence
+* Evidence integrity
+* Retention enforcement
 
 ---
 
 ## Read Side
 
+* Search projections
+* Timeline reconstruction
 * Security dashboards
-* Session projections
-* Audit analytics
+* Compliance reporting
 
 ---
 
@@ -738,20 +691,20 @@ Reactive support strongly recommended.
 
 ## Example
 
-```java id="r1x6wt"
-Mono<AuthenticatedSession>
-Flux<AuthenticationAuditRecord>
+```java id="u4m8vr"
+Mono<AuditRecord>
+Flux<SecurityAuditRecord>
 ```
 
 ---
 
 ## Benefits
 
-| Benefit                  | Description             |
-| ------------------------ | ----------------------- |
-| Non-blocking IO          | Scalability             |
-| High concurrency         | Reactive authentication |
-| Efficient resource usage | Performance             |
+| Benefit                   | Description         |
+| ------------------------- | ------------------- |
+| High ingestion throughput | Scalability         |
+| Non-blocking IO           | Performance         |
+| Async streaming           | Distributed systems |
 
 ---
 
@@ -759,53 +712,52 @@ Flux<AuthenticationAuditRecord>
 
 ## Strong Consistency Required
 
-| Operation              | Reason                   |
-| ---------------------- | ------------------------ |
-| Session creation       | Authentication integrity |
-| Refresh token rotation | Replay prevention        |
-| MFA validation         | Security correctness     |
-| Session revocation     | Immediate invalidation   |
+| Operation                  | Reason             |
+| -------------------------- | ------------------ |
+| Audit persistence          | Evidence integrity |
+| Integrity proof generation | Tamper protection  |
+| Legal hold application     | Compliance         |
 
 ---
 
 ## Eventual Consistency Acceptable
 
-| Operation             | Reason              |
-| --------------------- | ------------------- |
-| Analytics projections | Reporting           |
-| Security dashboards   | Monitoring          |
-| Audit indexing        | Search optimization |
+| Operation             | Reason             |
+| --------------------- | ------------------ |
+| Search indexing       | Query optimization |
+| SIEM forwarding       | Async integration  |
+| Analytics projections | Reporting          |
 
 ---
 
 # 24. Security-Critical Repository Rules
 
-## Secrets Never Retrievable
+## Audit Modification Forbidden
 
-Forbidden retrieval:
+After persistence:
 
-```text id="x5n8vr"
-- Plain passwords
-- Raw refresh tokens
-- API secrets
+```text id="c7v1xp"
+NO UPDATE
+```
+
+---
+
+## Sensitive Data Restrictions
+
+Repositories must never persist:
+
+```text id="g2m9wr"
+- Passwords
+- Secrets
+- Raw JWTs
 - MFA secrets
 ```
 
 ---
 
-## Fail Closed Principle
+## Fail Secure Principle
 
-Repository failures:
-
-```text id="p3v7wt"
-AUTHENTICATION = DENIED
-```
-
----
-
-## Immutable Audit Evidence
-
-Audit records must not be mutable.
+Repository failures must preserve evidence integrity.
 
 ---
 
@@ -813,95 +765,76 @@ Audit records must not be mutable.
 
 Critical performance areas:
 
-| Area                 | Optimization   |
-| -------------------- | -------------- |
-| Session validation   | Redis          |
-| JWT revocation       | Cache indexing |
-| Refresh token lookup | Hashed indexes |
-| Audit search         | Partitioning   |
+| Area               | Optimization            |
+| ------------------ | ----------------------- |
+| Audit ingestion    | Batch streaming         |
+| Correlation lookup | Indexed correlation IDs |
+| Security searches  | Elasticsearch           |
+| Archive retrieval  | Async restoration       |
 
 ---
 
 # 26. Indexing Recommendations
 
-| Table                | Recommended Index       |
-| -------------------- | ----------------------- |
-| sessions             | tenant_id + user_id     |
-| refresh_tokens       | token_hash              |
-| login_attempts       | username + attempted_at |
-| authentication_audit | tenant_id + occurred_at |
+| Table            | Recommended Index       |
+| ---------------- | ----------------------- |
+| audit_records    | tenant_id + occurred_at |
+| security_audit   | severity + occurred_at  |
+| traces           | correlation_id          |
+| sensitive_access | resource_id             |
 
 ---
 
 # 27. Soft Delete Strategy
 
-Recommended for:
+Soft delete is NOT recommended for immutable evidence.
 
-| Entity          | Reason              |
-| --------------- | ------------------- |
-| Sessions        | Auditability        |
-| API keys        | Historical evidence |
-| Trusted devices | Security forensics  |
+Preferred strategy:
 
----
-
-## Example
-
-```text id="n6k2xp"
-revoked = true
+```text id="j5x8vt"
+ARCHIVAL
+instead of deletion
 ```
 
-instead of physical deletion.
-
 ---
 
-# 28. Failure Handling Strategies
-
-| Failure                  | Strategy            |
-| ------------------------ | ------------------- |
-| Redis unavailable        | Fallback validation |
-| DB timeout               | Fail closed         |
-| Token replay uncertainty | Revoke session      |
-
----
-
-# 29. Distributed System Considerations
+# 28. Distributed System Considerations
 
 Repositories must support:
 
-* Horizontal scaling
-* Distributed session state
-* Eventual consistency
 * Multi-region deployments
-* Distributed cache synchronization
+* Distributed event ingestion
+* Horizontal scalability
+* Reactive streaming
+* Eventual consistency projections
 
 ---
 
-# 30. Future Repository Extensions
+# 29. Future Repository Extensions
 
 Future repositories may include:
 
-* WebAuthnRepository
-* BiometricCredentialRepository
-* AdaptiveAuthenticationRepository
-* RiskEvaluationRepository
-* PasswordlessAuthenticationRepository
+* BehavioralAuditRepository
+* AIThreatAnalysisRepository
+* ImmutableLedgerRepository
+* PrivacyInvestigationRepository
+* ComplianceSnapshotRepository
 
 ---
 
-# 31. Summary
+# 30. Summary
 
-The Authentication Management repositories provide:
+The Audit Management repositories provide:
 
-* Secure authentication persistence
-* Strong session integrity
-* Replay-resistant token management
-* Distributed authentication scalability
-* Reactive authentication support
-* Immutable security auditability
-* Enterprise-grade authentication consistency
+* Immutable audit persistence
+* Enterprise-grade forensic traceability
+* Distributed operational correlation
+* Compliance-grade evidence retention
+* Reactive audit scalability
+* Multi-tenant audit isolation
+* Tamper-resistant audit integrity
 
-These repositories form the persistence backbone of the authentication ecosystem.
+These repositories form the persistence backbone of the audit ecosystem.
 
 ```
 ```

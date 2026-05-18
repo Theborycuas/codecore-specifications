@@ -1,842 +1,643 @@
-# 05-authentication-management/testing-strategy.md
+# 06-audit-management/security-rules.md
 
-````md id="v6x2wp"
-# Authentication Management Testing Strategy
+````md id="h8x4vp"
+# Audit Management Security Rules
 
 ## 1. Introduction
 
-This document defines the testing strategy for the Authentication Management module.
+This document defines the security rules enforced by the Audit Management module.
 
-Authentication is one of the most security-critical areas of the platform.  
-Testing must guarantee:
+Audit Management is one of the most security-sensitive components of the platform because it protects:
 
-- Identity validation correctness
-- Session integrity
-- Token security
-- MFA reliability
-- Replay attack prevention
-- Tenant isolation
-- Authentication resilience
-- Distributed authentication consistency
-- Security auditability
+- Legal evidence
+- Compliance traceability
+- Security forensic data
+- Operational accountability
+- Distributed trace reconstruction
+- Incident investigation evidence
 
-The strategy is designed following:
+The rules are designed following:
 
-- Defense in Depth principles
-- Shift-left security testing
-- Zero Trust architecture
-- Domain-Driven Design (DDD)
-- Reactive systems testing
+- Zero Trust Architecture
+- Defense in Depth
+- Immutable evidence principles
+- OWASP ASVS guidance
 - Enterprise SaaS security standards
+- Regulatory compliance requirements
 
 ---
 
-# 2. Testing Objectives
+# 2. Security Principles
 
-| Objective | Description |
-|---|---|
-| Authentication correctness | Validate identity verification |
-| Session integrity | Prevent invalid session usage |
-| Replay prevention | Detect token reuse |
-| MFA validation | Ensure MFA reliability |
-| Tenant isolation | Prevent cross-tenant access |
-| Security resilience | Validate attack resistance |
-| Audit validation | Ensure immutable traceability |
-| Distributed consistency | Validate synchronization |
-| Reactive reliability | Validate non-blocking behavior |
+## 2.1 Immutable Evidence Principle
+
+Audit evidence must never be mutable after persistence.
 
 ---
 
-# 3. Testing Layers
+## Forbidden Operations
 
-| Layer | Purpose |
-|---|---|
-| Unit Tests | Validate isolated domain logic |
-| Integration Tests | Validate infrastructure integration |
-| Security Tests | Validate attack resistance |
-| API Contract Tests | Validate API compatibility |
-| End-to-End Tests | Validate full authentication flows |
-| Performance Tests | Validate scalability |
-| Chaos Tests | Validate resilience |
-| Audit Tests | Validate compliance traceability |
-| Reactive Tests | Validate reactive correctness |
-
----
-
-# 4. Unit Testing Strategy
-
-## Purpose
-
-Validate isolated authentication domain logic.
-
----
-
-# 4.1 Aggregate Tests
-
-Each aggregate must validate its invariants.
-
-| Aggregate | Validation |
-|---|---|
-| AuthenticationAggregate | Credential validation |
-| SessionAggregate | Session revocation |
-| RefreshTokenAggregate | Replay prevention |
-| MFAAggregate | Challenge expiration |
-| DeviceTrustAggregate | Trust validation |
-
----
-
-## Example
-
-```java id="x5m8vr"
-@Test
-void shouldRejectExpiredSession() {
-
-    AuthenticatedSession session =
-        createExpiredSession();
-
-    assertThrows(
-        SessionExpiredException.class,
-        session::validate
-    );
-}
+```text id="m5v8wr"
+- UPDATE audit evidence
+- DELETE audit evidence
+- OVERWRITE audit evidence
 ````
 
 ---
 
-# 4.2 Value Object Tests
+## Allowed Operations
 
-Validate:
-
-* Immutability
-* Validation rules
-* Equality semantics
-* Serialization safety
-
----
-
-## Example
-
-```java id="q9v2wt"
-@Test
-void shouldRejectInvalidEmailAddress() {
-
-    assertThrows(
-        InvalidEmailException.class,
-        () -> new EmailAddress("invalid")
-    );
-}
+```text id="u2x7vt"
+- Archival
+- Legal retention
+- Compliance export
 ```
 
 ---
 
-# 4.3 Token Rotation Tests
+# 2.2 Zero Trust Audit Access
 
-Critical security tests.
+All audit access requires explicit authorization.
 
----
-
-## Example
-
-```java id="g7x4vp"
-@Test
-void shouldInvalidateOldRefreshTokenAfterRotation() {
-
-    RefreshToken rotated =
-        token.rotate();
-
-    assertThrows(
-        TokenReplayException.class,
-        () -> token.validate()
-    );
-}
-```
+No implicit trust allowed.
 
 ---
 
-# 5. Integration Testing Strategy
+# 2.3 Least Privilege Principle
 
-## Purpose
-
-Validate interactions between:
-
-* Repositories
-* PostgreSQL
-* Redis
-* Kafka
-* OAuth providers
-* External MFA systems
+Audit visibility must expose only the minimum required evidence.
 
 ---
 
-# 5.1 Repository Integration Tests
+# 2.4 Tenant Isolation Principle
 
-Validate:
-
-* Tenant isolation
-* Persistence correctness
-* Transaction consistency
-* Secure secret handling
+Audit visibility must remain tenant-scoped.
 
 ---
 
-## Example
+# 2.5 Tamper Resistance Principle
 
-```java id="r2m9wx"
-@Test
-void shouldReturnOnlyTenantSessions() {
-
-    Flux<AuthenticatedSession> sessions =
-        repository.findActiveByUser(userId, tenantId);
-
-    StepVerifier.create(sessions)
-        .expectNextMatches(
-            session -> session.tenantId().equals(tenantId)
-        )
-        .verifyComplete();
-}
-```
+Audit integrity violations must be detectable.
 
 ---
 
-# 5.2 Redis Session Cache Tests
+# 3. Tenant Isolation Rules
 
-Validate:
+## 3.1 Cross-Tenant Audit Access Forbidden
 
-* Session synchronization
-* Revocation propagation
-* Expiration handling
-* Cache invalidation
+Default behavior:
 
----
-
-# 5.3 Kafka/Event Tests
-
-Validate:
-
-* Event publication
-* Event ordering
-* Replay handling
-* Consumer compatibility
-
----
-
-# 6. Security Testing Strategy
-
-## Purpose
-
-Validate resistance against authentication attacks.
-
----
-
-# 6.1 Credential Attack Tests
-
-Validate resistance against:
-
-```text id="w8n3vr"
-- Brute force
-- Credential stuffing
-- Timing attacks
-- Password spraying
-```
-
----
-
-# 6.2 JWT Security Tests
-
-Validate:
-
-* Signature validation
-* Expiration validation
-* Audience validation
-* Issuer validation
-* Token tampering detection
-
----
-
-## Example
-
-```java id="m4v7xp"
-@Test
-void shouldRejectTamperedJwt() {
-
-    assertEquals(
-        DENY,
-        engine.evaluateTamperedToken(...)
-    );
-}
-```
-
----
-
-# 6.3 Refresh Token Replay Tests
-
-Critical security coverage.
-
----
-
-## Example
-
-```java id="k1x8wt"
-@Test
-void shouldDetectRefreshTokenReplay() {
-
-    refreshService.rotate(token);
-
-    assertThrows(
-        RefreshTokenReplayException.class,
-        () -> refreshService.rotate(token)
-    );
-}
-```
-
----
-
-# 6.4 MFA Security Tests
-
-Validate:
-
-* Expiration enforcement
-* Replay prevention
-* Brute force protection
-* Challenge invalidation
-
----
-
-# 6.5 Tenant Isolation Tests
-
-Validate:
-
-```text id="t6m2vp"
+```text id="r7m1xp"
 Tenant A
-cannot authenticate
-into Tenant B
+cannot access
+Tenant B audit evidence
 ```
 
 ---
 
-# 6.6 OWASP Authentication Tests
+## 3.2 Tenant Context Mandatory
 
-Validate protection against:
+All audit operations require:
 
-| OWASP Risk            | Validation           |
+```text id="g4v9wr"
+tenantId
+```
+
+---
+
+## 3.3 Tenant-Aware Queries Mandatory
+
+Repositories must enforce:
+
+```sql id="f9x3vt"
+WHERE tenant_id = :tenantId
+```
+
+---
+
+# 4. Immutable Persistence Rules
+
+## 4.1 Append-Only Persistence Recommended
+
+Preferred persistence strategy:
+
+```text id="q6m8wp"
+INSERT ONLY
+```
+
+---
+
+## 4.2 Historical Integrity Mandatory
+
+Audit timestamps must remain immutable.
+
+---
+
+## 4.3 Actor Identity Preservation
+
+Audit evidence must preserve:
+
+* User identity
+* Service identity
+* Administrative actor
+
+---
+
+# 5. Sensitive Data Protection Rules
+
+## 5.1 Sensitive Data Restrictions
+
+Audit evidence must NEVER contain:
+
+```text id="n2v7xr"
+- Passwords
+- Secrets
+- MFA tokens
+- Raw JWTs
+- API secrets
+- Private encryption keys
+```
+
+---
+
+## 5.2 Metadata Sanitization Mandatory
+
+Operational metadata must be sanitized before persistence.
+
+---
+
+## 5.3 Privacy-Aware Logging
+
+Sensitive personal information should be minimized where possible.
+
+---
+
+# 6. Security Audit Rules
+
+## 6.1 Critical Security Events Mandatory
+
+Mandatory audit coverage:
+
+| Event                        | Required |
+| ---------------------------- | -------- |
+| Login failures               | Yes      |
+| MFA failures                 | Yes      |
+| Token replay                 | Yes      |
+| Privilege escalation         | Yes      |
+| Cross-tenant access attempts | Yes      |
+
+---
+
+## 6.2 Security Severity Classification
+
+Security events must include severity:
+
+```text id="t5x1vp"
+LOW
+MEDIUM
+HIGH
+CRITICAL
+```
+
+---
+
+## 6.3 Incident Traceability
+
+Security investigations must support timeline reconstruction.
+
+---
+
+# 7. Compliance Security Rules
+
+## 7.1 Compliance Audit Protection
+
+Compliance evidence requires enhanced protection.
+
+---
+
+## 7.2 Legal Hold Protection
+
+Legal holds override:
+
+```text id="y8m4wr"
+- Expiration
+- Archival cleanup
+- Retention deletion
+```
+
+---
+
+## 7.3 Regulatory Retention Enforcement
+
+Retention periods must comply with:
+
+* HIPAA
+* GDPR
+* SOC2
+* ISO27001
+
+depending on business scope.
+
+---
+
+# 8. Integrity Validation Rules
+
+## 8.1 Integrity Proof Generation Mandatory
+
+Critical audit evidence requires:
+
+* Hash generation
+* Tamper validation
+* Integrity verification
+
+---
+
+## 8.2 Integrity Algorithms
+
+Recommended algorithms:
+
+```text id="w1x9vt"
+SHA-256
+SHA-512
+```
+
+---
+
+## 8.3 Tampering Detection Mandatory
+
+Integrity mismatches must trigger:
+
+```text id="c7m2xp"
+- Security escalation
+- Investigation workflow
+- Alert generation
+```
+
+---
+
+# 9. Correlation Security Rules
+
+## 9.1 Correlation IDs Mandatory
+
+Distributed operations should include:
+
+```text id="d4v8wr"
+X-Correlation-ID
+```
+
+---
+
+## 9.2 Distributed Trace Integrity
+
+Correlation chains must remain consistent.
+
+---
+
+## 9.3 Cross-Service Traceability
+
+Distributed audit reconstruction must remain reproducible.
+
+---
+
+# 10. Access Control Rules
+
+## 10.1 Audit Access Requires Authorization
+
+Example permissions:
+
+| Permission            | Purpose                 |
+| --------------------- | ----------------------- |
+| VIEW_SECURITY_AUDIT   | Security investigations |
+| VIEW_COMPLIANCE_AUDIT | Compliance operations   |
+| EXPORT_AUDIT_DATA     | Export evidence         |
+
+---
+
+## 10.2 Sensitive Access Restrictions
+
+Sensitive audit visibility restricted to authorized roles only.
+
+---
+
+## 10.3 Export Authorization Mandatory
+
+Audit exports require explicit authorization.
+
+---
+
+# 11. Audit Export Security Rules
+
+## 11.1 Export Actions Must Be Audited
+
+Audit export itself generates audit evidence.
+
+---
+
+## 11.2 Export Filtering Mandatory
+
+Sensitive data masking supported when necessary.
+
+---
+
+## 11.3 Secure Export Delivery
+
+Recommended protections:
+
+| Protection     | Recommendation       |
+| -------------- | -------------------- |
+| Temporary URLs | Recommended          |
+| Encryption     | Strongly recommended |
+| Expiration     | Mandatory            |
+
+---
+
+# 12. Archive Security Rules
+
+## 12.1 Archived Evidence Protection
+
+Archives require:
+
+* Encryption at rest
+* Restricted access
+* Integrity validation
+
+---
+
+## 12.2 Immutable Archival Recommended
+
+Preferred storage:
+
+```text id="k9v3xp"
+WORM storage
+```
+
+(Write Once Read Many)
+
+---
+
+## 12.3 Archive Restoration Auditable
+
+Restoration operations must generate audit evidence.
+
+---
+
+# 13. SIEM Integration Security Rules
+
+## 13.1 SIEM Delivery Protection
+
+Security events require:
+
+* Secure transport
+* Authentication
+* Delivery validation
+
+---
+
+## 13.2 External Integration Hardening
+
+Recommended:
+
+```text id="u5m1vt"
+TLS everywhere
+mTLS internally
+```
+
+---
+
+## 13.3 Delivery Failure Monitoring
+
+SIEM forwarding failures require monitoring.
+
+---
+
+# 14. Reactive Security Rules
+
+## 14.1 Immutable Reactive Context
+
+Reactive audit pipelines require immutable context propagation.
+
+---
+
+## 14.2 Context Leakage Prevention
+
+Tenant/security contexts must never leak between reactive chains.
+
+---
+
+## 14.3 Non-Blocking Security Enforcement
+
+Blocking security validations discouraged.
+
+---
+
+# 15. Distributed System Security Rules
+
+## 15.1 Clock Synchronization Mandatory
+
+Required for:
+
+* Timeline reconstruction
+* Expiration validation
+* Correlation consistency
+
+---
+
+## 15.2 Distributed Integrity Validation
+
+Integrity verification must work across regions/services.
+
+---
+
+## 15.3 Event Delivery Durability
+
+Critical security events require durable persistence.
+
+---
+
+# 16. Search Security Rules
+
+## 16.1 Search Authorization Mandatory
+
+Audit searching requires authorization.
+
+---
+
+## 16.2 Search Scope Restrictions
+
+Users must only query:
+
+```text id="f3x7wr"
+authorized audit scope
+```
+
+---
+
+## 16.3 Search Metadata Protection
+
+Search responses should avoid overexposure of sensitive metadata.
+
+---
+
+# 17. Threat Detection Rules
+
+## 17.1 Suspicious Activity Monitoring
+
+Monitor:
+
+```text id="v8m2xp"
+- Excessive failures
+- Token replay
+- Privilege escalation
+- Cross-tenant attempts
+- Suspicious exports
+```
+
+---
+
+## 17.2 Critical Incident Escalation
+
+Critical incidents require:
+
+* Immediate alerts
+* Evidence preservation
+* Investigation workflows
+
+---
+
+# 18. Failure Handling Rules
+
+## 18.1 Fail Secure Principle
+
+Unexpected failures must preserve evidence integrity.
+
+---
+
+## 18.2 Integrity Validation Failure Handling
+
+If integrity verification fails:
+
+```text id="q4v9wt"
+ASSUME POSSIBLE TAMPERING
+```
+
+---
+
+## 18.3 Archive Failure Handling
+
+Archival failures require retry and investigation.
+
+---
+
+# 19. Operational Security Recommendations
+
+Recommended practices:
+
+| Practice             | Recommendation |
+| -------------------- | -------------- |
+| Immutable backups    | Mandatory      |
+| SIEM monitoring      | Continuous     |
+| Penetration testing  | Periodic       |
+| Retention reviews    | Periodic       |
+| Integrity validation | Automated      |
+
+---
+
+# 20. Compliance Security Alignment
+
+The module supports:
+
+| Standard | Usage                  |
+| -------- | ---------------------- |
+| HIPAA    | Medical traceability   |
+| GDPR     | Privacy accountability |
+| SOC2     | Operational governance |
+| ISO27001 | Security controls      |
+
+---
+
+# 21. OWASP Alignment
+
+The module mitigates:
+
+| OWASP Risk                | Mitigation            |
+| ------------------------- | --------------------- |
+| Insufficient Logging      | Immutable auditing    |
+| Broken Access Control     | Tenant isolation      |
+| Security Misconfiguration | Secure defaults       |
+| Sensitive Data Exposure   | Metadata sanitization |
+
+---
+
+# 22. Infrastructure Security Recommendations
+
+Recommended infrastructure protections:
+
+| Protection         | Recommendation |
+| ------------------ | -------------- |
+| Encryption at rest | Mandatory      |
+| TLS transport      | Mandatory      |
+| WORM archival      | Recommended    |
+| Network isolation  | Recommended    |
+| RBAC               | Mandatory      |
+
+---
+
+# 23. Security Monitoring Recommendations
+
+Recommended monitoring areas:
+
+| Area                  | Recommendation       |
 | --------------------- | -------------------- |
-| Broken Authentication | MFA + rotation       |
-| Session Hijacking     | Revocation           |
-| Replay Attacks        | Rotation             |
-| JWT Tampering         | Signature validation |
+| Integrity violations  | Critical alerts      |
+| Export activity       | Monitoring           |
+| Cross-tenant attempts | Immediate escalation |
+| Archive failures      | Operational alerts   |
 
 ---
 
-# 7. API Contract Testing Strategy
+# 24. Future Security Extensions
 
-## Purpose
+Future security enhancements may include:
 
-Validate API compatibility and correctness.
-
----
-
-# 7.1 REST API Tests
-
-Validate:
-
-* Request validation
-* Response schemas
-* Error handling
-* Security responses
+* Blockchain-backed audit evidence
+* AI-driven anomaly detection
+* Continuous compliance monitoring
+* Behavioral threat analysis
+* Immutable distributed ledgers
 
 ---
 
-## Example
-
-```java id="p5v9wr"
-@Test
-void shouldReturn401ForInvalidCredentials() {
-
-    webTestClient.post()
-        .uri("/login")
-        .exchange()
-        .expectStatus()
-        .isUnauthorized();
-}
-```
-
----
-
-# 7.2 OAuth2/OIDC Contract Tests
-
-Validate:
-
-* State validation
-* Callback handling
-* Provider compatibility
-
----
-
-# 7.3 Internal Service Contract Tests
-
-Validate:
-
-* mTLS enforcement
-* Service identity validation
-* Token propagation
-
----
-
-# 8. End-to-End Testing Strategy
-
-## Purpose
-
-Validate complete authentication workflows.
-
----
-
-# Example Flows
-
-| Flow                                | Validation          |
-| ----------------------------------- | ------------------- |
-| Login → MFA → JWT issuance          | Full authentication |
-| Refresh token rotation              | Replay protection   |
-| Password reset → session revocation | Security reset      |
-| OAuth login → session creation      | Federation support  |
-
----
-
-## Example
-
-```text id="u9x4vt"
-1. Login with password
-2. Complete MFA
-3. Receive JWT
-4. Refresh token
-5. Logout
-6. Validate session revoked
-```
-
----
-
-# 9. Reactive Testing Strategy
-
-## Purpose
-
-Validate reactive authentication behavior.
-
----
-
-# 9.1 Non-Blocking Validation
-
-Ensure authentication pipelines avoid blocking calls.
-
----
-
-## Example
-
-```java id="y3k7wp"
-Mono<AuthenticationResult>
-```
-
-must remain non-blocking.
-
----
-
-# 9.2 Reactor Context Tests
-
-Validate:
-
-* Tenant propagation
-* Security context propagation
-* Context isolation
-
----
-
-# 9.3 Reactive Concurrency Tests
-
-Validate:
-
-* Concurrent logins
-* Token rotations
-* Session revocations
-* Cache consistency
-
----
-
-# 10. Performance Testing Strategy
-
-## Purpose
-
-Validate scalability under load.
-
----
-
-# 10.1 Authentication Throughput Tests
-
-Simulate:
-
-```text id="g6v1xr"
-Thousands of logins
-per second
-```
-
----
-
-# 10.2 JWT Validation Benchmarks
-
-Measure:
-
-* Signature validation latency
-* Claim extraction performance
-* Cache hit ratios
-
----
-
-# 10.3 Session Store Performance Tests
-
-Validate:
-
-* Redis latency
-* Revocation propagation
-* Session lookup speed
-
----
-
-# 10.4 MFA Performance Tests
-
-Measure:
-
-* Challenge generation latency
-* OTP verification latency
-* Delivery throughput
-
----
-
-# 10.5 Recommended Targets
-
-| Metric           | Target  |
-| ---------------- | ------- |
-| Login latency    | < 100ms |
-| JWT validation   | < 10ms  |
-| Refresh rotation | < 50ms  |
-| Session lookup   | < 20ms  |
-
----
-
-# 11. Chaos Testing Strategy
-
-## Purpose
-
-Validate resilience during failures.
-
----
-
-# 11.1 Redis Failure Tests
-
-Simulate:
-
-* Session cache unavailable
-* Delayed invalidation
-* Partial cache corruption
-
----
-
-## Expected Behavior
-
-```text id="d2n8vt"
-Fallback validation
-or fail closed
-```
-
----
-
-# 11.2 OAuth Provider Failure Tests
-
-Validate:
-
-* Graceful degradation
-* Timeout handling
-* Retry behavior
-
----
-
-# 11.3 Database Failure Tests
-
-Validate:
-
-* Fail closed authentication
-* Secure recovery
-* Replay consistency
-
----
-
-# 12. Audit Testing Strategy
-
-## Purpose
-
-Validate authentication traceability.
-
----
-
-# 12.1 Mandatory Audit Tests
-
-Verify audit generation for:
-
-| Action             | Required |
-| ------------------ | -------- |
-| Login success      | Yes      |
-| Login failure      | Yes      |
-| MFA verification   | Yes      |
-| Password reset     | Yes      |
-| Session revocation | Yes      |
-
----
-
-# 12.2 Immutable Audit Tests
-
-Ensure authentication evidence cannot be modified.
-
----
-
-# 12.3 Compliance Audit Tests
-
-Validate:
-
-* Retention policies
-* Export functionality
-* Sensitive data filtering
-
----
-
-# 13. Distributed System Testing
-
-## Purpose
-
-Validate authentication across distributed environments.
-
----
-
-# 13.1 Distributed Revocation Tests
-
-Validate:
-
-* Multi-instance revocation
-* JWT blacklist synchronization
-* Cache invalidation propagation
-
----
-
-# 13.2 Eventual Consistency Tests
-
-Validate acceptable synchronization delays.
-
----
-
-# 13.3 Multi-Region Authentication Tests
-
-Validate:
-
-* Clock synchronization
-* Expiration consistency
-* Cross-region revocation
-
----
-
-# 14. JWT Testing Strategy
-
-## Validate
-
-| Validation              | Description        |
-| ----------------------- | ------------------ |
-| Signature verification  | Integrity          |
-| Expiration enforcement  | Security           |
-| Tenant claim validation | Isolation          |
-| Audience validation     | Misuse prevention  |
-| Replay handling         | Session protection |
-
----
-
-## Example
-
-```java id="h7m4wr"
-@Test
-void shouldRejectExpiredJwt() {
-
-    assertThrows(
-        TokenExpiredException.class,
-        () -> validator.validate(jwt)
-    );
-}
-```
-
----
-
-# 15. Mutation Testing Strategy
-
-## Purpose
-
-Ensure security logic is truly validated.
-
----
-
-# Examples
-
-Introduce mutations:
-
-```text id="v1x9tp"
-ALLOW -> DENY
-DENY -> ALLOW
-```
-
-Tests must fail correctly.
-
----
-
-# 16. Static Analysis and SAST
-
-Recommended tools:
-
-| Tool                   | Purpose             |
-| ---------------------- | ------------------- |
-| SonarQube              | Code quality        |
-| Semgrep                | Security analysis   |
-| SpotBugs               | Java analysis       |
-| OWASP Dependency Check | Dependency scanning |
-
----
-
-# 17. Dependency Security Testing
-
-Validate vulnerabilities in:
-
-* JWT libraries
-* OAuth libraries
-* Redis drivers
-* Spring Security
-* MFA libraries
-
----
-
-# 18. Penetration Testing
-
-Recommended scope:
-
-| Area                  | Validation |
-| --------------------- | ---------- |
-| Authentication bypass | Mandatory  |
-| Session hijacking     | Mandatory  |
-| JWT tampering         | Mandatory  |
-| Replay attacks        | Mandatory  |
-| OAuth abuse           | Mandatory  |
-
----
-
-# 19. Test Data Strategy
-
-## Requirements
-
-| Requirement                    | Description           |
-| ------------------------------ | --------------------- |
-| Tenant-separated data          | Isolation             |
-| Realistic authentication flows | Production simulation |
-| Immutable fixtures             | Consistency           |
-| Security-focused scenarios     | Threat validation     |
-
----
-
-# 20. Test Environment Recommendations
-
-| Environment      | Purpose                 |
-| ---------------- | ----------------------- |
-| Local            | Fast development        |
-| Integration      | Service validation      |
-| Staging          | Production-like testing |
-| Security Sandbox | Penetration testing     |
-
----
-
-# 21. TestContainers Recommendations
-
-Recommended infrastructure:
-
-| Component  | Container                  |
-| ---------- | -------------------------- |
-| PostgreSQL | Authentication persistence |
-| Redis      | Session cache              |
-| Kafka      | Event streaming            |
-
----
-
-## Example
-
-```java id="n8v3xp"
-@Container
-static RedisContainer redis =
-    new RedisContainer("redis:7");
-```
-
----
-
-# 22. CI/CD Security Gates
-
-Mandatory validations:
-
-| Validation          | Required |
-| ------------------- | -------- |
-| Unit tests          | Yes      |
-| Integration tests   | Yes      |
-| Security tests      | Yes      |
-| SAST                | Yes      |
-| Dependency scanning | Yes      |
-| Contract tests      | Yes      |
-
----
-
-# 23. Regression Testing Strategy
-
-Critical regression coverage:
-
-* JWT validation
-* Refresh token rotation
-* Replay detection
-* MFA expiration
-* Session revocation
-* Tenant isolation
-
----
-
-# 24. Recommended Coverage Targets
-
-| Area                    | Minimum Coverage |
-| ----------------------- | ---------------- |
-| Domain layer            | 90%+             |
-| Authentication engine   | 95%+             |
-| Security-critical flows | 100%             |
-| API contracts           | 85%+             |
-
----
-
-# 25. Future Testing Extensions
-
-Future testing strategies may include:
-
-* Passwordless authentication testing
-* WebAuthn testing
-* Adaptive authentication simulation
-* Behavioral anomaly testing
-* Continuous authentication validation
+# 25. Security Checklist
+
+## Mandatory Controls
+
+| Control                     | Required |
+| --------------------------- | -------- |
+| Immutable audit persistence | Yes      |
+| Tenant isolation            | Yes      |
+| Integrity validation        | Yes      |
+| Correlation tracing         | Yes      |
+| Audit access authorization  | Yes      |
+| Export authorization        | Yes      |
+| Archive encryption          | Yes      |
+| Tamper detection            | Yes      |
 
 ---
 
 # 26. Summary
 
-The Authentication Management testing strategy provides:
+The Audit Management security rules provide:
 
-* Enterprise-grade authentication validation
-* Strong replay attack protection testing
-* Distributed authentication reliability
-* Reactive authentication verification
-* Immutable audit validation
-* Security-focused resilience testing
-* Comprehensive authentication correctness assurance
+* Enterprise-grade audit protection
+* Immutable evidence enforcement
+* Tamper-resistant forensic traceability
+* Distributed audit integrity
+* Multi-tenant audit isolation
+* Compliance-grade security controls
+* Zero Trust audit access
+* Reactive audit security consistency
 
-This strategy establishes the quality and security baseline for the authentication ecosystem.
+These rules establish the security baseline of the audit ecosystem.
 
 ```
 ```

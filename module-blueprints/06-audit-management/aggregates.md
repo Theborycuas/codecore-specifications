@@ -1,28 +1,28 @@
-# 05-authentication-management/aggregates.md
+# 06-audit-management/aggregates.md
 
-````md id="k4v9xp"
-# Authentication Management Aggregates
+````md id="k8x3vp"
+# Audit Management Aggregates
 
 ## 1. Introduction
 
-This document defines the aggregates of the Authentication Management module.
+This document defines the aggregates of the Audit Management module.
 
-Aggregates represent the transactional consistency boundaries of the authentication domain and encapsulate:
+Aggregates represent the transactional consistency boundaries of the audit domain and encapsulate:
 
-- Identity verification rules
-- Session lifecycle management
-- Token integrity
-- MFA enforcement
-- Device trust validation
-- Account security protections
+- Immutable audit persistence
+- Security evidence management
+- Compliance traceability
+- Distributed correlation
+- Retention enforcement
+- Forensic reconstruction support
 
 The aggregates are designed following:
 
 - Domain-Driven Design (DDD)
-- Aggregate consistency principles
-- Security-first architecture
+- Event-driven architecture
+- Immutable evidence principles
 - Multi-tenant SaaS isolation
-- Zero Trust authentication principles
+- Enterprise compliance standards
 
 ---
 
@@ -30,307 +30,42 @@ The aggregates are designed following:
 
 | Aggregate | Responsibility |
 |---|---|
-| AuthenticationAggregate | Core authentication lifecycle |
-| SessionAggregate | Authenticated session management |
-| RefreshTokenAggregate | Refresh token lifecycle |
-| MFAAggregate | Multi-factor authentication |
-| DeviceTrustAggregate | Trusted device management |
-| APIKeyAggregate | API authentication management |
-| ServiceIdentityAggregate | Service-to-service authentication |
-| AuthenticationAuditAggregate | Authentication evidence tracking |
+| AuditRecordAggregate | Core immutable audit evidence |
+| SecurityAuditAggregate | Security-related auditing |
+| ComplianceAuditAggregate | Regulatory traceability |
+| AuditRetentionAggregate | Retention and archival policies |
+| CorrelationTraceAggregate | Distributed trace reconstruction |
+| AccessAuditAggregate | Sensitive access tracking |
+| AuditExportAggregate | Compliance export lifecycle |
+| AuditIntegrityAggregate | Tamper evidence validation |
 
 ---
 
-# 3. AuthenticationAggregate
+# 3. AuditRecordAggregate
 
 ## Purpose
 
-Represents the core authentication process.
+Represents the core immutable audit record lifecycle.
 
-This aggregate manages:
-
-- Credential validation
-- Account state validation
-- Authentication orchestration
-- Security checks
-- Authentication result generation
+This is the foundational audit aggregate.
 
 ---
 
 ## Aggregate Root
 
-```text id="x8m3wr"
-Authentication
+```text id="v5m8wr"
+AuditRecord
 ````
 
 ---
 
 ## Responsibilities
 
-* Validate credentials
-* Validate account status
-* Validate tenant membership
-* Enforce MFA policies
-* Trigger session creation
-* Generate authentication outcomes
-* Enforce brute force protections
-
----
-
-## Invariants
-
-| Invariant                  | Description                |
-| -------------------------- | -------------------------- |
-| Valid credentials required | Authentication correctness |
-| Tenant isolation enforced  | SaaS security              |
-| Locked accounts denied     | Account protection         |
-| MFA enforced when required | Security compliance        |
-| Expired credentials denied | Credential integrity       |
-
----
-
-## Example Structure
-
-```text id="q5n8vt"
-AuthenticationAggregate
-│
-├── Authentication (Root)
-├── Credentials
-├── AuthenticationContext
-├── AccountState
-└── AuthenticationPolicies
-```
-
----
-
-## Important Behaviors
-
-### authenticate()
-
-Validates:
-
-* Credentials
-* Tenant membership
-* MFA requirements
-* Device trust
-* Security policies
-
----
-
-### failAuthentication()
-
-Handles:
-
-* Failure counting
-* Account lock rules
-* Suspicious activity tracking
-
----
-
-### completeAuthentication()
-
-Produces:
-
-* Authenticated identity
-* Session
-* Tokens
-
----
-
-# 4. SessionAggregate
-
-## Purpose
-
-Manages authenticated user sessions.
-
-Critical for:
-
-* Session continuity
-* Revocation
-* Device tracking
-* Security monitoring
-
----
-
-## Aggregate Root
-
-```text id="m1v7pk"
-AuthenticatedSession
-```
-
----
-
-## Responsibilities
-
-* Create sessions
-* Revoke sessions
-* Expire sessions
-* Track device metadata
-* Track session activity
-* Detect suspicious sessions
-
----
-
-## Invariants
-
-| Invariant                 | Description           |
-| ------------------------- | --------------------- |
-| Session owner immutable   | Security integrity    |
-| Tenant context immutable  | Isolation             |
-| Expired sessions invalid  | Security              |
-| Revoked sessions unusable | Compromise protection |
-
----
-
-## Example Structure
-
-```text id="u6k2wx"
-SessionAggregate
-│
-├── AuthenticatedSession (Root)
-├── SessionMetadata
-├── DeviceInformation
-└── SessionSecurityState
-```
-
----
-
-## Important Behaviors
-
-### revoke()
-
-Immediately invalidates session.
-
----
-
-### extend()
-
-Refreshes expiration based on policy.
-
----
-
-### validateSession()
-
-Checks:
-
-* Expiration
-* Revocation
-* Tenant validity
-* Security restrictions
-
----
-
-# 5. RefreshTokenAggregate
-
-## Purpose
-
-Manages refresh token lifecycle.
-
-Critical for secure session continuation.
-
----
-
-## Aggregate Root
-
-```text id="p9x4vr"
-RefreshToken
-```
-
----
-
-## Responsibilities
-
-* Generate refresh tokens
-* Rotate refresh tokens
-* Revoke compromised tokens
-* Detect replay attempts
-* Enforce expiration
-
----
-
-## Invariants
-
-| Invariant                          | Description           |
-| ---------------------------------- | --------------------- |
-| Tokens are single-use when rotated | Replay prevention     |
-| Expired tokens invalid             | Security              |
-| Revoked tokens unusable            | Compromise protection |
-| Rotation chain integrity           | Session consistency   |
-
----
-
-## Example Structure
-
-```text id="r7w1ty"
-RefreshTokenAggregate
-│
-├── RefreshToken (Root)
-├── TokenMetadata
-├── RotationChain
-└── RevocationState
-```
-
----
-
-## Important Behaviors
-
-### rotate()
-
-Invalidates old token and creates replacement.
-
----
-
-### revoke()
-
-Terminates token usage immediately.
-
----
-
-### validate()
-
-Checks:
-
-* Expiration
-* Revocation
-* Replay attempts
-
----
-
-# 6. MFAAggregate
-
-## Purpose
-
-Manages multi-factor authentication workflows.
-
----
-
-## Aggregate Root
-
-```text id="t4n8vp"
-MFAChallenge
-```
-
----
-
-## Responsibilities
-
-* Generate MFA challenges
-* Validate MFA codes
-* Enforce MFA policies
-* Track challenge expiration
-* Prevent replay
-
----
-
-## Supported MFA Types
-
-| Type              | Support   |
-| ----------------- | --------- |
-| TOTP              | Primary   |
-| Email OTP         | Supported |
-| SMS OTP           | Optional  |
-| Push notification | Future    |
-| WebAuthn          | Future    |
+* Persist immutable audit events
+* Enforce audit integrity
+* Store audit metadata
+* Maintain distributed traceability
+* Support forensic reconstruction
 
 ---
 
@@ -338,238 +73,424 @@ MFAChallenge
 
 | Invariant                | Description            |
 | ------------------------ | ---------------------- |
-| Challenges expire        | Security               |
-| MFA codes single-use     | Replay prevention      |
-| Invalid attempts limited | Brute force protection |
+| Audit records immutable  | Compliance integrity   |
+| Tenant context mandatory | SaaS isolation         |
+| Correlation ID preserved | Distributed tracing    |
+| Timestamp immutable      | Historical correctness |
+| Actor identity preserved | Accountability         |
 
 ---
 
 ## Example Structure
 
-```text id="g3x7wr"
-MFAAggregate
+```text id="u1x6vt"
+AuditRecordAggregate
 │
-├── MFAChallenge (Root)
-├── MFADevice
-├── ChallengeMetadata
-└── VerificationState
+├── AuditRecord (Root)
+├── AuditMetadata
+├── CorrelationTrace
+└── AuditContext
 ```
 
 ---
 
-# 7. DeviceTrustAggregate
+## Important Behaviors
+
+### persist()
+
+Stores immutable audit evidence.
+
+---
+
+### enrichMetadata()
+
+Adds operational/security context.
+
+---
+
+### validateIntegrity()
+
+Ensures audit consistency.
+
+---
+
+# 4. SecurityAuditAggregate
 
 ## Purpose
 
-Represents trusted device relationships.
+Represents security-related audit evidence.
 
-Supports:
+Critical for:
 
-* Adaptive authentication
-* Reduced MFA friction
-* Suspicious login detection
+* Threat analysis
+* Incident response
+* Security investigations
+* Compliance evidence
 
 ---
 
 ## Aggregate Root
 
-```text id="w8k5tn"
-TrustedDevice
+```text id="p9n4wx"
+SecurityAuditRecord
 ```
 
 ---
 
 ## Responsibilities
 
-* Register trusted devices
-* Validate device trust
-* Detect anomalous devices
-* Revoke trusted devices
+* Track authentication events
+* Track authorization failures
+* Track privilege escalation attempts
+* Track suspicious activity
+* Support SIEM integrations
 
 ---
 
-## Example Device Metadata
+## Example Security Events
 
-```text id="f2m9xp"
-- Device ID
-- Browser fingerprint
-- IP history
-- OS
-- Trust level
+```text id="f2v8xr"
+- Login failure
+- MFA failure
+- Token replay
+- Cross-tenant access attempt
+- Unauthorized admin action
 ```
 
 ---
 
 ## Invariants
 
-| Invariant                  | Description           |
-| -------------------------- | --------------------- |
-| Device ownership immutable | Security              |
-| Revoked devices invalid    | Trust protection      |
-| Tenant isolation mandatory | Multi-tenant security |
+| Invariant                  | Description             |
+| -------------------------- | ----------------------- |
+| Security severity required | Threat classification   |
+| Immutable evidence         | Forensics               |
+| Tenant isolation mandatory | SaaS security           |
+| Correlation preserved      | Incident reconstruction |
 
 ---
 
-# 8. APIKeyAggregate
+## Example Structure
+
+```text id="m7x3vp"
+SecurityAuditAggregate
+│
+├── SecurityAuditRecord (Root)
+├── ThreatMetadata
+├── RiskIndicators
+└── SecurityContext
+```
+
+---
+
+# 5. ComplianceAuditAggregate
 
 ## Purpose
 
-Manages API-based authentication.
+Represents compliance-related audit evidence.
 
-Used for:
+Supports:
 
-* Integrations
-* External clients
-* Automation
-* Service access
+* HIPAA
+* GDPR
+* SOC2
+* ISO27001
 
 ---
 
 ## Aggregate Root
 
-```text id="y5v1rk"
-APIKey
+```text id="t3w9vr"
+ComplianceAuditRecord
 ```
 
 ---
 
 ## Responsibilities
 
-* Generate API keys
-* Revoke API keys
-* Rotate secrets
+* Track sensitive data access
+* Track consent changes
+* Track regulatory actions
+* Support legal evidence retention
+
+---
+
+## Example Compliance Events
+
+```text id="r6m1xt"
+- Medical record access
+- Consent modification
+- Sensitive export
+- Privacy request handling
+```
+
+---
+
+## Invariants
+
+| Invariant                    | Description     |
+| ---------------------------- | --------------- |
+| Regulatory context preserved | Compliance      |
+| Immutable evidence mandatory | Legal integrity |
+| Access actor required        | Accountability  |
+
+---
+
+# 6. AuditRetentionAggregate
+
+## Purpose
+
+Manages audit lifecycle retention.
+
+---
+
+## Aggregate Root
+
+```text id="x4k8wp"
+AuditRetentionPolicy
+```
+
+---
+
+## Responsibilities
+
+* Define retention rules
+* Trigger archival
 * Enforce expiration
-* Scope access
+* Support legal holds
+
+---
+
+## Retention Types
+
+| Type              | Example              |
+| ----------------- | -------------------- |
+| Security audit    | Long-term            |
+| Medical audit     | Regulatory retention |
+| Operational audit | Medium-term          |
+| Export audit      | Compliance retention |
 
 ---
 
 ## Invariants
 
-| Invariant                                | Description       |
-| ---------------------------------------- | ----------------- |
-| Secrets never retrievable after creation | Security          |
-| Revoked keys unusable                    | Access protection |
-| Expired keys denied                      | Security          |
+| Invariant                       | Description    |
+| ------------------------------- | -------------- |
+| Legal holds override expiration | Compliance     |
+| Immutable retention policies    | Integrity      |
+| Tenant-aware retention          | SaaS isolation |
 
 ---
 
-## Example Structure
-
-```text id="n7w4tz"
-APIKeyAggregate
-│
-├── APIKey (Root)
-├── KeyMetadata
-├── KeyScopes
-└── RevocationState
-```
-
----
-
-# 9. ServiceIdentityAggregate
+# 7. CorrelationTraceAggregate
 
 ## Purpose
 
-Represents internal service authentication.
-
-Supports microservice identity validation.
-
----
-
-## Aggregate Root
-
-```text id="v4x8qp"
-ServiceIdentity
-```
-
----
-
-## Responsibilities
-
-* Validate service identities
-* Manage service credentials
-* Enforce internal trust policies
-* Rotate service secrets
-
----
-
-## Example
-
-```text id="c6k2wr"
-clinical-service
-billing-service
-authorization-service
-```
-
----
-
-## Invariants
-
-| Invariant                  | Description |
-| -------------------------- | ----------- |
-| Service identities unique  | Security    |
-| Internal trust required    | Zero Trust  |
-| Expired credentials denied | Integrity   |
-
----
-
-# 10. AuthenticationAuditAggregate
-
-## Purpose
-
-Represents immutable authentication evidence.
+Represents distributed operational traces.
 
 Supports:
 
-* Compliance
-* Security analytics
-* Threat detection
-* Forensics
+* Cross-service tracing
+* Incident reconstruction
+* Workflow visibility
 
 ---
 
 ## Aggregate Root
 
-```text id="j9m5tv"
-AuthenticationAuditRecord
+```text id="n5v2wr"
+CorrelationTrace
 ```
 
 ---
 
 ## Responsibilities
 
-* Persist login events
-* Persist MFA events
-* Persist token events
-* Persist suspicious activity
-* Preserve immutable evidence
+* Link distributed events
+* Preserve correlation chains
+* Support timeline reconstruction
 
 ---
 
 ## Example Structure
 
-```text id="s1x7pk"
-AuthenticationAuditAggregate
+```text id="g8x4vt"
+CorrelationTraceAggregate
 │
-├── AuthenticationAuditRecord (Root)
-├── SecurityEvidence
-├── AuthenticationMetadata
-└── RiskIndicators
+├── CorrelationTrace (Root)
+├── TraceSegment
+├── ServiceHop
+└── TraceMetadata
 ```
+
+---
+
+## Important Behaviors
+
+### appendTrace()
+
+Adds distributed event trace.
+
+---
+
+### reconstructTimeline()
+
+Builds historical operation flow.
+
+---
+
+# 8. AccessAuditAggregate
+
+## Purpose
+
+Tracks access to sensitive resources.
+
+Critical for medical/legal systems.
+
+---
+
+## Aggregate Root
+
+```text id="w1m7xp"
+SensitiveAccessRecord
+```
+
+---
+
+## Responsibilities
+
+* Track resource access
+* Track who viewed records
+* Track export operations
+* Support privacy investigations
+
+---
+
+## Example Sensitive Resources
+
+```text id="q9v4wr"
+- Medical records
+- Psychological evaluations
+- Billing information
+- Consent documents
+```
+
+---
+
+## Invariants
+
+| Invariant                  | Description    |
+| -------------------------- | -------------- |
+| Resource identity required | Traceability   |
+| Actor identity required    | Accountability |
+| Timestamp immutable        | Legal evidence |
+
+---
+
+# 9. AuditExportAggregate
+
+## Purpose
+
+Represents compliance audit export workflows.
+
+---
+
+## Aggregate Root
+
+```text id="h6n2vt"
+AuditExport
+```
+
+---
+
+## Responsibilities
+
+* Generate audit exports
+* Track export requests
+* Enforce export authorization
+* Preserve export evidence
+
+---
+
+## Export Formats
+
+| Format      | Usage                |
+| ----------- | -------------------- |
+| CSV         | Operational          |
+| JSON        | Integration          |
+| PDF         | Legal/compliance     |
+| SIEM stream | Security integration |
+
+---
+
+## Invariants
+
+| Invariant                      | Description |
+| ------------------------------ | ----------- |
+| Export authorization mandatory | Security    |
+| Export tracking required       | Compliance  |
+| Sensitive filtering enforced   | Privacy     |
+
+---
+
+# 10. AuditIntegrityAggregate
+
+## Purpose
+
+Represents tamper evidence validation.
+
+Supports integrity verification.
+
+---
+
+## Aggregate Root
+
+```text id="c3x8vp"
+AuditIntegrityProof
+```
+
+---
+
+## Responsibilities
+
+* Validate hash chains
+* Detect tampering
+* Preserve evidence integrity
+* Support forensic verification
+
+---
+
+## Example Strategies
+
+```text id="u7k4wr"
+- Hash chaining
+- Append-only persistence
+- Integrity signatures
+```
+
+---
+
+## Invariants
+
+| Invariant                  | Description         |
+| -------------------------- | ------------------- |
+| Integrity hashes immutable | Evidence protection |
+| Verification reproducible  | Forensics           |
+| Tampering detectable       | Security            |
 
 ---
 
 # 11. Aggregate Relationships
 
-```text id="b5n2wx"
-AuthenticationAggregate
-    ├── creates -> SessionAggregate
-    ├── generates -> RefreshTokenAggregate
-    ├── interacts with -> MFAAggregate
-    └── validates -> DeviceTrustAggregate
+```text id="p5v9xt"
+AuditRecordAggregate
+    ├── specialized by -> SecurityAuditAggregate
+    ├── specialized by -> ComplianceAuditAggregate
+    ├── linked by -> CorrelationTraceAggregate
+    └── protected by -> AuditIntegrityAggregate
 
-SessionAggregate
-    └── audited by -> AuthenticationAuditAggregate
+AccessAuditAggregate
+    └── exported by -> AuditExportAggregate
 ```
 
 ---
@@ -578,149 +499,149 @@ SessionAggregate
 
 ## Strong Consistency Required
 
-| Aggregate               | Reason                  |
-| ----------------------- | ----------------------- |
-| AuthenticationAggregate | Identity correctness    |
-| SessionAggregate        | Session integrity       |
-| RefreshTokenAggregate   | Replay prevention       |
-| MFAAggregate            | Authentication security |
+| Aggregate               | Reason               |
+| ----------------------- | -------------------- |
+| AuditRecordAggregate    | Immutable evidence   |
+| SecurityAuditAggregate  | Incident correctness |
+| AuditIntegrityAggregate | Tamper protection    |
 
 ---
 
 ## Eventual Consistency Acceptable
 
-| Aggregate                    | Reason               |
-| ---------------------------- | -------------------- |
-| AuthenticationAuditAggregate | Historical tracking  |
-| DeviceTrustAggregate         | Behavioral analytics |
+| Aggregate                 | Reason                     |
+| ------------------------- | -------------------------- |
+| CorrelationTraceAggregate | Distributed reconstruction |
+| AuditExportAggregate      | Reporting workflows        |
 
 ---
 
-# 13. Security-Critical Aggregate Rules
+# 13. Event Sourcing Compatibility
 
-## Immutable Tenant Context
+The audit domain is highly compatible with:
 
-Authentication state cannot cross tenants.
-
----
-
-## Replay Protection
-
-Refresh tokens and MFA challenges require replay prevention.
+* Event sourcing
+* Append-only persistence
+* Immutable event streams
+* Timeline reconstruction
 
 ---
 
-## Fail Closed Principle
+# 14. Security-Critical Aggregate Rules
 
-Authentication failures:
+## Audit Modification Forbidden
 
-```text id="h7v3rq"
-AUTHENTICATION = DENIED
+After persistence:
+
+```text id="d2m8wr"
+NO MODIFICATION
 ```
 
 ---
 
-## Credential Protection
+## Tenant Isolation Mandatory
 
-Secrets must never be exposed by aggregates.
-
----
-
-# 14. Event Emission
-
-Aggregates emit domain events.
-
-| Aggregate               | Events                  |
-| ----------------------- | ----------------------- |
-| AuthenticationAggregate | UserAuthenticated       |
-| SessionAggregate        | SessionRevoked          |
-| RefreshTokenAggregate   | RefreshTokenRotated     |
-| MFAAggregate            | MFAChallengeCompleted   |
-| DeviceTrustAggregate    | TrustedDeviceRegistered |
+Audit visibility remains tenant-scoped.
 
 ---
 
-# 15. Scalability Considerations
+## Sensitive Data Restrictions
+
+Audit evidence must not expose:
+
+```text id="j8v1xp"
+- Passwords
+- Secrets
+- Raw tokens
+- Sensitive credentials
+```
+
+---
+
+# 15. Distributed System Considerations
 
 The aggregates support:
 
-* Stateless authentication
-* Distributed session handling
-* Reactive authentication
-* High authentication throughput
-* Multi-region deployments
+* Multi-region systems
+* Event-driven architectures
+* Horizontal scaling
+* Distributed tracing
+* Reactive ingestion
 
 ---
 
-## Strategies
-
-| Strategy             | Purpose                   |
-| -------------------- | ------------------------- |
-| JWT                  | Stateless scaling         |
-| Redis                | Distributed session state |
-| CQRS projections     | Optimized reads           |
-| Reactive persistence | High concurrency          |
-
----
-
-# 16. Aggregate Lifecycle Considerations
-
-| Aggregate                    | Lifecycle           |
-| ---------------------------- | ------------------- |
-| AuthenticationAggregate      | Short-lived         |
-| SessionAggregate             | Active duration     |
-| RefreshTokenAggregate        | Rotation chain      |
-| MFAAggregate                 | Ephemeral           |
-| AuthenticationAuditAggregate | Long-term retention |
-
----
-
-# 17. Reactive Considerations
+# 16. Reactive Considerations
 
 Reactive implementations should support:
 
-```text id="r2m8tv"
-Mono<AuthenticationResult>
-Mono<Session>
-Flux<AuthenticationAuditRecord>
+```text id="y4n7vt"
+Flux<AuditRecord>
+Mono<SecurityAuditRecord>
 ```
 
 ---
 
 ## Requirements
 
-* Non-blocking credential validation
-* Reactive security context propagation
-* Immutable authentication state
+* Non-blocking persistence
+* Async event ingestion
+* Reactive trace correlation
 
 ---
 
-# 18. Future Aggregate Extensions
+# 17. Retention and Archival Considerations
+
+Aggregates support:
+
+| Capability           | Purpose               |
+| -------------------- | --------------------- |
+| Long-term archival   | Compliance            |
+| Legal holds          | Regulatory protection |
+| Retention expiration | Lifecycle management  |
+| Immutable backups    | Disaster recovery     |
+
+---
+
+# 18. Integration Boundaries
+
+The aggregates consume events from:
+
+| Module           | Example                    |
+| ---------------- | -------------------------- |
+| Authentication   | Login events               |
+| Authorization    | Permission changes         |
+| Billing          | Subscription modifications |
+| Clinical modules | Record updates             |
+| Workflow engine  | State transitions          |
+
+---
+
+# 19. Future Aggregate Extensions
 
 Future aggregates may include:
 
-* PasswordlessAuthenticationAggregate
-* WebAuthnAggregate
-* AdaptiveAuthenticationAggregate
-* RiskBasedAuthenticationAggregate
-* ContinuousAuthenticationAggregate
-* BiometricAuthenticationAggregate
+* BehavioralAuditAggregate
+* AIThreatAnalysisAggregate
+* DataLineageAggregate
+* PrivacyInvestigationAggregate
+* ContinuousComplianceAggregate
+* ImmutableLedgerAggregate
 
 ---
 
-# 19. Summary
+# 20. Summary
 
-The Authentication Management aggregates provide:
+The Audit Management aggregates provide:
 
-* Secure identity verification boundaries
-* Strong session integrity
-* MFA orchestration
-* Token lifecycle protection
-* Trusted device management
-* Distributed authentication support
-* Enterprise-grade authentication consistency
+* Immutable audit persistence
+* Enterprise-grade traceability
+* Security forensic support
+* Distributed event correlation
+* Compliance-grade evidence retention
+* Multi-tenant audit isolation
+* Tamper-resistant audit integrity
 
-These aggregates form the transactional backbone of the authentication ecosystem.
+These aggregates form the transactional backbone of the audit ecosystem.
 
 ```
 ```
