@@ -1,5 +1,7 @@
 # 05-authentication-management/api-contracts.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="x7v3wp"
 # Authentication Management API Contracts
 

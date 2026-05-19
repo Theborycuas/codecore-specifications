@@ -123,7 +123,7 @@ The module is NOT responsible for:
 Those concerns belong to:
 
 * Payment Management
-* Authentication Management
+* Identity & Access Management (IAM)
 * Authorization Management
 * Subscription Management
 

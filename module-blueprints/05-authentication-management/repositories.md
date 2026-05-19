@@ -1,5 +1,7 @@
 # 05-authentication-management/repositories.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="m8v2xp"
 # Authentication Management Repositories
 

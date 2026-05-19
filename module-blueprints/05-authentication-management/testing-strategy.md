@@ -1,5 +1,7 @@
 # 05-authentication-management/testing-strategy.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="v6x2wp"
 # Authentication Management Testing Strategy
 

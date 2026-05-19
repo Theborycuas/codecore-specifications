@@ -119,7 +119,7 @@ Those concerns belong to:
 
 * Payment Management
 * Billing Management
-* Authentication Management
+* Identity & Access Management (IAM)
 * Authorization Management
 
 ---

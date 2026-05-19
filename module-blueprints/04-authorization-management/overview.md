@@ -262,8 +262,9 @@ The module integrates with:
 
 | Module              | Purpose                 |
 | ------------------- | ----------------------- |
-| Identity Management | User identity           |
-| Tenant Management   | Tenant boundaries       |
+| Identity & Access Management (IAM) | Authentication context |
+| User Management                    | Operational user identity |
+| Tenant Management                  | Tenant boundaries       |
 | API Gateway         | Centralized enforcement |
 | Audit Module        | Security auditing       |
 | Notification Module | Security alerts         |
@@ -404,10 +405,12 @@ The module is designed to scale for:
 Strategies include:
 
 * Redis caching
-* JWT permission snapshots
-* Local permission caching
-* Distributed policy evaluation
-* Event-driven invalidation
+* coarse JWT role/scope hints (non-authoritative — see `11-security-context-propagation.md`)
+* local permission caching with short TTL
+* distributed policy evaluation
+* event-driven invalidation
+
+**Important:** Permission snapshots in JWT are **hints only**. Sensitive authorization MUST be validated by this module at runtime.
 
 ---
 

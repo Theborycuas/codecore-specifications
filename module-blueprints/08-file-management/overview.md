@@ -104,7 +104,7 @@ The module is NOT responsible for:
 
 Those concerns belong to:
 
-* Authentication Management
+* Identity & Access Management (IAM)
 * Authorization Management
 * Billing Management
 * Domain-specific modules

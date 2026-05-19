@@ -122,7 +122,7 @@ Those concerns belong to:
 
 * Billing Management
 * Subscription Management
-* Authentication Management
+* Identity & Access Management (IAM)
 
 ---
 

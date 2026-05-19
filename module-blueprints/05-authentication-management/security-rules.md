@@ -1,5 +1,7 @@
 # 05-authentication-management/security-rules.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="t4x8vp"
 # Authentication Management Security Rules
 

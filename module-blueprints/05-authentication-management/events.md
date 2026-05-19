@@ -1,5 +1,7 @@
 # 05-authentication-management/events.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="r5x8vp"
 # Authentication Management Domain Events
 

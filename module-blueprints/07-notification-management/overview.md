@@ -1,580 +1,227 @@
-# 07-user-management/overview.md
+# overview.md
 
-````md id="u8x4vp"
-# User Management Module Overview
-
-## 1. Purpose
-
-The User Management module is responsible for managing the lifecycle, profile, organizational relationships, and business identity of platform users.
-
-This module centralizes:
-
-- User lifecycle management
-- User profiles
-- Tenant memberships
-- User preferences
-- User states
-- Invitations and onboarding
-- Organizational relationships
-- User visibility rules
-- Functional account management
-- Multi-tenant user associations
-
-The module acts as the authoritative business domain for users across the SaaS ecosystem.
+````md
+# Notification Management
+## Module Blueprint Overview
+### CodeCore Module Blueprints
+### Version 1.0
 
 ---
 
-# 2. Architectural Responsibility
+# 1. PURPOSE
 
-The module answers questions such as:
+The Notification Management module is responsible for:
 
-```text id="m5v9wr"
-Who is the user?
-Which tenants belong to the user?
-What profile data does the user have?
-What is the user's business state?
-What onboarding stage is completed?
-````
+- outbound notification orchestration
+- email notifications
+- SMS notifications
+- push notifications
+- in-app notifications
+- notification templates
+- notification preferences
+- delivery tracking and lifecycle
+- notification retries and dead-letter handling
+- notification provider abstraction
+- notification observability
 
----
+Notification Management acts as the **authoritative bounded context** for how CodeCore delivers messages to users and systems inside tenant boundaries.
 
-# 3. Important Architectural Separation
+This module defines:
 
-The platform intentionally separates:
+- WHAT notification is requested
+- HOW it is rendered and routed
+- WHICH channel and provider deliver it
+- WHETHER delivery succeeded, failed, or must retry
 
-| Concern                | Responsible Module        |
-| ---------------------- | ------------------------- |
-| Authentication         | Authentication Management |
-| Authorization          | Authorization Management  |
-| Auditability           | Audit Management          |
-| User Business Identity | User Management           |
+Notification Management does NOT authenticate users.
 
----
+Authentication belongs exclusively to:
 
-# 4. What User Management IS
+- Identity & Access Management (IAM)
 
-User Management IS responsible for:
+Notification Management does NOT authorize platform access.
 
-* User business profiles
-* Tenant membership
-* User preferences
-* User lifecycle
-* Invitations
-* Onboarding
-* Organizational structure
-* Functional states
-* Visibility and ownership relationships
+Authorization belongs to:
+
+- Authorization Management
 
 ---
 
-# 5. What User Management IS NOT
+# 2. BOUNDED CONTEXT DEFINITION
 
-User Management is NOT responsible for:
+The Notification Management bounded context governs:
 
-```text id="p2x8vt"
-- Password validation
-- JWT generation
-- MFA authentication
-- Permission evaluation
-- Access token management
+```text
+Tenant-safe message delivery,
+notification lifecycle,
+template rendering,
+channel routing,
+delivery reliability,
+and notification preference enforcement.
 ```
 
-Those responsibilities belong to:
+Notification Management owns:
 
-* Authentication Management
+* notification requests and delivery state
+* templates and localization of message content
+* channel configuration (email, SMS, push, in-app)
+* recipient targeting (operational references, not identity credentials)
+* delivery attempts and retry policies
+* provider orchestration ports (provider-agnostic)
+* notification preferences and opt-out rules
+* notification observability metadata
+
+Notification Management does NOT own:
+
+* user authentication
+* permission evaluation
+* operational user profiles (except consuming references)
+* long-running business workflows
+* immutable compliance audit storage
+* external CRM/ERP integration orchestration
+
+Those belong to:
+
+* Identity & Access Management
 * Authorization Management
+* User Management
+* Workflow Management
+* Audit Management
+* Integration Management
 
 ---
 
-# 6. Strategic Goals
+# 3. CORE RESPONSIBILITIES
 
-The module is designed to provide:
+## 3.1 Channel responsibilities
 
-* Enterprise-grade user lifecycle management
-* Multi-tenant user associations
-* Flexible user profiles
-* Organizational scalability
-* Distributed user consistency
-* User onboarding orchestration
-* User state management
-* SaaS-ready identity abstraction
-* Reactive user operations
-* Compliance-aware user management
+| Channel | Responsibility |
+|---------|----------------|
+| Email | Transactional and operational email delivery |
+| SMS | Text alerts and verification delivery (content only — codes issued by IAM when auth-related) |
+| Push | Mobile/web push notifications |
+| In-app | Tenant-scoped in-app notification inbox |
 
----
+## 3.2 Template responsibilities
 
-# 7. Core Concepts
+* template definition and versioning
+* variable binding and rendering
+* locale and tenant branding hooks
+* template activation and deprecation
 
-## 7.1 User
+## 3.3 Delivery responsibilities
 
-Represents the business identity of a platform participant.
+* enqueue and dispatch
+* idempotent delivery attempts
+* retry with backoff
+* dead-letter for non-recoverable failures
+* delivery status tracking
 
-A user may represent:
+## 3.4 Preference responsibilities
 
-* Psychologist
-* Patient
-* Receptionist
-* Administrator
-* Support agent
-* System operator
-
----
-
-## 7.2 User Account
-
-Represents the functional account within the SaaS ecosystem.
+* per-user and per-tenant channel preferences
+* category-based opt-in/opt-out
+* quiet hours and throttling policies
 
 ---
 
-## 7.3 Person Profile
+# 4. OWNERSHIP BOUNDARIES
 
-Represents human profile information.
+## Notification Management owns
 
-Examples:
+* `Notification` lifecycle
+* `NotificationTemplate` lifecycle
+* `NotificationPreference` rules
+* `DeliveryAttempt` traceability
+* provider routing through **ports** (hexagonal)
 
-```text id="f7m1xp"
-- First name
-- Last name
-- Avatar
-- Timezone
-- Language
-```
+## Notification Management does NOT own
 
----
-
-## 7.4 Tenant Membership
-
-Represents user association with tenants.
-
-Critical for enterprise SaaS.
+* JWT, sessions, MFA → IAM
+* `UserProfile` data → User Management
+* compliance audit records → Audit Management (consumes events)
+* third-party API connectors → Integration Management (adapters)
 
 ---
 
-# 8. Multi-Tenant User Model
+# 5. EXTERNAL DEPENDENCIES
 
-The architecture supports:
+Notification Management depends on:
 
-```text id="k4v8wr"
-One user
-can belong
-to multiple tenants
-```
-
-This is essential for:
-
-* Multi-clinic organizations
-* Enterprise organizations
-* Shared professionals
-* Cross-organization support staff
+* Identity & Access Management (IAM) — security context only
+* User Management — recipient resolution
+* Tenant Management — tenant policies and isolation
+* Authorization Management — protected admin APIs
+* Audit Management — compliance ingestion via events
+* Observability infrastructure — traces and metrics
+* Integration Management — optional external delivery adapters
 
 ---
 
-# 9. User Lifecycle
+# 6. MULTITENANCY STRATEGY
 
-The module manages the complete lifecycle of users.
+All notifications MUST be tenant-scoped.
 
----
-
-## Lifecycle Stages
-
-```text id="x9m2vt"
-INVITED
-PENDING_ACTIVATION
-ACTIVE
-SUSPENDED
-LOCKED
-DEACTIVATED
-DELETED
-```
+* `tenant_id` is mandatory on every notification and template
+* cross-tenant recipient routing is forbidden
+* provider credentials are tenant-scoped or platform-scoped with explicit isolation
+* reactive pipelines MUST preserve tenant context (Reactor Context)
 
 ---
 
-## Example Lifecycle Flow
+# 7. EVENT-DRIVEN INTEGRATION
 
-```text id="u6x3wp"
-Invitation
-    → Registration
-        → Onboarding
-            → Active usage
-                → Suspension/Deactivation
-```
+Notification Management is **event-driven**:
 
----
+* consumes integration events from IAM, User, Tenant, Billing, etc.
+* publishes `NotificationDispatched`, `NotificationFailed`, `NotificationDelivered` facts
+* MUST NOT require synchronous coupling to domain modules
 
-# 10. Main Responsibilities
-
-| Responsibility               | Description                |
-| ---------------------------- | -------------------------- |
-| User Registration            | Functional user creation   |
-| Profile Management           | Personal/business profile  |
-| Tenant Membership            | Multi-tenant associations  |
-| User State Management        | Active/suspended/etc       |
-| Invitations                  | User onboarding initiation |
-| Preferences                  | Personal configuration     |
-| Organizational Relationships | Teams/departments          |
-| User Search                  | Tenant-scoped discovery    |
-| User Visibility              | Controlled exposure        |
-| Account Lifecycle            | Activation/deactivation    |
+See `events.md` for the official event catalog.
 
 ---
 
-# 11. User Types
+# 8. REACTIVE RESPONSIBILITIES
 
-The platform supports multiple user categories.
+* non-blocking dispatch pipelines
+* backpressure-aware provider calls
+* reactive retry orchestration
+* no blocking I/O on event loop threads
 
----
-
-## Example User Types
-
-| User Type              | Example       |
-| ---------------------- | ------------- |
-| Clinical User          | Psychologist  |
-| Patient User           | Patient       |
-| Administrative User    | Receptionist  |
-| Tenant Administrator   | Clinic owner  |
-| Platform Administrator | SaaS operator |
+See `06-reactive-architecture-rules.md`.
 
 ---
 
-# 12. Organizational Relationships
+# 9. PROVIDER-AGNOSTIC ARCHITECTURE
 
-The module supports organizational hierarchies.
+Delivery MUST use hexagonal ports:
 
----
+* `EmailProviderPort`
+* `SmsProviderPort`
+* `PushProviderPort`
 
-## Examples
-
-```text id="q3v7xp"
-- Departments
-- Teams
-- Clinics
-- Branches
-- Organizations
-```
+Concrete vendors (SendGrid, Twilio, FCM, etc.) are **adapters**, not domain owners.
 
 ---
 
-## Use Cases
+# 10. OBSERVABILITY
 
-| Use Case            | Description           |
-| ------------------- | --------------------- |
-| Multi-branch clinic | Shared staff          |
-| Corporate hierarchy | Department visibility |
-| Clinical assignment | Professional grouping |
+Notification Management MUST emit:
 
----
+* delivery latency metrics
+* failure rates by channel and provider
+* retry counts
+* correlation and tenant-aware structured logs
 
-# 13. User Preferences
-
-The module manages user personalization.
+Operational dashboards are consumed by Observability Management; compliance facts go to Audit Management.
 
 ---
 
-## Examples
+# 11. RELATED DOCUMENTS
 
-```text id="n1m8wr"
-- Language
-- Timezone
-- Theme
-- Notification preferences
-- Dashboard preferences
-```
+* `aggregates.md`, `entities.md`, `events.md`, `workflows.md`
+* `AUTHENTICATION-CANONICALIZATION.md`
+* `MODULE-CATALOG.md`
+* `DOCUMENTATION-REPAIR-NOTES.md`
 
----
-
-# 14. Invitation and Onboarding
-
-The module supports enterprise onboarding workflows.
-
----
-
-## Example Flow
-
-```text id="d8x2vt"
-Admin invites user
-    → User accepts invitation
-        → Profile completion
-            → Tenant activation
-```
-
----
-
-## Capabilities
-
-| Capability               | Description         |
-| ------------------------ | ------------------- |
-| Invitation expiration    | Security            |
-| Multi-tenant invitations | SaaS support        |
-| Deferred onboarding      | Flexible activation |
-
----
-
-# 15. User Visibility Rules
-
-Visibility is tenant-aware.
-
----
-
-## Visibility Rules
-
-| Rule                      | Description |
-| ------------------------- | ----------- |
-| Tenant isolation          | Mandatory   |
-| Role-aware visibility     | Supported   |
-| Organizational visibility | Optional    |
-
----
-
-## Forbidden Behavior
-
-```text id="y5v9wp"
-Tenant A users
-cannot enumerate
-Tenant B users
-```
-
----
-
-# 16. User States
-
-User states are business states, not authentication states.
-
----
-
-## Examples
-
-| State              | Meaning                |
-| ------------------ | ---------------------- |
-| ACTIVE             | Operational user       |
-| SUSPENDED          | Temporarily restricted |
-| DEACTIVATED        | Disabled user          |
-| PENDING_ACTIVATION | Awaiting onboarding    |
-
----
-
-## Important Clarification
-
-Authentication lockout ≠ business suspension.
-
----
-
-# 17. Separation from Authentication
-
-Example:
-
-| Concern           | Authentication | User Management |
-| ----------------- | -------------- | --------------- |
-| Passwords         | Yes            | No              |
-| JWT               | Yes            | No              |
-| Profile photo     | No             | Yes             |
-| User timezone     | No             | Yes             |
-| Tenant membership | No             | Yes             |
-| User onboarding   | No             | Yes             |
-
----
-
-# 18. Integration with Other Modules
-
-The module integrates with:
-
-| Module                    | Purpose                |
-| ------------------------- | ---------------------- |
-| Authentication Management | Identity linkage       |
-| Authorization Management  | Permission assignments |
-| Audit Management          | User traceability      |
-| Tenant Management         | Memberships            |
-| Notification Management   | Invitations/alerts     |
-| Billing Management        | Subscription ownership |
-
----
-
-# 19. Event-Driven Architecture Integration
-
-The module both publishes and consumes events.
-
----
-
-## Published Events
-
-```text id="g7m4xr"
-- UserCreated
-- UserActivated
-- UserSuspended
-- MembershipAssigned
-```
-
----
-
-## Consumed Events
-
-```text id="c2x8vp"
-- InvitationAccepted
-- TenantCreated
-- AuthenticationRegistered
-```
-
----
-
-# 20. Reactive User Architecture
-
-The module supports reactive operations.
-
----
-
-## Example
-
-```text id="r9v1wt"
-Flux<User>
-Mono<UserProfile>
-```
-
----
-
-## Benefits
-
-| Benefit                 | Description |
-| ----------------------- | ----------- |
-| Non-blocking operations | Scalability |
-| Async onboarding        | Better UX   |
-| High concurrency        | SaaS growth |
-
----
-
-# 21. Scalability Considerations
-
-The module is designed for:
-
-* Millions of users
-* Multi-region deployments
-* Distributed organizations
-* High onboarding throughput
-* Large tenant structures
-
----
-
-# 22. Security Considerations
-
-User Management enforces:
-
-| Principle              | Description                 |
-| ---------------------- | --------------------------- |
-| Tenant isolation       | Mandatory                   |
-| Least privilege        | Visibility control          |
-| Privacy-aware exposure | Sensitive data protection   |
-| Auditability           | User lifecycle traceability |
-
----
-
-# 23. Compliance Considerations
-
-The module supports:
-
-| Compliance Standard | Usage                      |
-| ------------------- | -------------------------- |
-| GDPR                | User privacy               |
-| HIPAA               | Clinical user traceability |
-| SOC2                | Operational accountability |
-
----
-
-# 24. User Data Classification
-
-The module handles:
-
-## Public User Data
-
-```text id="m6x3vr"
-- Display name
-- Avatar
-```
-
----
-
-## Sensitive User Data
-
-```text id="u1v7xp"
-- Email
-- Phone
-- Personal identifiers
-```
-
----
-
-## Restricted Data
-
-```text id="f4m9wt"
-- Clinical assignments
-- Organizational hierarchy
-```
-
----
-
-# 25. Search and Discovery
-
-The module supports:
-
-* Tenant-scoped user search
-* Organizational filtering
-* Role-aware visibility
-* User lookup
-* Membership discovery
-
----
-
-# 26. Recommended Technologies
-
-| Technology    | Purpose               |
-| ------------- | --------------------- |
-| PostgreSQL    | Core user persistence |
-| Redis         | Cached projections    |
-| Elasticsearch | User search           |
-| Kafka         | User event streaming  |
-
----
-
-# 27. Future Evolution
-
-The architecture supports future capabilities including:
-
-* Delegated administration
-* Cross-organization collaboration
-* User federation
-* External identity linking
-* Professional licensing
-* Clinical specialization profiles
-* Advanced organizational structures
-* User relationship graphs
-
----
-
-# 28. Operational Recommendations
-
-Recommended practices:
-
-| Practice                    | Recommendation       |
-| --------------------------- | -------------------- |
-| Soft delete                 | Recommended          |
-| Audit integration           | Mandatory            |
-| Tenant isolation validation | Mandatory            |
-| Invitation expiration       | Mandatory            |
-| Profile validation          | Strongly recommended |
-
----
-
-# 29. Summary
-
-The User Management module provides:
-
-* Enterprise-grade user lifecycle management
-* Multi-tenant membership management
-* Organizational user modeling
-* User onboarding orchestration
-* Reactive user scalability
-* Tenant-aware user visibility
-* Compliance-aware user management
-* Distributed SaaS-ready identity abstraction
-
-It acts as the business identity backbone of the SaaS ecosystem.
-
-```
-```
+````

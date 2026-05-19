@@ -141,27 +141,57 @@ Authentication SHOULD remain:
 
 # 4.3 JWT Ownership Principle
 
-JWT tokens represent:
+JWT tokens are issued by **Identity & Access Management (IAM)** and represent:
 
 * authenticated identity
-* tenant-scoped access
-* authorization claims
+* tenant-scoped execution context
+* session binding
+* **coarse** authorization hints (not definitive authorization)
+
+JWTs MUST NOT be treated as the sole source of authorization truth.
 
 ---
 
-# 4.4 Mandatory JWT Claims
+# 4.4 Hybrid JWT Claim Strategy (AUD-003)
+
+CodeCore adopts a **hybrid JWT model**:
+
+* JWT carries identity and coarse access context for scalability
+* **Authorization Management** remains the authoritative runtime validator for permissions and dynamic policies
+
+### 4.4.1 Allowed JWT Claims
 
 Recommended claims:
 
 ```text id="5sec5"
 sub
 tenant_id
-roles
-permissions
+session_id
+roles          # coarse role identifiers only
+scopes         # coarse scope identifiers only
 iat
 exp
 jti
 ```
+
+### 4.4.2 Coarse vs sensitive authorization
+
+| Claim type | JWT may carry | Authoritative validation |
+|------------|---------------|-------------------------|
+| Identity (`sub`, `tenant_id`, `session_id`) | Yes | IAM + gateway introspection |
+| Coarse roles | Yes (hints) | Authorization Management |
+| Coarse scopes | Yes (hints) | Authorization Management |
+| Fine-grained permissions | Discouraged | Authorization Management only |
+| Dynamic policies (resource, context) | No | Authorization Management only |
+
+### 4.4.3 JWT is not definitive authorization
+
+The following MUST be enforced in documentation and implementation:
+
+* **Sensitive permissions MUST NOT depend solely on JWT claims.**
+* **JWT claims are not definitive authorization.**
+* **Authorization Management has priority** over token hints for protected operations.
+* Gateway or edge caches MAY use coarse claims for routing only, not for final deny/allow on sensitive resources.
 
 ---
 
@@ -172,6 +202,8 @@ JWTs MUST NOT expose:
 * passwords
 * secrets
 * sensitive business data
+* exhaustive permission matrices
+* clinical or financial record payloads
 
 ---
 
@@ -191,12 +223,21 @@ RBAC + Permission-Based Authorization
 
 # 5.2 Authorization Principle
 
+**Authorization Management** is the **authoritative** source for:
+
+* permission evaluation
+* dynamic policy execution
+* resource-level authorization
+* tenant boundary enforcement (in coordination with Tenant context)
+
 Authorization MUST validate:
 
 * tenant ownership
 * role permissions
 * resource visibility
 * operation eligibility
+
+JWT coarse roles/scopes MAY accelerate read-only or low-risk paths but MUST NOT replace Authorization Management for sensitive operations.
 
 ---
 

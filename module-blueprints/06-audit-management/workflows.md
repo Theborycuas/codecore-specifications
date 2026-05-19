@@ -543,7 +543,7 @@ Consumes audit events from distributed modules.
 # Event Sources
 
 ```text id="c5m8wr"
-- Authentication Management
+- Identity & Access Management (IAM)
 - Authorization Management
 - User Management
 - Workflow Management

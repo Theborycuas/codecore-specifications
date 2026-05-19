@@ -1,5 +1,7 @@
 # 05-authentication-management/value-objects.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="n7v4xp"
 # Authentication Management Value Objects
 

@@ -510,7 +510,7 @@ must remain auditable
 
 ## Consumers
 
-* Authentication Management
+* Identity & Access Management (IAM)
 * API Gateway
 * Session Management
 

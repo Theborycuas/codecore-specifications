@@ -1,5 +1,7 @@
 # 05-authentication-management/entities.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="v8k3wp"
 # Authentication Management Entities
 

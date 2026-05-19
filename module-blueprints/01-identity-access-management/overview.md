@@ -20,12 +20,22 @@ The Identity & Access Management module (IAM) is responsible for:
 - token validation
 - access entry control
 - authentication security boundaries
+- multi-factor authentication (MFA)
+- identity OAuth / OpenID Connect (user login)
+- API key authentication (platform identity-bound access)
+- device trust validation
+- refresh token lifecycle
+- login and logout flows
 
 This module acts as the foundational security gateway of CodeCore.
 
 All platform access MUST originate through IAM-controlled authentication flows.
 
 IAM is one of the most critical bounded contexts in CodeCore because every other module depends directly or indirectly on authenticated identity propagation.
+
+IAM is the **canonical and sole authoritative bounded context** for platform authentication.
+
+`05-authentication-management` is **DEPRECATED** — see `AUTHENTICATION-CANONICALIZATION.md` and `module-blueprints/05-authentication-management/DEPRECATED.md`.
 
 ---
 
@@ -50,6 +60,11 @@ IAM owns:
 * login attempts
 * password policies
 * authentication state
+* MFA enrollment and verification
+* identity OAuth/OIDC login flows
+* API keys for platform authentication
+* device trust state
+* JWT access token issuance (hybrid claims per `11-security-context-propagation.md`)
 
 IAM does NOT own:
 
@@ -154,6 +169,10 @@ The IAM module MUST support:
 | Failed Login Detection | Detect brute-force behavior     |
 | Session Tracking       | Monitor active sessions         |
 | Token Validation       | Validate access tokens          |
+| MFA                    | Multi-factor authentication     |
+| Identity OAuth/OIDC    | Federated user login            |
+| API Key Auth           | Service and API identity access |
+| Device Trust           | Trusted device policies         |
 | Security Auditing      | Produce audit events            |
 
 ---
@@ -243,6 +262,10 @@ Authentication MUST preserve:
 * Login Attempts
 * Token Lifecycle
 * Password Policies
+* MFA
+* Identity OAuth/OIDC
+* API Keys (platform authentication)
+* Device Trust
 * Authentication Events
 
 ---

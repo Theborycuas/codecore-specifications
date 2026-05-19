@@ -379,7 +379,7 @@ Retention policies depend on:
 The module consumes events from:
 
 ```text id="t7x1wr"
-- Authentication Management
+- Identity & Access Management (IAM)
 - Authorization Management
 - User Management
 - Tenant Management

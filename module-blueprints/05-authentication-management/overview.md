@@ -1,7 +1,11 @@
 # 05-authentication-management/overview.md
 
+> **DEPRECATED** — This bounded context is no longer authoritative. Use **[Identity & Access Management (IAM)](../01-identity-access-management/)**. See [DEPRECATED.md](./DEPRECATED.md) and [AUTHENTICATION-CANONICALIZATION.md](../../AUTHENTICATION-CANONICALIZATION.md).
+
 ````md id="h7k3vp"
 # Authentication Management Module Overview
+
+> **Status: DEPRECATED** — Historical reference only.
 
 ## 1. Purpose
 

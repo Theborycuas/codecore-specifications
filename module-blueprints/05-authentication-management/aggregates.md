@@ -1,5 +1,7 @@
 # 05-authentication-management/aggregates.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="k4v9xp"
 # Authentication Management Aggregates
 

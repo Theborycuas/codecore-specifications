@@ -1,5 +1,7 @@
 # 05-authentication-management/workflows.md
 
+> **DEPRECATED** — See [DEPRECATED.md](./DEPRECATED.md). Authoritative: [IAM](../01-identity-access-management/).
+
 ````md id="p6x2vt"
 # Authentication Management Workflows
 

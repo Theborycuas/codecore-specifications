@@ -68,7 +68,8 @@ Authentication handled by:
 * API Gateway
 * JWT validation
 * OAuth2 provider
-* Identity Management module
+* Identity & Access Management (IAM)
+* User Management
 
 ---
 
