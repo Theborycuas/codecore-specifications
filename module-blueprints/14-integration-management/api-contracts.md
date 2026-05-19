@@ -1,35 +1,37 @@
-# 11-payment-management/api-contracts.md
+# 14-integration-management/api-contracts.md
 
-````md id="s9x4vp"
-# Payment Management API Contracts
+````md id="w1x4vp"
+# Integration Management API Contracts
 
 ## 1. Introduction
 
-This document defines the API contracts exposed by the Payment Management module.
+This document defines the API contracts exposed by the Integration Management module.
 
-The APIs provide capabilities related to:
+The APIs provide runtime capabilities related to:
 
-- Payment authorization
-- Payment capture
-- Refund execution
-- Webhook processing
-- Payment retries
-- Payment reconciliation
-- Fraud validation
-- Provider routing
-- Settlement synchronization
-- Chargeback handling
-- Tokenized payment methods
-- Payment session orchestration
+- External provider orchestration
+- Webhook management
+- Retry coordination
+- Circuit breaker monitoring
+- DLQ management
+- OAuth integrations
+- Secret governance
+- Event-driven integrations
+- Synchronization workflows
+- Provider failover
+- Quota management
+- Integration observability
+- Streaming integrations
+- Idempotency validation
 
 The contracts are designed following:
 
 - RESTful principles
 - Reactive API architecture
-- PCI DSS boundary isolation
+- Event-driven integrations
+- Provider-agnostic orchestration
 - Multi-tenant SaaS governance
-- Event-driven payment orchestration
-- Enterprise financial resilience
+- Enterprise fault tolerance
 
 ---
 
@@ -37,20 +39,20 @@ The contracts are designed following:
 
 | Principle | Description |
 |---|---|
-| Tenant-aware APIs | Mandatory |
-| PCI boundary isolation | Critical |
-| Idempotent operations | Mandatory |
 | Reactive-first design | Scalability |
-| Provider abstraction | Vendor independence |
-| Replay-safe workflows | Reliability |
-| Event-driven side effects | Distributed consistency |
+| Non-blocking integrations | Mandatory |
+| Tenant-aware APIs | Mandatory |
+| Idempotency support | Required |
+| Replay-safe APIs | Required |
+| Observability-first | Required |
+| Provider abstraction | Mandatory |
 
 ---
 
 # 3. Base URL
 
 ```text id="u5m1wr"
-/api/v1/payments
+/api/v1/integrations
 ````
 
 ---
@@ -60,28 +62,28 @@ The contracts are designed following:
 | Header           | Required    | Description         |
 | ---------------- | ----------- | ------------------- |
 | Authorization    | Yes         | Bearer JWT          |
-| X-Tenant-ID      | Yes         | Tenant context      |
+| X-Tenant-ID      | Optional    | Tenant scope        |
 | X-Correlation-ID | Recommended | Distributed tracing |
+| Idempotency-Key  | Recommended | Replay protection   |
 | Content-Type     | Yes         | Request mime type   |
-| Idempotency-Key  | Recommended | Retry safety        |
 
 ---
 
-# 5. Payment Authorization APIs
+# 5. Integration APIs
 
-# 5.1 Authorize Payment
+# 5.1 Execute Integration
 
 ## Endpoint
 
 ```text id="m8v3xp"
-POST /transactions/authorize
+POST /execute
 ```
 
 ---
 
 ## Purpose
 
-Requests payment authorization through a provider.
+Executes outbound provider integrations.
 
 ---
 
@@ -89,10 +91,10 @@ Requests payment authorization through a provider.
 
 ```json id="f2x7wr"
 {
-  "invoiceId": "uuid",
-  "paymentMethodId": "uuid",
-  "amount": 49.99,
-  "currency": "USD"
+  "providerType": "EMAIL",
+  "providerId": "sendgrid",
+  "payload": {},
+  "retryStrategy": "EXPONENTIAL_BACKOFF"
 }
 ```
 
@@ -104,358 +106,9 @@ Requests payment authorization through a provider.
 {
   "success": true,
   "data": {
-    "paymentTransactionId": "uuid",
-    "status": "AUTHORIZED"
+    "integrationId": "uuid",
+    "status": "RUNNING"
   }
-}
-```
-
----
-
-## Side Effects
-
-```text id="x9v1wr"
-- Fraud validation
-- Provider routing
-- Payment events emitted
-```
-
----
-
-## Critical Rule
-
-```text id="k3m8xp"
-Authorization
-must remain idempotent
-```
-
----
-
-# 5.2 Retrieve Payment Transaction
-
-## Endpoint
-
-```text id="p1v9wr"
-GET /transactions/{paymentTransactionId}
-```
-
----
-
-## Response
-
-```json id="g6m2xt"
-{
-  "success": true,
-  "data": {
-    "paymentTransactionId": "uuid",
-    "provider": "STRIPE",
-    "status": "CAPTURED",
-    "amount": 49.99
-  }
-}
-```
-
----
-
-## Security Rules
-
-* Tenant ownership validation mandatory
-
----
-
-# 6. Payment Capture APIs
-
-# 6.1 Capture Payment
-
-## Endpoint
-
-```text id="u7m1wr"
-POST /transactions/{paymentTransactionId}/capture
-```
-
----
-
-## Purpose
-
-Captures authorized funds.
-
----
-
-## Response
-
-```json id="m4v8wr"
-{
-  "success": true,
-  "data": {
-    "status": "CAPTURED"
-  }
-}
-```
-
----
-
-## Critical Rule
-
-```text id="t5v3xp"
-Duplicate captures
-must never occur
-```
-
----
-
-# 6.2 Cancel Payment
-
-## Endpoint
-
-```text id="w2m8vt"
-POST /transactions/{paymentTransactionId}/cancel
-```
-
----
-
-## Purpose
-
-Cancels pending or authorized transactions.
-
----
-
-# 7. Refund APIs
-
-# 7.1 Execute Refund
-
-## Endpoint
-
-```text id="q7x1wr"
-POST /refunds
-```
-
----
-
-## Request
-
-```json id="y9v4xp"
-{
-  "paymentTransactionId": "uuid",
-  "refundType": "PARTIAL_REFUND",
-  "amount": 15.00,
-  "reason": "CUSTOMER_REQUEST"
-}
-```
-
----
-
-## Response
-
-```json id="f4m7wr"
-{
-  "success": true,
-  "data": {
-    "refundExecutionId": "uuid",
-    "status": "PROCESSING"
-  }
-}
-```
-
----
-
-## Refund Types
-
-```text id="u1x8vt"
-FULL_REFUND
-PARTIAL_REFUND
-```
-
----
-
-# 7.2 Retrieve Refund
-
-## Endpoint
-
-```text id="m6v2wr"
-GET /refunds/{refundExecutionId}
-```
-
----
-
-# 8. Webhook APIs
-
-# 8.1 Provider Webhook Endpoint
-
-## Endpoint
-
-```text id="g3x9vp"
-POST /webhooks/{provider}
-```
-
----
-
-## Purpose
-
-Receives provider webhook notifications.
-
----
-
-## Supported Providers
-
-```text id="r5m1xt"
-STRIPE
-PAYPAL
-MERCADOPAGO
-ADYEN
-```
-
----
-
-## Critical Requirements
-
-| Requirement          | Mandatory |
-| -------------------- | --------- |
-| Signature validation | Yes       |
-| Replay protection    | Yes       |
-| Idempotency          | Yes       |
-
----
-
-## Important Principle
-
-```text id="x8v4wr"
-Webhook processing
-must remain replay-safe
-```
-
----
-
-# 9. Retry APIs
-
-# 9.1 Retry Payment
-
-## Endpoint
-
-```text id="n7m1vt"
-POST /transactions/{paymentTransactionId}/retry
-```
-
----
-
-## Purpose
-
-Retries transient payment failures.
-
----
-
-## Examples
-
-```text id="k2v7xp"
-- temporary timeout
-- provider unavailable
-```
-
----
-
-## Restrictions
-
-| Restriction                  | Description |
-| ---------------------------- | ----------- |
-| Fraud failures non-retryable | Mandatory   |
-| Max retry limit enforced     | Mandatory   |
-
----
-
-# 10. Reconciliation APIs
-
-# 10.1 Execute Reconciliation
-
-## Endpoint
-
-```text id="d1m8wr"
-POST /reconciliation
-```
-
----
-
-## Purpose
-
-Validates provider synchronization.
-
----
-
-## Response
-
-```json id="h6x2vt"
-{
-  "success": true,
-  "data": {
-    "reconciliationId": "uuid",
-    "status": "COMPLETED"
-  }
-}
-```
-
----
-
-## Example
-
-```text id="t9v4xp"
-Provider says CAPTURED
-Local says FAILED
-```
-
----
-
-# 10.2 Retrieve Reconciliation Report
-
-## Endpoint
-
-```text id="j4x9wt"
-GET /reconciliation/reports/{reconciliationId}
-```
-
----
-
-# 11. Fraud APIs
-
-# 11.1 Retrieve Fraud Assessment
-
-## Endpoint
-
-```text id="m7v1xp"
-GET /fraud-assessments/{fraudAssessmentId}
-```
-
----
-
-## Response
-
-```json id="u5x8wr"
-{
-  "success": true,
-  "data": {
-    "riskLevel": "HIGH",
-    "recommendation": "BLOCK"
-  }
-}
-```
-
----
-
-# 12. Payment Method APIs
-
-# 12.1 Register Tokenized Payment Method
-
-## Endpoint
-
-```text id="q9m3vt"
-POST /payment-methods
-```
-
----
-
-## Request
-
-```json id="k1m8vt"
-{
-  "provider": "STRIPE",
-  "paymentToken": "tok_xxx"
 }
 ```
 
@@ -463,170 +116,535 @@ POST /payment-methods
 
 ## Critical Principle
 
-```text id="d2m8wr"
-Raw PCI-sensitive data
-must never be received
+```text id="x9v1wr"
+Business logic
+must remain provider agnostic
 ```
 
 ---
 
-# 12.2 Retrieve Payment Methods
+# 5.2 Retrieve Integration
 
 ## Endpoint
 
-```text id="u8x3wp"
-GET /payment-methods
-```
-
----
-
-# 12.3 Deactivate Payment Method
-
-## Endpoint
-
-```text id="f6m9wr"
-POST /payment-methods/{paymentMethodId}/deactivate
-```
-
----
-
-# 13. Payment Session APIs
-
-# 13.1 Create Payment Session
-
-## Endpoint
-
-```text id="c8m4xt"
-POST /sessions
-```
-
----
-
-## Request
-
-```json id="u1x8wr"
-{
-  "invoiceId": "uuid",
-  "provider": "STRIPE"
-}
-```
-
----
-
-## Response
-
-```json id="w6x3wr"
-{
-  "success": true,
-  "data": {
-    "sessionId": "uuid",
-    "checkoutUrl": "provider-url"
-  }
-}
-```
-
----
-
-# 13.2 Expire Payment Session
-
-## Endpoint
-
-```text id="r1m7vp"
-POST /sessions/{sessionId}/expire
-```
-
----
-
-# 14. Provider Routing APIs
-
-# 14.1 Resolve Provider
-
-## Endpoint
-
-```text id="x4v8xt"
-POST /providers/resolve
-```
-
----
-
-## Request
-
-```json id="f2v9xp"
-{
-  "region": "LATAM",
-  "paymentMethodType": "CARD"
-}
-```
-
----
-
-## Response
-
-```json id="m6x3vt"
-{
-  "success": true,
-  "data": {
-    "provider": "MERCADOPAGO"
-  }
-}
-```
-
----
-
-# 15. Settlement APIs
-
-# 15.1 Retrieve Settlement Report
-
-## Endpoint
-
-```text id="y5v2wp"
-GET /settlements
+```text id="k3m8xp"
+GET /{integrationId}
 ```
 
 ---
 
 ## Purpose
 
-Returns settlement synchronization information.
+Retrieves integration lifecycle details.
 
 ---
 
-# 16. Chargeback APIs
+# 6. Provider APIs
 
-# 16.1 Retrieve Chargebacks
+# 6.1 Retrieve Providers
 
 ## Endpoint
 
-```text id="m2x7wp"
-GET /chargebacks
+```text id="p1v9wr"
+GET /providers
 ```
 
 ---
 
 ## Examples
 
-```text id="q6v3xt"
-FRAUD
-UNRECOGNIZED_CHARGE
+```text id="g6m2xt"
+SES
+SendGrid
+Stripe
+OpenAI
+Twilio
 ```
 
 ---
 
-# 16.2 Retrieve Chargeback
+## Query Parameters
+
+| Parameter    | Purpose            |
+| ------------ | ------------------ |
+| providerType | Provider filtering |
+| healthStatus | Health filtering   |
+| region       | Regional filtering |
+
+---
+
+# 6.2 Register Provider
 
 ## Endpoint
 
-```text id="h4m9wr"
-GET /chargebacks/{chargebackId}
+```text id="u7m1wr"
+POST /providers
 ```
 
 ---
 
-# 17. Common Response Structure
+## Request
+
+```json id="m4v8wr"
+{
+  "providerType": "EMAIL",
+  "providerName": "SendGrid",
+  "priority": "PRIMARY"
+}
+```
+
+---
+
+# 6.3 Disable Provider
+
+## Endpoint
+
+```text id="t5v3xp"
+POST /providers/{providerId}/disable
+```
+
+---
+
+# 7. Webhook APIs
+
+# 7.1 Receive Webhook
+
+## Endpoint
+
+```text id="w2m8vt"
+POST /webhooks/{provider}
+```
+
+---
+
+## Examples
+
+```text id="q7x1wr"
+Stripe webhook
+GitHub webhook
+OAuth callback
+```
+
+---
+
+## Required Headers
+
+| Header       | Purpose              |
+| ------------ | -------------------- |
+| X-Signature  | Signature validation |
+| X-Webhook-ID | Replay protection    |
+
+---
+
+## Critical Principle
+
+```text id="y9v4xp"
+External webhooks
+may arrive multiple times
+```
+
+---
+
+# 7.2 Retrieve Webhook Delivery
+
+## Endpoint
+
+```text id="f4m7wr"
+GET /webhooks/deliveries/{deliveryId}
+```
+
+---
+
+# 8. Retry APIs
+
+# 8.1 Retrieve Retry Policies
+
+## Endpoint
+
+```text id="u1x8vt"
+GET /retries/policies
+```
+
+---
+
+## Supported Strategies
+
+```text id="m6v2wr"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
+```
+
+---
+
+# 8.2 Replay Failed Integration
+
+## Endpoint
+
+```text id="g3x9vp"
+POST /retries/replay/{integrationId}
+```
+
+---
+
+## Important Principle
+
+```text id="r5m1xt"
+Retries
+must not amplify failures
+```
+
+---
+
+# 9. Circuit Breaker APIs
+
+# 9.1 Retrieve Circuit Breakers
+
+## Endpoint
+
+```text id="x8v4wr"
+GET /circuit-breakers
+```
+
+---
+
+## Supported States
+
+```text id="n7m1vt"
+CLOSED
+OPEN
+HALF_OPEN
+```
+
+---
+
+## Response
+
+```json id="k2v7xp"
+{
+  "provider": "Stripe",
+  "state": "OPEN"
+}
+```
+
+---
+
+# 9.2 Reset Circuit Breaker
+
+## Endpoint
+
+```text id="d1m8wr"
+POST /circuit-breakers/{providerId}/reset
+```
+
+---
+
+# 10. DLQ APIs
+
+# 10.1 Retrieve DLQ Messages
+
+## Endpoint
+
+```text id="h6x2vt"
+GET /dlq/messages
+```
+
+---
+
+## Examples
+
+```text id="t9v4xp"
+failed webhook
+failed CRM sync
+failed ERP event
+```
+
+---
+
+## Query Parameters
+
+| Parameter  | Purpose            |
+| ---------- | ------------------ |
+| provider   | Provider filtering |
+| reason     | Failure filtering  |
+| replayable | Replay eligibility |
+
+---
+
+# 10.2 Replay DLQ Message
+
+## Endpoint
+
+```text id="j4x9wt"
+POST /dlq/messages/{messageId}/replay
+```
+
+---
+
+# 11. OAuth APIs
+
+# 11.1 Start OAuth Flow
+
+## Endpoint
+
+```text id="m7v1xp"
+POST /oauth/{provider}/authorize
+```
+
+---
+
+## Examples
+
+```text id="u5x8wr"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
+```
+
+---
+
+## Response
+
+```json id="q9m3vt"
+{
+  "authorizationUrl": "https://..."
+}
+```
+
+---
+
+# 11.2 OAuth Callback
+
+## Endpoint
+
+```text id="k1m8vt"
+GET /oauth/{provider}/callback
+```
+
+---
+
+# 11.3 Refresh OAuth Token
+
+## Endpoint
+
+```text id="d2m8wr"
+POST /oauth/{provider}/refresh
+```
+
+---
+
+# 12. Secret APIs
+
+# 12.1 Rotate Secret
+
+## Endpoint
+
+```text id="u8x3wp"
+POST /secrets/{secretId}/rotate
+```
+
+---
+
+## Examples
+
+```text id="f6m9wr"
+API keys
+OAuth secrets
+Webhook secrets
+```
+
+---
+
+## Critical Principle
+
+```text id="c8m4xt"
+Secrets
+must never be exposed
+```
+
+---
+
+# 13. Synchronization APIs
+
+# 13.1 Execute Synchronization
+
+## Endpoint
+
+```text id="u1x8wr"
+POST /sync/jobs
+```
+
+---
+
+## Examples
+
+```text id="w6x3wr"
+CRM sync
+ERP sync
+billing export
+```
+
+---
+
+## Request
+
+```json id="r1m7vp"
+{
+  "mode": "INCREMENTAL_SYNC",
+  "provider": "salesforce"
+}
+```
+
+---
+
+# 13.2 Retrieve Synchronization Status
+
+## Endpoint
+
+```text id="x4v8xt"
+GET /sync/jobs/{jobId}
+```
+
+---
+
+# 14. Quota APIs
+
+# 14.1 Retrieve Provider Quotas
+
+## Endpoint
+
+```text id="f2v9xp"
+GET /quotas
+```
+
+---
+
+## Examples
+
+```text id="m6x3vt"
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
+```
+
+---
+
+## Response
+
+```json id="y5v2wp"
+{
+  "provider": "OpenAI",
+  "remainingQuota": 12000
+}
+```
+
+---
+
+# 15. Idempotency APIs
+
+# 15.1 Validate Idempotency
+
+## Endpoint
+
+```text id="m2x7wp"
+POST /idempotency/validate
+```
+
+---
+
+## Purpose
+
+Checks duplicate integration requests.
+
+---
+
+## Critical Principle
+
+```text id="h4m9wr"
+External providers
+may resend requests
+multiple times
+```
+
+---
+
+# 16. Integration Observability APIs
+
+# 16.1 Retrieve Integration Metrics
+
+## Endpoint
+
+```text id="d1x8vp"
+GET /observability/metrics
+```
+
+---
+
+## Monitored Metrics
+
+```text id="v7m2xt"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+# 16.2 Retrieve Provider Health
+
+## Endpoint
+
+```text id="u5m1wr"
+GET /observability/providers/health
+```
+
+---
+
+## Example
+
+```text id="m8v3xp"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
+```
+
+---
+
+# 17. Streaming APIs
+
+# 17.1 Stream Integration Events
+
+## Endpoint
+
+```text id="f2x7wr"
+GET /stream/events
+```
+
+---
+
+## Examples
+
+```text id="r4m9vt"
+Kafka streams
+Webhook streams
+AI streaming APIs
+```
+
+---
+
+## Purpose
+
+Provides real-time integration event streaming.
+
+---
+
+# 18. Common Response Structure
 
 ## Success Response
 
-```json id="d1x8vp"
+```json id="x9v1wr"
 {
   "success": true,
   "timestamp": "2026-05-20T10:00:00Z",
@@ -638,162 +656,158 @@ GET /chargebacks/{chargebackId}
 
 ## Error Response
 
-```json id="v7m2xt"
+```json id="k3m8xp"
 {
   "success": false,
   "timestamp": "2026-05-20T10:00:00Z",
   "error": {
-    "code": "PAYMENT_ALREADY_CAPTURED",
-    "message": "Duplicate capture rejected"
+    "code": "INTEGRATION_ERROR",
+    "message": "Provider unavailable"
   }
 }
 ```
 
 ---
 
-# 18. HTTP Status Codes
+# 19. HTTP Status Codes
 
-| Status | Meaning                  |
-| ------ | ------------------------ |
-| 200    | Success                  |
-| 201    | Created                  |
-| 202    | Async processing         |
-| 400    | Validation error         |
-| 401    | Unauthenticated          |
-| 403    | Forbidden                |
-| 404    | Resource not found       |
-| 409    | Conflict                 |
-| 422    | Financial rule violation |
-| 429    | Rate limit exceeded      |
-| 500    | Internal error           |
+| Status | Meaning              |
+| ------ | -------------------- |
+| 200    | Success              |
+| 201    | Created              |
+| 202    | Async processing     |
+| 400    | Validation error     |
+| 401    | Unauthenticated      |
+| 403    | Forbidden            |
+| 404    | Resource not found   |
+| 409    | Idempotency conflict |
+| 429    | Rate limit exceeded  |
+| 500    | Internal error       |
 
 ---
 
-# 19. Security Rules
+# 20. Security Rules
 
 ## Mandatory Protections
 
 | Protection             | Required |
 | ---------------------- | -------- |
-| Tenant isolation       | Yes      |
-| PCI boundary isolation | Yes      |
-| Signature validation   | Yes      |
+| Secret encryption      | Yes      |
 | Replay protection      | Yes      |
-| Idempotency            | Yes      |
+| Idempotency validation | Yes      |
+| Signature validation   | Yes      |
 
 ---
 
 ## Forbidden Behavior
 
-```text id="u5m1wr"
-Raw payment credentials
-must never cross
-domain boundaries
+```text id="p1v9wr"
+Secrets
+must never be exposed
 ```
 
 ---
 
-# 20. Reactive API Considerations
+# 21. Reactive API Considerations
 
 Reactive implementations should support:
 
-```text id="m8v3xp"
-Mono<PaymentTransactionResponse>
-Flux<WebhookEvent>
-Flux<SettlementReport>
+```text id="g6m2xt"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
 ```
 
 ---
 
 ## Requirements
 
-* Non-blocking provider calls
-* Reactive reconciliation
-* Async retry orchestration
-* High-concurrency support
+* Non-blocking integrations
+* Async retries
+* Streaming orchestration
+* Backpressure support
 
 ---
 
-# 21. CQRS Considerations
+# 22. CQRS Considerations
 
 Recommended projections:
 
-| Projection                | Purpose               |
-| ------------------------- | --------------------- |
-| PaymentProjection         | Fast retrieval        |
-| FraudAnalyticsProjection  | Risk analysis         |
-| SettlementProjection      | Settlement reporting  |
-| ProviderMetricsProjection | Operational analytics |
+| Projection                   | Purpose               |
+| ---------------------------- | --------------------- |
+| ProviderHealthProjection     | Routing analytics     |
+| RetryProjection              | Failure visibility    |
+| DLQProjection                | Recovery operations   |
+| IntegrationMetricsProjection | Operational analytics |
 
 ---
 
-# 22. Distributed System Considerations
+# 23. Distributed System Considerations
 
 The APIs support:
 
-* Multi-region payment orchestration
-* Distributed reconciliation
-* Event-driven synchronization
+* Multi-region integrations
+* Distributed retries
+* Event-driven orchestration
 * Horizontal scalability
-* Replay-safe payment workflows
+* Fault-tolerant provider routing
 
 ---
 
-# 23. API Versioning Strategy
+# 24. API Versioning Strategy
 
 Recommended:
 
-```text id="f2x7wr"
-/api/v1/payments
+```text id="u7m1wr"
+/api/v1/integrations
 ```
 
 Future evolution:
 
-```text id="r4m9vt"
-/api/v2/payments
+```text id="m4v8wr"
+/api/v2/integrations
 ```
 
 ---
 
-# 24. Error Codes
+# 25. Error Codes
 
-| Code                      | Description             |
-| ------------------------- | ----------------------- |
-| PAYMENT_NOT_FOUND         | Missing transaction     |
-| PAYMENT_ALREADY_CAPTURED  | Duplicate capture       |
-| INVALID_WEBHOOK_SIGNATURE | Security failure        |
-| PAYMENT_RETRY_EXHAUSTED   | Retry limit exceeded    |
-| PROVIDER_DESYNCHRONIZED   | Reconciliation mismatch |
-| FRAUD_BLOCKED             | Fraud prevention        |
-| INVALID_REFUND_STATE      | Refund inconsistency    |
+| Code                      | Description              |
+| ------------------------- | ------------------------ |
+| PROVIDER_UNAVAILABLE      | Provider failure         |
+| INVALID_WEBHOOK_SIGNATURE | Security validation      |
+| QUOTA_EXCEEDED            | Quota violation          |
+| CIRCUIT_OPEN              | Fault tolerance          |
+| IDEMPOTENCY_CONFLICT      | Duplicate request        |
+| SECRET_RESOLUTION_FAILED  | Secret retrieval failure |
 
 ---
 
-# 25. Future API Extensions
+# 26. Future API Extensions
 
 Future APIs may include:
 
-* Crypto payment APIs
-* BNPL APIs
-* Real-time transfer APIs
-* Marketplace split-payment APIs
-* AI fraud APIs
+* AI provider routing APIs
+* Predictive failover APIs
+* Autonomous retry optimization APIs
+* Smart quota management APIs
+* Self-healing integration APIs
 
 ---
 
-# 26. Summary
+# 27. Summary
 
-The Payment Management API contracts provide:
+The Integration Management API contracts provide:
 
-* Enterprise-grade payment APIs
-* PCI-aware boundary isolation
-* Reactive payment orchestration
-* Distributed provider synchronization
-* Fraud-aware transaction governance
-* Multi-provider routing support
-* Scalable SaaS payment resilience
+* Enterprise-grade external orchestration APIs
+* Provider-agnostic architecture
+* Fault-tolerant integrations
+* Reactive integration pipelines
+* Distributed webhook orchestration
+* Multi-provider failover
+* Secure interoperability
+* Scalable event-driven integrations
 
-These APIs form the external contract layer of the payment ecosystem.
+These APIs form the external contract layer of the integration ecosystem.
 
 ```
 ```

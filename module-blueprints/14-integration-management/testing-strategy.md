@@ -1,74 +1,80 @@
-# 11-payment-management/testing-strategy.md
+# 14-integration-management/testing-strategy.md
 
-````md id="v9x4vp"
-# Payment Management Testing Strategy
+````md id="z1x4vp"
+# Integration Management Testing Strategy
 
 ## 1. Introduction
 
-This document defines the testing strategy for the Payment Management module.
+This document defines the testing strategy of the Integration Management module.
 
-Payment Management is one of the most critical and security-sensitive domains of the SaaS platform because it controls:
+Integration Management is one of the most operationally sensitive modules because it coordinates:
 
-- Payment authorization
-- Payment capture
-- Refund execution
-- Webhook synchronization
-- Provider reconciliation
-- Fraud detection
-- Chargeback handling
-- Settlement synchronization
-- Multi-provider routing
-- Tokenized payment methods
+- External APIs
+- Payment gateways
+- AI providers
+- OAuth integrations
+- Webhooks
+- ERP integrations
+- CRM integrations
+- Email providers
+- SMS providers
+- Streaming integrations
+- Retry orchestration
+- Circuit breakers
+- DLQ workflows
+- Provider failover
+- Event-driven integrations
 
-A defect in this module may cause:
+A failure in this module may produce:
 
 ```text id="u5m1wr"
-- duplicate charges
-- payment fraud
-- PCI violations
-- financial inconsistencies
-- provider desynchronization
-- revenue loss
+- payment failures
+- duplicate operations
+- provider outages
+- webhook corruption
+- OAuth compromise
+- retry storms
+- cross-tenant exposure
 ````
 
 The testing strategy is designed following:
 
 * Domain-Driven Design (DDD)
 * Event-Driven Architecture (EDA)
-* PCI DSS boundary isolation
+* Reactive integration orchestration
+* Provider-agnostic architecture
 * Multi-tenant SaaS governance
-* Reactive payment orchestration
-* Enterprise financial resilience
+* Enterprise fault tolerance
 
 ---
 
 # 2. Testing Objectives
 
-| Objective                | Description          |
-| ------------------------ | -------------------- |
-| Payment correctness      | Financial integrity  |
-| Idempotency validation   | Duplicate prevention |
-| Replay safety            | Webhook resilience   |
-| Provider synchronization | Consistency          |
-| Fraud protection         | Security             |
-| PCI isolation            | Compliance           |
-| Tenant isolation         | Security             |
-| Reactive scalability     | Performance          |
+| Objective                | Description                |
+| ------------------------ | -------------------------- |
+| Provider reliability     | External stability         |
+| Fault tolerance          | Failure resilience         |
+| Replay protection        | Duplicate prevention       |
+| Tenant isolation         | SaaS governance            |
+| Secret protection        | Security                   |
+| Retry correctness        | Operational resilience     |
+| Observability validation | Runtime visibility         |
+| Reactive scalability     | Non-blocking orchestration |
 
 ---
 
 # 3. Testing Layers
 
-| Layer              | Purpose                   |
-| ------------------ | ------------------------- |
-| Unit Tests         | Domain validation         |
-| Integration Tests  | Infrastructure validation |
-| API Contract Tests | Contract correctness      |
-| Security Tests     | Payment protection        |
-| Reactive Tests     | Non-blocking validation   |
-| Performance Tests  | Scalability               |
-| Chaos Tests        | Failure resilience        |
-| Compliance Tests   | PCI/audit validation      |
+| Layer                    | Purpose                      |
+| ------------------------ | ---------------------------- |
+| Unit Tests               | Domain validation            |
+| Integration Tests        | External provider validation |
+| Contract Tests           | API correctness              |
+| Reactive Tests           | Non-blocking validation      |
+| Security Tests           | Secret and OAuth protection  |
+| Distributed System Tests | Multi-service consistency    |
+| Chaos Tests              | Failure resilience           |
+| Performance Tests        | Scalability validation       |
 
 ---
 
@@ -76,7 +82,7 @@ The testing strategy is designed following:
 
 ## Purpose
 
-Validate isolated payment domain behavior.
+Validate isolated integration domain behavior.
 
 ---
 
@@ -84,13 +90,13 @@ Validate isolated payment domain behavior.
 
 Each aggregate must validate invariants.
 
-| Aggregate                      | Validation           |
-| ------------------------------ | -------------------- |
-| PaymentTransactionAggregate    | Lifecycle integrity  |
-| RefundExecutionAggregate       | Refund consistency   |
-| WebhookAggregate               | Replay safety        |
-| FraudDetectionAggregate        | Fraud governance     |
-| PaymentReconciliationAggregate | Provider consistency |
+| Aggregate               | Validation             |
+| ----------------------- | ---------------------- |
+| IntegrationAggregate    | Provider orchestration |
+| WebhookAggregate        | Replay protection      |
+| CircuitBreakerAggregate | Fault tolerance        |
+| DLQAggregate            | Failure persistence    |
+| IdempotencyAggregate    | Duplicate prevention   |
 
 ---
 
@@ -98,7 +104,7 @@ Each aggregate must validate invariants.
 
 ```java id="m8v3xp"
 @Test
-void shouldRejectDuplicateCapture() {
+void shouldFailoverToSecondaryProvider() {
 }
 ```
 
@@ -110,8 +116,9 @@ Validate:
 
 * Immutability
 * Equality semantics
-* Validation rules
-* Serialization consistency
+* Retry calculations
+* Quota calculations
+* Signature validation
 
 ---
 
@@ -119,408 +126,41 @@ Validate:
 
 ```java id="f2x7wr"
 @Test
-void shouldRejectNegativePaymentAmount() {
+void shouldCalculateRetryDelay() {
 }
 ```
 
 ---
 
-# 4.3 Payment Lifecycle Tests
+# 4.3 Entity Lifecycle Tests
 
-Validate lifecycle correctness.
+Validate:
+
+* Webhook lifecycle
+* OAuth lifecycle
+* Retry lifecycle
+* DLQ lifecycle
+* Synchronization lifecycle
 
 ---
 
-## Example Lifecycle
+# 5. Provider Integration Testing
+
+## Purpose
+
+Validate external provider orchestration.
+
+---
+
+# Examples
 
 ```text id="r4m9vt"
-PENDING
-→ AUTHORIZED
-→ CAPTURED
+SES
+SendGrid
+Stripe
+OpenAI
+Twilio
 ```
-
----
-
-## Forbidden Lifecycle
-
-```text id="x9v1wr"
-CAPTURED
-→ PENDING
-```
-
----
-
-# 5. Integration Testing Strategy
-
-## Purpose
-
-Validate infrastructure integration.
-
----
-
-# 5.1 Repository Integration Tests
-
-Validate:
-
-* Payment persistence
-* Tenant filtering
-* Provider correlation
-* Audit traceability
-
----
-
-## Example
-
-```java id="k3m8xp"
-@Test
-void shouldReturnOnlyTenantTransactions() {
-
-    StepVerifier.create(
-        repository.findByTenant(tenantId)
-    )
-    .expectNextMatches(
-        transaction ->
-            transaction.belongsTo(tenantId)
-    )
-    .verifyComplete();
-}
-```
-
----
-
-# 5.2 Provider Integration Tests
-
-Validate:
-
-* Provider authorization
-* Provider capture
-* Refund synchronization
-* Timeout handling
-
----
-
-## Supported Providers
-
-```text id="p1v9wr"
-STRIPE
-PAYPAL
-MERCADOPAGO
-ADYEN
-```
-
----
-
-# 5.3 Kafka/Event Integration Tests
-
-Validate:
-
-* Event publication
-* Replay safety
-* Ordering guarantees
-* Durable delivery
-
----
-
-# 5.4 Redis Integration Tests
-
-Validate:
-
-* Payment projections
-* Fraud analytics
-* Provider metrics
-* Cache invalidation
-
----
-
-# 6. API Contract Testing Strategy
-
-## Purpose
-
-Validate API consistency and compatibility.
-
----
-
-# 6.1 Authorization API Tests
-
-Validate:
-
-* Payment authorization
-* Idempotency behavior
-* Provider routing
-* Fraud validation
-
----
-
-## Example
-
-```java id="g6m2xt"
-@Test
-void shouldAuthorizePaymentSuccessfully() {
-}
-```
-
----
-
-# 6.2 Capture API Tests
-
-Validate:
-
-* Duplicate prevention
-* Capture consistency
-* Provider synchronization
-
----
-
-## Critical Rule
-
-```text id="u7m1wr"
-Duplicate captures
-must never occur
-```
-
----
-
-# 6.3 Refund API Tests
-
-Validate:
-
-* Full refunds
-* Partial refunds
-* Invalid refund states
-* Refund authorization
-
----
-
-# 6.4 Webhook API Tests
-
-Validate:
-
-* Signature validation
-* Replay detection
-* Duplicate delivery handling
-* Event ordering
-
----
-
-## Critical Challenges
-
-```text id="m4v8wr"
-- duplicated webhooks
-- delayed webhooks
-- out-of-order events
-```
-
----
-
-# 7. Security Testing Strategy
-
-## Purpose
-
-Validate payment protection mechanisms.
-
----
-
-# 7.1 PCI Boundary Tests
-
-Validate absence of:
-
-```text id="t5v3xp"
-- CVV data
-- full PAN
-- banking credentials
-```
-
----
-
-## Critical Principle
-
-```text id="w2m8vt"
-Raw PCI-sensitive data
-must never be persisted
-```
-
----
-
-# 7.2 Tenant Isolation Tests
-
-Critical validation:
-
-```text id="q7x1wr"
-Tenant A
-cannot access
-Tenant B payments
-```
-
----
-
-# 7.3 Replay Attack Tests
-
-Validate:
-
-* Duplicate webhook rejection
-* Event deduplication
-* Replay-safe processing
-
----
-
-## Example
-
-```java id="y9v4xp"
-@Test
-void shouldRejectDuplicateWebhookReplay() {
-}
-```
-
----
-
-# 7.4 Fraud Prevention Tests
-
-Validate:
-
-* Velocity anomalies
-* Excessive retries
-* Suspicious geography
-* Fraud blocking
-
----
-
-## Examples
-
-```text id="f4m7wr"
-- rapid retries
-- country mismatch
-- abnormal transaction frequency
-```
-
----
-
-# 8. Reactive Testing Strategy
-
-## Purpose
-
-Validate non-blocking payment orchestration.
-
----
-
-# 8.1 Reactive Context Tests
-
-Validate propagation of:
-
-* Tenant context
-* Security context
-* Correlation IDs
-
----
-
-# 8.2 High-Concurrency Tests
-
-Validate:
-
-* Concurrent authorizations
-* Concurrent captures
-* Concurrent webhooks
-* Concurrent retries
-
----
-
-## Example
-
-```java id="u1x8vt"
-Flux.range(1, 10000)
-```
-
-must not compromise financial consistency.
-
----
-
-# 8.3 Backpressure Tests
-
-Validate:
-
-* Webhook ingestion
-* Provider event streaming
-* Fraud event processing
-
----
-
-# 9. Event Testing Strategy
-
-## Purpose
-
-Validate event-driven payment consistency.
-
----
-
-# 9.1 Event Publication Tests
-
-Validate:
-
-* Correct payloads
-* Immutable events
-* Tenant metadata
-* Correlation metadata
-
----
-
-# 9.2 Event Ordering Tests
-
-Validate ordering guarantees.
-
----
-
-## Example
-
-```text id="m6v2wr"
-PaymentAuthorized
-before
-PaymentCaptured
-```
-
----
-
-# 9.3 Replay Safety Tests
-
-Validate replay correctness for:
-
-* Webhook events
-* Payment retries
-* Reconciliation workflows
-
----
-
-# 10. Reconciliation Testing Strategy
-
-## Purpose
-
-Validate provider synchronization.
-
----
-
-# Example Validation
-
-```text id="g3x9vp"
-Provider says CAPTURED
-Local says FAILED
-```
-
----
-
-## Mandatory Tests
-
-| Validation          | Required |
-| ------------------- | -------- |
-| Missing captures    | Yes      |
-| Duplicate captures  | Yes      |
-| Provider drift      | Yes      |
-| Settlement mismatch | Yes      |
-
----
-
-# 11. Settlement Testing Strategy
-
-## Purpose
-
-Validate settlement synchronization.
 
 ---
 
@@ -528,90 +168,579 @@ Validate settlement synchronization.
 
 Validate:
 
-* Settlement ingestion
-* Settlement reconciliation
-* Settlement drift detection
+* Provider connectivity
+* Provider failover
+* Timeout handling
+* Retry orchestration
+* Health scoring
 
 ---
 
-# 12. Chargeback Testing Strategy
+## Critical Principle
+
+```text id="x9v1wr"
+Business logic
+must remain provider agnostic
+```
+
+---
+
+# 6. Webhook Testing Strategy
 
 ## Purpose
 
-Validate dispute workflows.
+Validate inbound webhook orchestration.
 
 ---
 
-## Tests
+# Examples
+
+```text id="k3m8xp"
+Stripe webhook
+GitHub webhook
+OAuth callback
+```
+
+---
+
+# Tests
 
 Validate:
 
-* Chargeback creation
-* Evidence handling
-* Dispute lifecycle
-* Revenue adjustments
+* Signature validation
+* Replay detection
+* Payload validation
+* Ordering guarantees
+* Idempotency enforcement
+
+---
+
+## Critical Principle
+
+```text id="p1v9wr"
+External webhooks
+may arrive multiple times
+```
+
+---
+
+# 7. Retry Testing Strategy
+
+## Purpose
+
+Validate recovery orchestration.
+
+---
+
+# Supported Strategies
+
+```text id="g6m2xt"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Retry scheduling
+* Retry exhaustion
+* Delay calculations
+* Jitter application
+* DLQ escalation
+
+---
+
+## Important Principle
+
+```text id="u7m1wr"
+Retries
+must not amplify failures
+```
+
+---
+
+# 8. Circuit Breaker Testing Strategy
+
+## Purpose
+
+Validate fault tolerance behavior.
+
+---
+
+# Supported States
+
+```text id="m4v8wr"
+CLOSED
+OPEN
+HALF_OPEN
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Failure threshold transitions
+* HALF_OPEN recovery
+* Request blocking
+* Recovery orchestration
+
+---
+
+# 9. DLQ Testing Strategy
+
+## Purpose
+
+Validate dead-letter queue workflows.
+
+---
+
+# Examples
+
+```text id="t5v3xp"
+failed webhook
+failed CRM sync
+failed ERP event
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Failure persistence
+* Replay orchestration
+* Replay safety
+* Duplicate prevention
+
+---
+
+## Important Principle
+
+```text id="w2m8vt"
+Failures
+must remain recoverable
+```
+
+---
+
+# 10. OAuth Testing Strategy
+
+## Purpose
+
+Validate OAuth integrations.
+
+---
+
+# Examples
+
+```text id="q7x1wr"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Authorization flow
+* Token exchange
+* Token refresh
+* Scope validation
+* Callback validation
+
+---
+
+## Security Validation
+
+| Protection        | Required    |
+| ----------------- | ----------- |
+| State validation  | Yes         |
+| PKCE validation   | Recommended |
+| Replay protection | Yes         |
+
+---
+
+# 11. Secret Management Testing
+
+## Purpose
+
+Validate integration secret protection.
+
+---
+
+# Examples
+
+```text id="y9v4xp"
+API keys
+OAuth secrets
+Webhook secrets
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Secret encryption
+* Secret rotation
+* Secret retrieval
+* Secret expiration
+
+---
+
+## Critical Principle
+
+```text id="f4m7wr"
+Secrets
+must never be hardcoded
+```
+
+---
+
+# 12. Idempotency Testing Strategy
+
+## Purpose
+
+Validate duplicate prevention.
+
+---
+
+# Tests
+
+Validate:
+
+* Replay detection
+* Duplicate rejection
+* Idempotency persistence
+* Request uniqueness
+
+---
+
+## Critical Principle
+
+```text id="u1x8vt"
+External providers
+may resend requests
+multiple times
+```
+
+---
+
+# 13. Synchronization Testing Strategy
+
+## Purpose
+
+Validate synchronization workflows.
+
+---
+
+# Examples
+
+```text id="m6v2wr"
+CRM sync
+ERP sync
+billing export
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Batch synchronization
+* Incremental synchronization
+* Retry orchestration
+* Failure recovery
+
+---
+
+## Supported Modes
+
+```text id="g3x9vp"
+FULL_SYNC
+INCREMENTAL_SYNC
+REALTIME_SYNC
+```
+
+---
+
+# 14. Quota Management Testing
+
+## Purpose
+
+Validate provider quota governance.
+
+---
+
+# Examples
+
+```text id="r5m1xt"
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Quota tracking
+* Rate limiting
+* Burst protection
+* Exhaustion handling
+
+---
+
+# 15. Provider Health Testing
+
+## Purpose
+
+Validate provider reliability scoring.
+
+---
+
+## Example
+
+```text id="x8v4wr"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Health calculations
+* Failure scoring
+* Latency scoring
+* Routing recommendations
+
+---
+
+# 16. Integration Observability Testing
+
+## Purpose
+
+Validate operational telemetry.
+
+---
+
+## Monitored Metrics
+
+```text id="n7m1vt"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Metrics collection
+* Distributed tracing
+* Log indexing
+* Alert triggering
+
+---
+
+# 17. Streaming Integration Testing
+
+## Purpose
+
+Validate streaming orchestration.
 
 ---
 
 ## Examples
 
-```text id="r5m1xt"
-FRAUD
-UNRECOGNIZED_CHARGE
+```text id="k2v7xp"
+Kafka streams
+Webhook streams
+AI streaming APIs
 ```
 
 ---
 
-# 13. Performance Testing Strategy
+# Tests
+
+Validate:
+
+* Stream continuity
+* Backpressure handling
+* Event ordering
+* Replay protection
+
+---
+
+## Characteristics
+
+```text id="d1m8wr"
+event-driven
++
+streaming-based
++
+fault tolerant
++
+reactive
+```
+
+---
+
+# 18. Event-Driven Integration Testing
 
 ## Purpose
 
-Validate enterprise SaaS scalability.
+Validate asynchronous orchestration.
 
 ---
 
-# 13.1 Authorization Performance Tests
+## Examples
 
-Measure:
-
-* Authorization latency
-* Provider response time
-* Concurrent payment throughput
-
----
-
-# 13.2 Webhook Performance Tests
-
-Measure:
-
-* High-frequency webhook ingestion
-* Replay detection performance
-* Idempotency overhead
+```text id="h6x2vt"
+UserCreated → CRM Sync
+PaymentCaptured → ERP Sync
+```
 
 ---
 
-# 13.3 Fraud Engine Performance Tests
+# Tests
 
-Measure:
+Validate:
 
-* Fraud scoring latency
-* Risk classification speed
-* Concurrent fraud evaluations
-
----
-
-# 13.4 Recommended Targets
-
-| Metric                | Target          |
-| --------------------- | --------------- |
-| Authorization latency | < 200ms         |
-| Capture latency       | < 150ms         |
-| Webhook processing    | High throughput |
-| Fraud evaluation      | Near real-time  |
+* Event propagation
+* Async retries
+* Correlation propagation
+* Event ordering
 
 ---
 
-# 14. Chaos Testing Strategy
+# 19. Integration Contract Testing
+
+## Purpose
+
+Validate provider API compatibility.
+
+---
+
+# Tests
+
+Validate:
+
+* Request schemas
+* Response schemas
+* OAuth compatibility
+* Webhook payload compatibility
+
+---
+
+## Recommended Tools
+
+| Tool     | Purpose                   |
+| -------- | ------------------------- |
+| Pact     | Consumer-driven contracts |
+| WireMock | Provider simulation       |
+
+---
+
+# 20. Security Testing Strategy
+
+## Purpose
+
+Validate integration security protections.
+
+---
+
+## Mandatory Protections
+
+| Protection           | Required |
+| -------------------- | -------- |
+| Secret encryption    | Yes      |
+| Replay protection    | Yes      |
+| Signature validation | Yes      |
+| OAuth security       | Yes      |
+
+---
+
+## Forbidden Exposure
+
+```text id="t9v4xp"
+- raw API keys
+- OAuth secrets
+- webhook secrets
+```
+
+---
+
+# 21. Reactive Testing Strategy
+
+## Purpose
+
+Validate non-blocking integration orchestration.
+
+---
+
+## Example
+
+```java id="j4x9wt"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
+```
+
+---
+
+# Tests
+
+Validate:
+
+* Async orchestration
+* Backpressure handling
+* Reactive retries
+* Context propagation
+
+---
+
+# 22. Distributed System Testing
+
+## Purpose
+
+Validate distributed integration consistency.
+
+---
+
+# Tests
+
+Validate:
+
+* Multi-region failover
+* Distributed retries
+* Event propagation
+* Correlation tracing
+
+---
+
+# 23. Chaos Testing Strategy
 
 ## Purpose
 
@@ -619,265 +748,162 @@ Validate resilience during failures.
 
 ---
 
-# 14.1 Provider Failure Tests
+# Failure Scenarios
 
-Validate:
-
-* Retry orchestration
-* Failover routing
-* Recovery consistency
-
----
-
-# 14.2 Kafka Failure Tests
-
-Validate:
-
-* Event durability
-* Replay recovery
-* Retry safety
+| Failure              | Validation           |
+| -------------------- | -------------------- |
+| Provider unavailable | Failover             |
+| OAuth provider down  | Graceful degradation |
+| Retry storms         | Backpressure         |
+| Kafka unavailable    | Buffered retries     |
+| DLQ unavailable      | Failure persistence  |
 
 ---
 
-# 14.3 Redis Failure Tests
+## Critical Principle
 
-Validate:
-
-* Projection degradation
-* Fraud analytics fallback
-* Cache recovery
-
----
-
-# 14.4 Partial Failure Tests
-
-Validate:
-
-* Provider desynchronization
-* Settlement drift
-* Eventual consistency recovery
-
----
-
-# 15. Compliance Testing Strategy
-
-## Purpose
-
-Validate governance and compliance.
-
----
-
-# 15.1 PCI DSS Boundary Tests
-
-Validate:
-
-* Token-only persistence
-* Provider isolation
-* Secret protection
-
----
-
-# 15.2 SOC2 Tests
-
-Validate:
-
-* Immutable audit trails
-* Operational accountability
-* Financial traceability
-
----
-
-# 15.3 GDPR Tests
-
-Validate:
-
-* Tenant governance
-* Access traceability
-* Data minimization
-
----
-
-# 16. Mutation Testing Strategy
-
-## Purpose
-
-Validate robustness of payment rules.
-
----
-
-# Example Mutations
-
-```text id="x8v4wr"
-AUTHORIZED → PENDING
-CAPTURED → FAILED
-RetryCount(3) → RetryCount(-1)
+```text id="m7v1xp"
+External provider failures
+must not crash
+business systems
 ```
 
-Tests must fail correctly.
+---
+
+# 24. Performance Testing Strategy
+
+## Purpose
+
+Validate enterprise scalability.
 
 ---
 
-# 17. Static Analysis and SAST
+# Metrics to Measure
 
-Recommended tools:
-
-| Tool                   | Purpose             |
-| ---------------------- | ------------------- |
-| SonarQube              | Code quality        |
-| Semgrep                | Security analysis   |
-| SpotBugs               | Java analysis       |
-| OWASP Dependency Check | Dependency scanning |
-
----
-
-# 18. Dependency Security Testing
-
-Validate vulnerabilities in:
-
-* Payment SDKs
-* Reactive frameworks
-* Kafka libraries
-* Fraud integrations
+| Metric                  | Purpose             |
+| ----------------------- | ------------------- |
+| Integration throughput  | Scalability         |
+| Webhook latency         | Responsiveness      |
+| Retry latency           | Recovery speed      |
+| Provider failover speed | Availability        |
+| DLQ replay speed        | Recovery operations |
 
 ---
 
-# 19. Penetration Testing
+# Recommended Targets
 
-Mandatory testing areas:
-
-| Area                | Priority |
-| ------------------- | -------- |
-| Replay attacks      | Critical |
-| Webhook spoofing    | Critical |
-| Cross-tenant access | Critical |
-| Duplicate captures  | Critical |
-| Refund abuse        | Critical |
+| Metric             | Target         |
+| ------------------ | -------------- |
+| Webhook processing | < 500ms        |
+| Retry scheduling   | < 100ms        |
+| Provider failover  | < 3s           |
+| DLQ replay         | Near real-time |
 
 ---
 
-# 20. Test Data Strategy
-
-## Required Datasets
-
-| Dataset               | Purpose                   |
-| --------------------- | ------------------------- |
-| Multi-tenant payments | Isolation validation      |
-| Fraud scenarios       | Fraud testing             |
-| Webhook duplicates    | Replay testing            |
-| Settlement reports    | Reconciliation validation |
-
----
-
-# 21. Test Environment Recommendations
-
-| Environment   | Purpose                   |
-| ------------- | ------------------------- |
-| Local         | Fast feedback             |
-| Integration   | Infrastructure validation |
-| Staging       | Production simulation     |
-| Chaos Sandbox | Failure testing           |
-
----
-
-# 22. TestContainers Recommendations
+# 25. TestContainers Recommendations
 
 Recommended infrastructure:
 
-| Component              | Container           |
-| ---------------------- | ------------------- |
-| PostgreSQL             | Payment persistence |
-| Redis                  | CQRS projections    |
-| Kafka                  | Payment events      |
-| Mock payment providers | Provider simulation |
+| Component  | Container                 |
+| ---------- | ------------------------- |
+| PostgreSQL | Transactional persistence |
+| Redis      | Idempotency/replay        |
+| Kafka      | Event streaming           |
+| Vault      | Secret management         |
+| WireMock   | Provider mocking          |
 
 ---
 
 ## Example
 
-```java id="n7m1vt"
+```java id="u5x8wr"
 @Container
-static PostgreSQLContainer<?> postgres =
-    new PostgreSQLContainer<>();
+static KafkaContainer kafka =
+    new KafkaContainer();
 ```
 
 ---
 
-# 23. CI/CD Security Gates
+# 26. CI/CD Quality Gates
 
 Mandatory validations:
 
-| Validation          | Required |
-| ------------------- | -------- |
-| Unit tests          | Yes      |
-| Integration tests   | Yes      |
-| Security tests      | Yes      |
-| Contract tests      | Yes      |
-| SAST                | Yes      |
-| Dependency scanning | Yes      |
+| Validation        | Required    |
+| ----------------- | ----------- |
+| Unit tests        | Yes         |
+| Integration tests | Yes         |
+| Security tests    | Yes         |
+| Reactive tests    | Yes         |
+| Chaos tests       | Recommended |
+| Performance tests | Recommended |
 
 ---
 
-# 24. Regression Testing Strategy
+# 27. Mutation Testing Strategy
 
-Critical regression areas:
+## Purpose
 
-* Payment authorization
-* Payment capture
-* Refund workflows
-* Webhook synchronization
-* Replay detection
-* Fraud detection
-* Settlement reconciliation
+Validate resilience of integration rules.
 
 ---
 
-# 25. Recommended Coverage Targets
+## Example Mutations
 
-| Area                    | Minimum Coverage |
-| ----------------------- | ---------------- |
-| Domain layer            | 90%+             |
-| Payment lifecycle rules | 100%             |
-| Security-critical flows | 100%             |
-| Webhook processing      | 95%+             |
-
----
-
-# 26. Distributed System Testing
-
-Validate:
-
-* Eventual consistency
-* Replay-safe processing
-* Multi-region synchronization
-* Distributed reconciliation
+```text id="q9m3vt"
+invalid webhook signatures
+expired OAuth tokens
+negative retry delays
+duplicate idempotency keys
+```
 
 ---
 
-# 27. Future Testing Extensions
+# 28. Failure Injection Testing
+
+## Purpose
+
+Validate resilience under provider failures.
+
+---
+
+## Examples
+
+| Failure         | Validation      |
+| --------------- | --------------- |
+| HTTP 500        | Retry           |
+| Timeout         | Circuit breaker |
+| Invalid payload | Rejection       |
+| Quota exceeded  | Backoff         |
+
+---
+
+# 29. Future Testing Extensions
 
 Future testing may include:
 
-* Crypto payment testing
-* BNPL testing
-* Marketplace split-payment testing
-* AI fraud engine testing
-* Real-time transfer testing
+* AI provider routing testing
+* Predictive failover testing
+* Autonomous retry optimization testing
+* Smart quota optimization testing
+* Self-healing integration testing
 
 ---
 
-# 28. Summary
+# 30. Summary
 
-The Payment Management testing strategy provides:
+The Integration Management testing strategy provides:
 
-* Enterprise-grade payment validation
-* PCI-aware payment isolation assurance
-* Reactive payment orchestration verification
-* Distributed provider synchronization testing
-* Fraud-aware transaction governance validation
-* Multi-provider routing resilience testing
-* Scalable SaaS payment integrity
+* Enterprise-grade external integration validation
+* Provider-agnostic architecture testing
+* Fault-tolerant integration assurance
+* Reactive orchestration validation
+* Distributed webhook protection
+* Multi-provider failover resilience
+* Secure interoperability validation
+* Scalable event-driven integration testing
 
-This strategy establishes the quality and security baseline of the payment ecosystem.
+This strategy establishes the quality baseline of the integration ecosystem.
 
 ```
 ```

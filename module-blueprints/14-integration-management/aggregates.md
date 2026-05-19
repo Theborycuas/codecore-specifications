@@ -1,33 +1,37 @@
-# 11-payment-management/aggregates.md
+# 14-integration-management/aggregates.md
 
-````md id="n9x4vp"
-# Payment Management Aggregates
+````md id="r1x4vp"
+# Integration Management Aggregates
 
 ## 1. Introduction
 
-This document defines the aggregates of the Payment Management module.
+This document defines the aggregates of the Integration Management module.
 
-Aggregates represent transactional consistency boundaries for the payment domain and encapsulate:
+Aggregates represent transactional consistency boundaries for:
 
-- Payment transaction lifecycle
-- Payment authorization
-- Payment capture
-- Refund execution
-- Webhook synchronization
-- Provider reconciliation
-- Retry orchestration
-- Tokenized payment methods
-- Fraud detection coordination
-- Multi-provider orchestration
+- External provider orchestration
+- Webhook processing
+- Retry coordination
+- Circuit breaker management
+- Dead-letter queue orchestration
+- OAuth integrations
+- API integrations
+- Provider failover
+- Secret governance
+- Event-driven integrations
+- Integration observability
+- Quota management
+- Multi-provider routing
+- Idempotency protection
 
 The aggregates are designed following:
 
 - Domain-Driven Design (DDD)
 - Event-Driven Architecture (EDA)
-- PCI boundary isolation
+- Reactive integration orchestration
+- Provider-agnostic architecture
 - Multi-tenant SaaS governance
-- Reactive payment orchestration
-- Enterprise financial resilience
+- Enterprise fault tolerance
 
 ---
 
@@ -35,328 +39,409 @@ The aggregates are designed following:
 
 | Aggregate | Responsibility |
 |---|---|
-| PaymentTransactionAggregate | Payment lifecycle |
-| PaymentMethodAggregate | Tokenized payment methods |
-| RefundExecutionAggregate | Refund execution lifecycle |
-| WebhookAggregate | External synchronization |
-| ProviderTransactionAggregate | Provider orchestration |
-| PaymentRetryAggregate | Retry management |
-| FraudDetectionAggregate | Fraud analysis coordination |
-| PaymentReconciliationAggregate | Provider consistency |
-| ProviderRoutingAggregate | Multi-provider routing |
-| PaymentProjectionAggregate | CQRS payment projections |
+| IntegrationAggregate | Core integration orchestration |
+| ProviderAggregate | External provider lifecycle |
+| WebhookAggregate | Webhook orchestration |
+| RetryPolicyAggregate | Retry coordination |
+| CircuitBreakerAggregate | Fault tolerance |
+| DLQAggregate | Dead-letter queue orchestration |
+| OAuthIntegrationAggregate | OAuth provider integration |
+| SecretAggregate | Integration secret governance |
+| IntegrationEventAggregate | Event-driven integrations |
+| ProviderHealthAggregate | Provider health scoring |
+| QuotaAggregate | Provider quota management |
+| IdempotencyAggregate | Duplicate prevention |
+| IntegrationObservabilityAggregate | Integration telemetry |
+| SyncJobAggregate | Synchronization orchestration |
+| IntegrationProjectionAggregate | CQRS integration projections |
 
 ---
 
-# 3. PaymentTransactionAggregate
+# 3. IntegrationAggregate
 
 ## Purpose
 
-Represents the core transactional lifecycle of a payment.
+Represents the core orchestration of external integrations.
 
 ---
 
 ## Aggregate Root
 
 ```text id="u5m1wr"
-PaymentTransaction
+Integration
 ````
 
 ---
 
 ## Responsibilities
 
-* Manage payment lifecycle
-* Coordinate authorization
-* Coordinate capture
-* Track provider state
-* Preserve transaction traceability
+* Coordinate provider interactions
+* Manage integration workflows
+* Preserve integration consistency
+* Support provider abstraction
 
 ---
 
-## Lifecycle States
+## Supported Integrations
 
 ```text id="m8v3xp"
-PENDING
-AUTHORIZED
-CAPTURED
-FAILED
-REFUNDED
-CANCELED
-EXPIRED
+email
+payments
+AI providers
+ERP integrations
+CRM integrations
 ```
 
 ---
 
 ## Invariants
 
-| Invariant                       | Description         |
-| ------------------------------- | ------------------- |
-| Captured payments immutable     | Financial integrity |
-| Transaction ownership mandatory | Tenant isolation    |
-| Duplicate captures forbidden    | Idempotency         |
-| Provider correlation mandatory  | Reconciliation      |
+| Invariant                 | Description            |
+| ------------------------- | ---------------------- |
+| Provider required         | Integration routing    |
+| Tenant isolation required | SaaS governance        |
+| Retry strategy required   | Fault tolerance        |
+| Observability required    | Operational visibility |
 
 ---
 
-## Example Structure
+## Behaviors
 
-```text id="f2x7wr"
-PaymentTransactionAggregate
-│
-├── PaymentTransaction (Root)
-├── ProviderReference
-├── PaymentStatus
-├── CaptureInformation
-├── RetryMetadata
-└── ReconciliationMetadata
-```
+| Behavior             | Description               |
+| -------------------- | ------------------------- |
+| executeIntegration() | Integration orchestration |
+| routeProvider()      | Provider selection        |
+| fallbackProvider()   | Failover execution        |
 
 ---
 
-## Important Behaviors
-
-### authorizePayment()
-
-Requests provider authorization.
-
----
-
-### capturePayment()
-
-Executes financial capture.
-
----
-
-### failPayment()
-
-Registers payment failure state.
-
----
-
-### refundPayment()
-
-Triggers reimbursement execution.
-
----
-
-# 4. PaymentMethodAggregate
+# 4. ProviderAggregate
 
 ## Purpose
 
-Represents tokenized payment instruments.
+Represents external provider lifecycle management.
 
 ---
 
 ## Aggregate Root
 
+```text id="f2x7wr"
+Provider
+```
+
+---
+
+## Example
+
 ```text id="r4m9vt"
-PaymentMethod
+EmailProvider
+    ├── SES
+    ├── SendGrid
+    └── Mailgun
 ```
 
 ---
 
 ## Responsibilities
 
-* Store tokenized references
-* Manage payment preferences
-* Coordinate provider vault references
+* Provider registration
+* Provider prioritization
+* Provider failover
+* Health scoring
 
 ---
 
-## Important Principle
+## Behaviors
+
+| Behavior               | Description            |
+| ---------------------- | ---------------------- |
+| registerProvider()     | Provider onboarding    |
+| disableProvider()      | Operational isolation  |
+| calculateHealthScore() | Reliability evaluation |
+
+---
+
+## Critical Principle
 
 ```text id="x9v1wr"
-Raw PCI-sensitive data
-must never be stored
+Business logic
+must never depend
+on a specific provider
+```
+
+---
+
+# 5. WebhookAggregate
+
+## Purpose
+
+Represents inbound webhook orchestration.
+
+---
+
+## Aggregate Root
+
+```text id="k3m8xp"
+Webhook
 ```
 
 ---
 
 ## Examples
 
-```text id="k3m8xp"
-- Stripe payment token
-- PayPal billing agreement
-- Provider vault token
-```
-
----
-
-## Invariants
-
-| Invariant                  | Description   |
-| -------------------------- | ------------- |
-| Tokenized references only  | PCI isolation |
-| Tenant ownership mandatory | Isolation     |
-| Expired methods invalid    | Security      |
-
----
-
-# 5. RefundExecutionAggregate
-
-## Purpose
-
-Represents execution of reimbursements through providers.
-
----
-
-## Aggregate Root
-
 ```text id="p1v9wr"
-RefundExecution
+Stripe webhook
+GitHub webhook
+OAuth callback
 ```
 
 ---
 
 ## Responsibilities
 
-* Coordinate provider refunds
-* Preserve reimbursement traceability
-* Synchronize provider state
-
----
-
-## Refund Types
-
-```text id="g6m2xt"
-FULL_REFUND
-PARTIAL_REFUND
-```
+* Signature validation
+* Replay protection
+* Idempotency enforcement
+* Retry coordination
 
 ---
 
 ## Behaviors
 
-| Behavior        | Description             |
-| --------------- | ----------------------- |
-| executeRefund() | Provider reimbursement  |
-| rejectRefund()  | Invalid refund handling |
+| Behavior            | Description          |
+| ------------------- | -------------------- |
+| validateSignature() | Security validation  |
+| processWebhook()    | Workflow execution   |
+| detectReplay()      | Duplicate prevention |
 
 ---
 
-# 6. WebhookAggregate
+## Important Principle
+
+```text id="g6m2xt"
+External webhooks
+may arrive multiple times
+```
+
+---
+
+# 6. RetryPolicyAggregate
 
 ## Purpose
 
-Represents synchronization with external providers.
+Represents integration retry orchestration.
 
 ---
 
 ## Aggregate Root
 
 ```text id="u7m1wr"
-WebhookEvent
+RetryPolicy
 ```
 
 ---
 
-## Responsibilities
-
-* Validate webhook authenticity
-* Ensure idempotent processing
-* Synchronize provider states
-* Prevent replay attacks
-
----
-
-## Critical Challenges
+## Supported Strategies
 
 ```text id="m4v8wr"
-- duplicated webhooks
-- delayed delivery
-- out-of-order delivery
-```
-
----
-
-## Invariants
-
-| Invariant                      | Description |
-| ------------------------------ | ----------- |
-| Signature validation mandatory | Security    |
-| Replay protection mandatory    | Integrity   |
-| Duplicate processing forbidden | Idempotency |
-
----
-
-# 7. ProviderTransactionAggregate
-
-## Purpose
-
-Represents provider-side transaction orchestration.
-
----
-
-## Aggregate Root
-
-```text id="t5v3xp"
-ProviderTransaction
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
 ```
 
 ---
 
 ## Responsibilities
 
-* Track external transaction state
-* Maintain provider references
-* Support reconciliation
+* Retry orchestration
+* Delay management
+* Failure recovery
+* Retry optimization
 
 ---
 
-## Supported Providers
+## Behaviors
 
-```text id="w2m8vt"
-STRIPE
-PAYPAL
-MERCADOPAGO
-ADYEN
-```
+| Behavior             | Description       |
+| -------------------- | ----------------- |
+| calculateNextRetry() | Retry scheduling  |
+| stopRetries()        | Failure isolation |
 
 ---
 
 ## Important Principle
 
-```text id="q7x1wr"
-Provider SDKs
-must remain isolated
-behind ACL layers
+```text id="t5v3xp"
+Retries
+must not amplify failures
 ```
 
 ---
 
-# 8. PaymentRetryAggregate
+# 7. CircuitBreakerAggregate
 
 ## Purpose
 
-Represents retry orchestration for transient failures.
+Represents integration fault tolerance.
+
+---
+
+## Aggregate Root
+
+```text id="w2m8vt"
+CircuitBreaker
+```
+
+---
+
+## Supported States
+
+```text id="q7x1wr"
+CLOSED
+OPEN
+HALF_OPEN
+```
+
+---
+
+## Responsibilities
+
+* Failure isolation
+* Timeout protection
+* Provider shielding
+* Recovery coordination
+
+---
+
+## Behaviors
+
+| Behavior            | Description          |
+| ------------------- | -------------------- |
+| openCircuit()       | Failure protection   |
+| closeCircuit()      | Recovery restoration |
+| allowTrialRequest() | HALF_OPEN evaluation |
+
+---
+
+# 8. DLQAggregate
+
+## Purpose
+
+Represents dead-letter queue orchestration.
 
 ---
 
 ## Aggregate Root
 
 ```text id="y9v4xp"
-PaymentRetry
+DeadLetterQueue
+```
+
+---
+
+## Examples
+
+```text id="f4m7wr"
+failed webhook
+failed CRM sync
+failed ERP event
 ```
 
 ---
 
 ## Responsibilities
 
-* Retry transient failures
-* Prevent retry storms
-* Preserve retry traceability
+* Persist failed integrations
+* Support replay workflows
+* Preserve failure visibility
 
 ---
 
-## Retryable Scenarios
+## Behaviors
 
-| Scenario                   | Retry |
-| -------------------------- | ----- |
-| Network timeout            | Yes   |
-| Temporary provider failure | Yes   |
-| Fraud rejection            | No    |
-| Invalid card               | No    |
+| Behavior         | Description            |
+| ---------------- | ---------------------- |
+| enqueueFailure() | Failure persistence    |
+| replayFailure()  | Recovery orchestration |
+
+---
+
+# 9. OAuthIntegrationAggregate
+
+## Purpose
+
+Represents OAuth provider orchestration.
+
+---
+
+## Aggregate Root
+
+```text id="u1x8vt"
+OAuthIntegration
+```
+
+---
+
+## Examples
+
+```text id="m6v2wr"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
+```
+
+---
+
+## Responsibilities
+
+* Token exchange
+* Token refresh
+* Scope validation
+* Callback orchestration
+
+---
+
+## Behaviors
+
+| Behavior        | Description        |
+| --------------- | ------------------ |
+| exchangeToken() | OAuth workflow     |
+| refreshToken()  | Session continuity |
+
+---
+
+# 10. SecretAggregate
+
+## Purpose
+
+Represents integration credential governance.
+
+---
+
+## Aggregate Root
+
+```text id="g3x9vp"
+IntegrationSecret
+```
+
+---
+
+## Examples
+
+```text id="r5m1xt"
+API keys
+OAuth secrets
+Webhook secrets
+```
+
+---
+
+## Responsibilities
+
+* Secret encryption
+* Rotation support
+* Access control
+* Secure retrieval
 
 ---
 
@@ -364,331 +449,434 @@ PaymentRetry
 
 | Behavior        | Description                |
 | --------------- | -------------------------- |
-| scheduleRetry() | Retry orchestration        |
-| abortRetries()  | Permanent failure handling |
+| rotateSecret()  | Security rotation          |
+| encryptSecret() | Confidentiality protection |
 
 ---
 
-# 9. FraudDetectionAggregate
-
-## Purpose
-
-Represents fraud analysis coordination.
-
----
-
-## Aggregate Root
-
-```text id="f4m7wr"
-FraudAssessment
-```
-
----
-
-## Responsibilities
-
-* Evaluate payment risk
-* Integrate external fraud engines
-* Trigger payment restrictions
-
----
-
-## Examples
-
-```text id="u1x8vt"
-- Velocity checks
-- Country mismatch
-- Excessive retries
-```
-
----
-
-## Important Principle
-
-Fraud analysis engines should remain externalized.
-
----
-
-# 10. PaymentReconciliationAggregate
-
-## Purpose
-
-Represents synchronization validation between local and provider states.
-
----
-
-## Aggregate Root
-
-```text id="m6v2wr"
-PaymentReconciliation
-```
-
----
-
-## Responsibilities
-
-* Detect inconsistencies
-* Resolve provider drift
-* Coordinate recovery workflows
-
----
-
-## Examples
-
-```text id="g3x9vp"
-Provider says CAPTURED
-Local says FAILED
-```
-
----
-
-## Behaviors
-
-| Behavior                       | Description            |
-| ------------------------------ | ---------------------- |
-| reconcileProviderState()       | Consistency validation |
-| recoverDesynchronizedPayment() | Recovery orchestration |
-
----
-
-# 11. ProviderRoutingAggregate
-
-## Purpose
-
-Represents multi-provider routing orchestration.
-
----
-
-## Aggregate Root
-
-```text id="r5m1xt"
-ProviderRouting
-```
-
----
-
-## Responsibilities
-
-* Route payments dynamically
-* Handle provider failover
-* Optimize regional processing
-
----
-
-## Examples
+## Critical Principle
 
 ```text id="x8v4wr"
-LATAM → MercadoPago
-US → Stripe
+Integration secrets
+must never be exposed
 ```
 
 ---
 
-## Behaviors
-
-| Behavior          | Description            |
-| ----------------- | ---------------------- |
-| resolveProvider() | Dynamic routing        |
-| switchProvider()  | Failover orchestration |
-
----
-
-# 12. PaymentProjectionAggregate
+# 11. IntegrationEventAggregate
 
 ## Purpose
 
-Represents CQRS-oriented payment read models.
+Represents event-driven integrations.
 
 ---
 
 ## Aggregate Root
 
 ```text id="n7m1vt"
-PaymentProjection
+IntegrationEvent
+```
+
+---
+
+## Examples
+
+```text id="k2v7xp"
+UserCreated → CRM Sync
+PaymentCaptured → ERP Sync
 ```
 
 ---
 
 ## Responsibilities
 
-* Fast payment retrieval
-* Payment dashboards
-* Provider analytics
-* Failure analytics
+* Event orchestration
+* Async propagation
+* Event routing
+* Retry coordination
 
 ---
 
-# 13. Aggregate Relationships
+## Behaviors
 
-```text id="k2v7xp"
-PaymentTransactionAggregate
-    ├── owns -> ProviderTransactionAggregate
-    ├── linked to -> PaymentMethodAggregate
-    ├── synchronized by -> WebhookAggregate
-    ├── coordinated by -> PaymentRetryAggregate
-    ├── protected by -> FraudDetectionAggregate
-    ├── validated by -> PaymentReconciliationAggregate
-    └── routed by -> ProviderRoutingAggregate
+| Behavior                  | Description                |
+| ------------------------- | -------------------------- |
+| publishIntegrationEvent() | Async integration          |
+| routeIntegrationEvent()   | Event-driven orchestration |
+
+---
+
+# 12. ProviderHealthAggregate
+
+## Purpose
+
+Represents provider operational health.
+
+---
+
+## Aggregate Root
+
+```text id="d1m8wr"
+ProviderHealth
 ```
 
 ---
 
-# 14. Aggregate Transaction Boundaries
+## Example
+
+```text id="h6x2vt"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
+```
+
+---
+
+## Responsibilities
+
+* Health scoring
+* Availability tracking
+* Failover coordination
+
+---
+
+## Behaviors
+
+| Behavior                | Description            |
+| ----------------------- | ---------------------- |
+| calculateHealthScore()  | Reliability evaluation |
+| detectProviderFailure() | Operational monitoring |
+
+---
+
+# 13. QuotaAggregate
+
+## Purpose
+
+Represents provider quota governance.
+
+---
+
+## Aggregate Root
+
+```text id="t9v4xp"
+ProviderQuota
+```
+
+---
+
+## Examples
+
+```text id="j4x9wt"
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
+```
+
+---
+
+## Responsibilities
+
+* Usage tracking
+* Limit enforcement
+* Quota alerts
+
+---
+
+## Behaviors
+
+| Behavior                | Description            |
+| ----------------------- | ---------------------- |
+| incrementUsage()        | Quota accounting       |
+| detectQuotaExhaustion() | Operational protection |
+
+---
+
+# 14. IdempotencyAggregate
+
+## Purpose
+
+Represents duplicate request protection.
+
+---
+
+## Aggregate Root
+
+```text id="m7v1xp"
+IdempotencyKey
+```
+
+---
+
+## Responsibilities
+
+* Replay protection
+* Duplicate detection
+* Consistency enforcement
+
+---
+
+## Behaviors
+
+| Behavior                 | Description          |
+| ------------------------ | -------------------- |
+| detectDuplicateRequest() | Replay prevention    |
+| persistIdempotencyKey()  | Consistency tracking |
+
+---
+
+## Critical Principle
+
+```text id="u5x8wr"
+External providers
+may send duplicate requests
+```
+
+---
+
+# 15. IntegrationObservabilityAggregate
+
+## Purpose
+
+Represents integration telemetry visibility.
+
+---
+
+## Aggregate Root
+
+```text id="q9m3vt"
+IntegrationTelemetry
+```
+
+---
+
+## Monitored Metrics
+
+```text id="k1m8vt"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+## Responsibilities
+
+* Integration tracing
+* Metrics collection
+* Failure analytics
+* Operational visibility
+
+---
+
+## Behaviors
+
+| Behavior        | Description            |
+| --------------- | ---------------------- |
+| recordLatency() | Performance visibility |
+| recordFailure() | Incident diagnostics   |
+
+---
+
+# 16. SyncJobAggregate
+
+## Purpose
+
+Represents synchronization workflows.
+
+---
+
+## Aggregate Root
+
+```text id="d2m8wr"
+SynchronizationJob
+```
+
+---
+
+## Examples
+
+```text id="u8x3wp"
+CRM sync
+ERP sync
+billing export
+```
+
+---
+
+## Responsibilities
+
+* Batch synchronization
+* Retry coordination
+* Progress tracking
+
+---
+
+## Behaviors
+
+| Behavior         | Description            |
+| ---------------- | ---------------------- |
+| executeSyncJob() | Synchronization        |
+| retrySyncJob()   | Recovery orchestration |
+
+---
+
+# 17. IntegrationProjectionAggregate
+
+## Purpose
+
+Represents CQRS integration projections.
+
+---
+
+## Aggregate Root
+
+```text id="f6m9wr"
+IntegrationProjection
+```
+
+---
+
+## Responsibilities
+
+* Integration dashboards
+* Provider analytics
+* Retry analytics
+* DLQ visibility
+
+---
+
+# 18. Aggregate Relationships
+
+```text id="c8m4xt"
+IntegrationAggregate
+    ├── routed by -> ProviderAggregate
+    ├── protected by -> CircuitBreakerAggregate
+    ├── retried by -> RetryPolicyAggregate
+    ├── monitored by -> IntegrationObservabilityAggregate
+    ├── isolated by -> IdempotencyAggregate
+    └── projected by -> IntegrationProjectionAggregate
+```
+
+---
+
+# 19. Aggregate Transaction Boundaries
 
 ## Strong Consistency Required
 
-| Aggregate                      | Reason                      |
-| ------------------------------ | --------------------------- |
-| PaymentTransactionAggregate    | Financial integrity         |
-| RefundExecutionAggregate       | Monetary correctness        |
-| WebhookAggregate               | Synchronization correctness |
-| PaymentReconciliationAggregate | Provider consistency        |
+| Aggregate               | Reason               |
+| ----------------------- | -------------------- |
+| IdempotencyAggregate    | Duplicate prevention |
+| SecretAggregate         | Security             |
+| WebhookAggregate        | Replay protection    |
+| CircuitBreakerAggregate | Fault tolerance      |
 
 ---
 
 ## Eventual Consistency Acceptable
 
-| Aggregate           | Reason            |
-| ------------------- | ----------------- |
-| Payment dashboards  | Read optimization |
-| Provider analytics  | Reporting         |
-| Payment projections | CQRS scalability  |
+| Aggregate                         | Reason     |
+| --------------------------------- | ---------- |
+| IntegrationProjectionAggregate    | Dashboards |
+| ProviderHealthAggregate           | Monitoring |
+| IntegrationObservabilityAggregate | Analytics  |
 
 ---
 
-# 15. Multi-Tenant Isolation Rules
-
-Critical rule:
-
-```text id="d1m8wr"
-Tenant payment data
-must remain isolated
-```
-
----
-
-## Mandatory Protections
-
-| Protection                    | Required |
-| ----------------------------- | -------- |
-| Tenant-scoped transactions    | Yes      |
-| Tenant-scoped payment methods | Yes      |
-| Tenant-scoped refunds         | Yes      |
-
----
-
-# 16. PCI Boundary Isolation
-
-## Forbidden Data
-
-```text id="h6x2vt"
-- CVV
-- Full card numbers
-- Banking secrets
-```
-
----
-
-## Allowed Data
-
-| Data                    | Allowed |
-| ----------------------- | ------- |
-| Payment token           | Yes     |
-| Masked card number      | Yes     |
-| Provider transaction ID | Yes     |
-
----
-
-# 17. Reactive Considerations
+# 20. Reactive Considerations
 
 Reactive implementations should support:
 
-```text id="t9v4xp"
-Mono<PaymentTransaction>
-Flux<WebhookEvent>
+```text id="u1x8wr"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
 ```
 
 ---
 
 ## Requirements
 
-* Non-blocking provider integration
-* Async reconciliation
-* Reactive retry orchestration
-* High-concurrency support
+* Non-blocking integrations
+* Async retries
+* Streaming orchestration
+* Backpressure support
 
 ---
 
-# 18. Distributed System Considerations
+# 21. Distributed System Considerations
 
 Aggregates support:
 
-* Multi-region payment orchestration
-* Distributed reconciliation
-* Event-driven synchronization
+* Multi-region integrations
+* Distributed retries
+* Event-driven orchestration
 * Horizontal scalability
-* Replay-safe payment workflows
+* Fault-tolerant provider routing
 
 ---
 
-# 19. Security-Critical Rules
+# 22. Security-Critical Rules
+
+## Mandatory Protections
+
+| Protection              | Required |
+| ----------------------- | -------- |
+| Secret encryption       | Yes      |
+| Replay protection       | Yes      |
+| Idempotency enforcement | Yes      |
+| Provider authentication | Yes      |
+
+---
 
 ## Forbidden Behavior
 
-```text id="j4x9wt"
-Duplicate captures
-must never occur
+```text id="w6x3wr"
+Integration secrets
+must never be exposed
 ```
 
 ---
 
-## Mandatory Protections
+# 23. CQRS Compatibility
 
-| Protection           | Required |
-| -------------------- | -------- |
-| Idempotency          | Yes      |
-| Signature validation | Yes      |
-| Replay protection    | Yes      |
-| Provider correlation | Yes      |
+The aggregates support:
 
----
-
-# 20. Event Sourcing Compatibility
-
-The aggregates are compatible with:
-
-* Payment replay
-* Reconciliation replay
-* Refund reconstruction
-* Webhook recovery
+* Integration dashboards
+* Retry analytics
+* Provider health projections
+* DLQ visibility
+* Quota analytics
 
 ---
 
-# 21. Future Aggregate Extensions
+# 24. Future Aggregate Extensions
 
 Future aggregates may include:
 
-* CryptoPaymentAggregate
-* MarketplaceSplitPaymentAggregate
-* BNPLPaymentAggregate
-* RealTimeTransferAggregate
-* AI FraudDetectionAggregate
+* AIProviderRoutingAggregate
+* PredictiveFailoverAggregate
+* AutonomousRetryAggregate
+* SmartQuotaOptimizationAggregate
+* SelfHealingIntegrationAggregate
 
 ---
 
-# 22. Summary
+# 25. Summary
 
-The Payment Management aggregates provide:
+The Integration Management aggregates provide:
 
-* Enterprise-grade payment orchestration
-* PCI-aware transaction isolation
-* Reactive payment processing
-* Distributed provider synchronization
-* Multi-provider routing
-* Fraud-aware transaction governance
-* Scalable SaaS payment consistency
+* Enterprise-grade external orchestration
+* Provider-agnostic architecture
+* Fault-tolerant integrations
+* Reactive integration pipelines
+* Distributed webhook orchestration
+* Multi-provider failover
+* Secure interoperability
+* Scalable event-driven integrations
 
-These aggregates form the transactional backbone of the payment ecosystem.
+These aggregates form the orchestration backbone of the integration ecosystem.
 
 ```
 ```

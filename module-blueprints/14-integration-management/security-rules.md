@@ -1,128 +1,131 @@
-# 11-payment-management/security-rules.md
+# 14-integration-management/security-rules.md
 
-````md id="u9x4vp"
-# Payment Management Security Rules
+````md id="y1x4vp"
+# Integration Management Security Rules
 
 ## 1. Introduction
 
-This document defines the security rules of the Payment Management module.
+This document defines the security rules of the Integration Management module.
 
-Payment Management is one of the most security-sensitive modules of the SaaS ecosystem because it interacts directly with:
+Integration Management is one of the highest-risk modules in the SaaS ecosystem because it directly communicates with:
 
-- External payment providers
-- Financial transaction execution
-- Tokenized payment methods
-- Refund execution
-- Webhook synchronization
-- Settlement reconciliation
-- Fraud detection systems
-- Chargeback workflows
+- External providers
+- Payment gateways
+- AI providers
+- OAuth providers
+- Webhooks
+- ERP systems
+- CRM systems
+- Email providers
+- SMS providers
+- Streaming integrations
+- Event bridges
 
-A security failure in this module may produce:
+A security failure in this module may expose:
 
 ```text id="u5m1wr"
-- financial fraud
-- duplicate charges
-- PCI violations
-- provider desynchronization
-- payment replay attacks
-- revenue loss
+- API keys
+- OAuth secrets
+- customer data
+- payment information
+- external provider access
+- cross-tenant integrations
 ````
 
 The security model is designed following:
 
 * Zero Trust Architecture
-* PCI DSS boundary isolation
 * Domain-Driven Design (DDD)
+* Reactive security orchestration
 * Multi-tenant SaaS governance
-* Event-driven payment resilience
-* Enterprise financial compliance
+* Enterprise fault tolerance
+* Distributed integration security
 
 ---
 
 # 2. Security Principles
 
-| Principle                    | Description                  |
-| ---------------------------- | ---------------------------- |
-| Zero Trust                   | Never trust external systems |
-| PCI boundary isolation       | Mandatory                    |
-| Tenant isolation             | Mandatory                    |
-| Replay-safe processing       | Required                     |
-| Idempotent payment execution | Critical                     |
-| Immutable auditability       | Mandatory                    |
-| Least privilege              | Required                     |
-| Provider abstraction         | Mandatory                    |
+| Principle               | Description                  |
+| ----------------------- | ---------------------------- |
+| Zero Trust              | Never trust external systems |
+| Least privilege         | Minimal provider permissions |
+| Provider isolation      | Mandatory                    |
+| Tenant isolation        | Mandatory                    |
+| Replay protection       | Mandatory                    |
+| Secret encryption       | Mandatory                    |
+| Idempotency enforcement | Mandatory                    |
+| Observability-first     | Required                     |
 
 ---
 
-# 3. PCI DSS Boundary Isolation
+# 3. Secret Management Rules
 
 ## Critical Principle
 
 ```text id="m8v3xp"
-The platform must never store
-raw PCI-sensitive data
+Secrets
+must never be hardcoded
 ```
 
 ---
 
-## Forbidden Data
+## Examples
 
 ```text id="f2x7wr"
-- CVV
-- Full credit card numbers
-- Banking passwords
-- Raw payment secrets
-```
-
----
-
-## Allowed Data
-
-| Data                     | Allowed |
-| ------------------------ | ------- |
-| Tokenized references     | Yes     |
-| Masked card numbers      | Yes     |
-| Provider transaction IDs | Yes     |
-
----
-
-## Important Rule
-
-Sensitive payment handling belongs to:
-
-```text id="r4m9vt"
-external payment providers
-```
-
----
-
-# 4. Multi-Tenant Isolation Rules
-
-## Critical Rule
-
-```text id="x9v1wr"
-Tenant payment data
-must never leak
-across tenants
+API keys
+OAuth secrets
+Webhook secrets
 ```
 
 ---
 
 ## Mandatory Protections
 
-| Protection                    | Required |
-| ----------------------------- | -------- |
-| Tenant-scoped payment access  | Yes      |
-| Tenant-scoped refunds         | Yes      |
-| Tenant-scoped reconciliation  | Yes      |
-| Tenant-scoped payment methods | Yes      |
+| Protection        | Required |
+| ----------------- | -------- |
+| Secret encryption | Yes      |
+| Secret rotation   | Yes      |
+| Secret vaulting   | Yes      |
+| Access auditing   | Yes      |
+
+---
+
+## Recommended Technologies
+
+| Technology | Purpose           |
+| ---------- | ----------------- |
+| Vault      | Secret management |
+| KMS        | Encryption        |
+| HSM        | Hardware security |
+
+---
+
+# 4. Multi-Tenant Isolation Rules
+
+## Critical Principle
+
+```text id="r4m9vt"
+Tenant A integrations
+≠
+Tenant B integrations
+```
+
+---
+
+## Mandatory Protections
+
+| Protection              | Required |
+| ----------------------- | -------- |
+| Tenant-scoped providers | Yes      |
+| Tenant-scoped webhooks  | Yes      |
+| Tenant-scoped OAuth     | Yes      |
+| Tenant-scoped telemetry | Yes      |
 
 ---
 
 ## Required Query Pattern
 
-```sql id="k3m8xp"
+```sql id="x9v1wr"
 WHERE tenant_id = :tenantId
 ```
 
@@ -130,277 +133,178 @@ WHERE tenant_id = :tenantId
 
 ## Forbidden Behavior
 
-```text id="p1v9wr"
-Cross-tenant payment access
+```text id="k3m8xp"
+Cross-tenant integration access
 ```
 
 ---
 
 # 5. Authentication Rules
 
-All payment APIs require authenticated access.
+All integration APIs require authentication.
 
 ---
 
 ## Mandatory Requirements
 
-| Requirement                 | Mandatory |
-| --------------------------- | --------- |
-| JWT validation              | Yes       |
-| Token expiration validation | Yes       |
-| Signature validation        | Yes       |
-| Tenant extraction           | Yes       |
+| Requirement           | Mandatory |
+| --------------------- | --------- |
+| JWT validation        | Yes       |
+| Signature validation  | Yes       |
+| Expiration validation | Yes       |
+| Tenant extraction     | Yes       |
 
 ---
 
 ## Recommended Headers
 
-```text id="g6m2xt"
+```text id="p1v9wr"
 Authorization: Bearer <jwt>
 X-Tenant-ID: <tenant-id>
+X-Correlation-ID: <correlation-id>
 ```
 
 ---
 
 # 6. Authorization Rules
 
-Payment operations require strict authorization.
+Integration operations require strict authorization.
 
 ---
 
 ## Recommended Roles
 
-| Role          | Permissions          |
-| ------------- | -------------------- |
-| PAYMENT_ADMIN | Full payment control |
-| BILLING_ADMIN | Refund governance    |
-| SUPPORT_AGENT | Limited visibility   |
-| FRAUD_ANALYST | Fraud investigation  |
-| AUDITOR       | Read-only access     |
+| Role              | Permissions                |
+| ----------------- | -------------------------- |
+| PLATFORM_ADMIN    | Full integration access    |
+| INTEGRATION_ADMIN | Provider orchestration     |
+| SECURITY_ADMIN    | Security governance        |
+| TENANT_ADMIN      | Tenant-scoped integrations |
+| AUDITOR           | Read-only observability    |
 
 ---
 
 ## Critical Restriction
 
-```text id="u7m1wr"
-Refund execution
-must require elevated privileges
+```text id="g6m2xt"
+Provider administration
+must never be publicly accessible
 ```
 
 ---
 
 # 7. Webhook Security Rules
 
-Webhooks are one of the highest-risk entry points.
+Webhooks are high-risk inbound integrations.
+
+---
+
+## Examples
+
+```text id="u7m1wr"
+Stripe webhook
+GitHub webhook
+OAuth callback
+```
 
 ---
 
 ## Mandatory Protections
 
-| Protection            | Required |
-| --------------------- | -------- |
-| Signature validation  | Yes      |
-| Replay detection      | Yes      |
-| Idempotent processing | Yes      |
-| Provider verification | Yes      |
+| Protection              | Required |
+| ----------------------- | -------- |
+| Signature validation    | Yes      |
+| Replay protection       | Yes      |
+| Payload validation      | Yes      |
+| Idempotency enforcement | Yes      |
 
 ---
 
 ## Critical Principle
 
 ```text id="m4v8wr"
-Webhook events
-must never be trusted implicitly
+Webhook payloads
+must be verifiable
 ```
 
 ---
 
-## Forbidden Situations
+# 8. Replay Protection Rules
 
-```text id="t5v3xp"
-- unsigned webhooks
-- duplicate processing
-- replay attacks
-```
-
----
-
-# 8. Idempotency Rules
-
-Payment workflows must support retry safety.
-
----
-
-## Mandatory Operations
-
-| Operation             | Idempotent |
-| --------------------- | ---------- |
-| Payment authorization | Yes        |
-| Payment capture       | Yes        |
-| Refund execution      | Yes        |
-| Webhook processing    | Yes        |
-
----
-
-## Recommended Header
-
-```text id="w2m8vt"
-Idempotency-Key
-```
-
----
-
-## Critical Rule
-
-```text id="q7x1wr"
-Duplicate captures
-must never occur
-```
-
----
-
-# 9. Provider Integration Security Rules
-
-External provider SDKs must remain isolated.
-
----
-
-## Required Architecture
-
-```text id="y9v4xp"
-Anti-Corruption Layers (ACL)
-```
-
----
-
-## Purpose
-
-Prevent:
-
-* SDK contamination
-* Vendor lock-in
-* Domain leakage
-* External coupling
-
----
-
-## Forbidden Behavior
-
-```text id="f4m7wr"
-Provider SDKs
-must never leak
-into domain layers
-```
-
----
-
-# 10. Fraud Prevention Rules
-
-Fraud detection is mandatory.
-
----
-
-## Recommended Protections
-
-| Protection                   | Recommendation |
-| ---------------------------- | -------------- |
-| Velocity checks              | Yes            |
-| Country mismatch detection   | Yes            |
-| Excessive retries monitoring | Yes            |
-| Suspicious behavior analysis | Yes            |
-
----
-
-## Examples
-
-```text id="u1x8vt"
-- abnormal retry frequency
-- suspicious geography
-- rapid transaction bursts
-```
-
----
-
-# 11. Replay Protection Rules
-
-Replay-safe processing is critical.
-
----
-
-## Mandatory Protections
-
-| Protection                    | Required |
-| ----------------------------- | -------- |
-| Event deduplication           | Yes      |
-| Webhook replay detection      | Yes      |
-| Transaction replay prevention | Yes      |
-
----
-
-## Important Principle
-
-```text id="m6v2wr"
-External payment events
-may arrive duplicated
-```
-
----
-
-# 12. Payment Capture Security Rules
-
-Captures are financially critical.
-
----
-
-## Mandatory Validations
-
-| Validation               | Required |
-| ------------------------ | -------- |
-| Authorization validation | Yes      |
-| Capture uniqueness       | Yes      |
-| Provider synchronization | Yes      |
+External systems may replay requests.
 
 ---
 
 ## Critical Principle
 
-```text id="g3x9vp"
-Captured transactions
-must become immutable
+```text id="t5v3xp"
+External providers
+may resend requests
+multiple times
 ```
-
----
-
-# 13. Refund Security Rules
-
-Refunds require strict governance.
 
 ---
 
 ## Mandatory Protections
 
-| Protection                  | Required    |
-| --------------------------- | ----------- |
-| Refund authorization        | Yes         |
-| Refund traceability         | Yes         |
-| Duplicate refund prevention | Yes         |
-| Fraud monitoring            | Recommended |
+| Protection               | Required |
+| ------------------------ | -------- |
+| Idempotency keys         | Yes      |
+| Replay window validation | Yes      |
+| Duplicate detection      | Yes      |
 
 ---
 
-## Forbidden Situations
+## Recommended Technologies
 
-```text id="r5m1xt"
-- negative refunds
-- duplicate reimbursements
-- unauthorized refunds
+| Technology | Purpose        |
+| ---------- | -------------- |
+| Redis      | Replay cache   |
+| Kafka      | Event ordering |
+
+---
+
+# 9. OAuth Security Rules
+
+OAuth integrations require strong protection.
+
+---
+
+## Examples
+
+```text id="w2m8vt"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
 ```
 
 ---
 
-# 14. Reconciliation Security Rules
+## Mandatory Protections
 
-Provider synchronization must remain trustworthy.
+| Protection               | Required    |
+| ------------------------ | ----------- |
+| PKCE support             | Recommended |
+| State validation         | Yes         |
+| Scope validation         | Yes         |
+| Token encryption         | Yes         |
+| Refresh token protection | Yes         |
+
+---
+
+## Forbidden Behavior
+
+```text id="q7x1wr"
+OAuth tokens
+must never appear
+in logs
+```
+
+---
+
+# 10. API Key Security Rules
+
+API keys are highly sensitive credentials.
 
 ---
 
@@ -408,53 +312,320 @@ Provider synchronization must remain trustworthy.
 
 | Protection             | Required |
 | ---------------------- | -------- |
-| State validation       | Yes      |
-| Drift detection        | Yes      |
-| Recovery orchestration | Yes      |
+| Encryption at rest     | Yes      |
+| Secure memory handling | Yes      |
+| Rotation support       | Yes      |
+| Access auditing        | Yes      |
 
 ---
 
-## Critical Principle
+## Forbidden Exposure
 
-```text id="x8v4wr"
-Provider inconsistencies
-must never be ignored
+```text id="y9v4xp"
+- raw API keys
+- OAuth secrets
+- webhook secrets
+- private credentials
 ```
 
 ---
 
-# 15. Payment Method Security Rules
+# 11. Circuit Breaker Security Rules
 
-Payment methods must remain tokenized.
+Circuit breakers protect integration stability.
+
+---
+
+## Supported States
+
+```text id="f4m7wr"
+CLOSED
+OPEN
+HALF_OPEN
+```
 
 ---
 
 ## Mandatory Protections
 
-| Protection                    | Required |
-| ----------------------------- | -------- |
-| Token-only persistence        | Yes      |
-| Secure expiration handling    | Yes      |
-| Provider ownership validation | Yes      |
+| Protection                   | Required |
+| ---------------------------- | -------- |
+| State integrity              | Yes      |
+| Failure threshold validation | Yes      |
+| Replay-safe recovery         | Yes      |
 
 ---
 
-## Forbidden Persistence
+# 12. Retry Security Rules
 
-```text id="n7m1vt"
-- CVV
-- full PAN
-- raw credentials
+Retries may create attack amplification.
+
+---
+
+## Supported Strategies
+
+```text id="u1x8vt"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
 ```
 
 ---
 
-# 16. Reactive Security Considerations
+## Critical Principle
 
-Reactive pipelines must preserve:
+```text id="m6v2wr"
+Retries
+must not amplify failures
+```
 
-* Tenant context
+---
+
+## Mandatory Protections
+
+| Protection        | Required |
+| ----------------- | -------- |
+| Retry limits      | Yes      |
+| Jitter support    | Yes      |
+| Replay protection | Yes      |
+
+---
+
+# 13. DLQ Security Rules
+
+Dead-letter queues may contain sensitive payloads.
+
+---
+
+## Examples
+
+```text id="g3x9vp"
+failed webhook
+failed CRM sync
+failed ERP event
+```
+
+---
+
+## Mandatory Protections
+
+| Protection         | Required |
+| ------------------ | -------- |
+| Encryption at rest | Yes      |
+| Restricted access  | Yes      |
+| Replay auditing    | Yes      |
+
+---
+
+## Important Principle
+
+```text id="r5m1xt"
+Failures
+must remain recoverable
+without exposing sensitive data
+```
+
+---
+
+# 14. Provider Failover Security Rules
+
+Provider failover must preserve security guarantees.
+
+---
+
+## Mandatory Protections
+
+| Protection                         | Required |
+| ---------------------------------- | -------- |
+| Provider authentication validation | Yes      |
+| Secret isolation                   | Yes      |
+| TLS validation                     | Yes      |
+
+---
+
+## Forbidden Behavior
+
+```text id="x8v4wr"
+Fallback providers
+must not weaken security guarantees
+```
+
+---
+
+# 15. Quota and Rate Limit Security Rules
+
+Quota enforcement protects provider stability.
+
+---
+
+## Examples
+
+```text id="n7m1vt"
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
+```
+
+---
+
+## Mandatory Protections
+
+| Protection        | Required |
+| ----------------- | -------- |
+| Rate limiting     | Yes      |
+| Burst protection  | Yes      |
+| Quota enforcement | Yes      |
+
+---
+
+# 16. Integration Observability Security Rules
+
+Integration telemetry may expose sensitive information.
+
+---
+
+## Monitored Metrics
+
+```text id="k2v7xp"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+## Mandatory Protections
+
+| Protection              | Required |
+| ----------------------- | -------- |
+| Sensitive log filtering | Yes      |
+| Trace sanitization      | Yes      |
+| Tenant-scoped telemetry | Yes      |
+
+---
+
+## Forbidden Exposure
+
+```text id="d1m8wr"
+Sensitive credentials
+must never appear
+in telemetry
+```
+
+---
+
+# 17. Streaming Integration Security Rules
+
+Streaming integrations require continuous protection.
+
+---
+
+## Examples
+
+```text id="h6x2vt"
+Kafka streams
+Webhook streams
+AI streaming APIs
+```
+
+---
+
+## Mandatory Protections
+
+| Protection            | Required |
+| --------------------- | -------- |
+| Stream authentication | Yes      |
+| Replay-safe streaming | Yes      |
+| Event integrity       | Yes      |
+
+---
+
+# 18. Synchronization Security Rules
+
+Synchronization jobs may expose sensitive datasets.
+
+---
+
+## Examples
+
+```text id="t9v4xp"
+CRM sync
+ERP sync
+billing export
+```
+
+---
+
+## Mandatory Protections
+
+| Protection                 | Required    |
+| -------------------------- | ----------- |
+| Payload encryption         | Recommended |
+| Secure transfer            | Yes         |
+| Retry-safe synchronization | Yes         |
+
+---
+
+# 19. Transport Security Rules
+
+All provider communication must use secure transport.
+
+---
+
+## Mandatory Protections
+
+| Protection             | Required |
+| ---------------------- | -------- |
+| TLS 1.2+               | Yes      |
+| Certificate validation | Yes      |
+| HTTPS enforcement      | Yes      |
+
+---
+
+## Forbidden Behavior
+
+```text id="j4x9wt"
+Plain HTTP
+must never transport
+sensitive integration data
+```
+
+---
+
+# 20. Idempotency Security Rules
+
+Idempotency protects consistency and security.
+
+---
+
+## Critical Principle
+
+```text id="m7v1xp"
+Duplicate requests
+must never produce
+duplicate side effects
+```
+
+---
+
+## Mandatory Protections
+
+| Protection          | Required |
+| ------------------- | -------- |
+| Idempotency keys    | Yes      |
+| Replay detection    | Yes      |
+| Duplicate rejection | Yes      |
+
+---
+
+# 21. Reactive Security Considerations
+
+Reactive integrations must preserve:
+
 * Security context
+* Tenant identity
 * Correlation IDs
 * Authorization metadata
 
@@ -462,258 +633,153 @@ Reactive pipelines must preserve:
 
 ## Important Principle
 
-```text id="k2v7xp"
-Reactive context propagation
-must preserve tenant identity
+```text id="u5x8wr"
+Reactive pipelines
+must preserve security context
 ```
 
 ---
 
-# 17. Distributed System Security Rules
+# 22. Event-Driven Security Rules
 
-Distributed payment workflows require:
-
-| Requirement        | Description |
-| ------------------ | ----------- |
-| Durable messaging  | Mandatory   |
-| Replay-safe events | Mandatory   |
-| Retry safety       | Mandatory   |
-| Event ordering     | Recommended |
+Integration events require secure propagation.
 
 ---
-
-# 18. Encryption Rules
-
-## Mandatory Encryption
-
-| Data                 | Encryption |
-| -------------------- | ---------- |
-| Provider tokens      | At rest    |
-| Transaction metadata | At rest    |
-| API communication    | TLS        |
-| Secrets              | Vault/KMS  |
-
----
-
-# 19. Logging Rules
-
-## Mandatory Logging
-
-| Operation             | Logged |
-| --------------------- | ------ |
-| Payment authorization | Yes    |
-| Capture execution     | Yes    |
-| Refund execution      | Yes    |
-| Webhook validation    | Yes    |
-| Fraud rejection       | Yes    |
-
----
-
-## Forbidden Logging
-
-```text id="d1m8wr"
-Sensitive payment secrets
-must never appear in logs
-```
-
----
-
-# 20. Compliance Security Rules
-
-The module must support:
-
-| Compliance                 | Purpose              |
-| -------------------------- | -------------------- |
-| PCI DSS boundary isolation | Payment segregation  |
-| SOC2                       | Financial governance |
-| GDPR                       | Tenant traceability  |
-| Audit compliance           | Immutable history    |
-
----
-
-# 21. API Security Rules
 
 ## Mandatory Protections
 
-| Protection         | Required |
-| ------------------ | -------- |
-| Rate limiting      | Yes      |
-| JWT validation     | Yes      |
-| Tenant validation  | Yes      |
-| Request validation | Yes      |
+| Protection            | Required |
+| --------------------- | -------- |
+| Event integrity       | Yes      |
+| Correlation tracking  | Yes      |
+| Replay-safe messaging | Yes      |
+
+---
+
+## Forbidden Exposure
+
+```text id="q9m3vt"
+Sensitive credentials
+must never appear
+in events
+```
+
+---
+
+# 23. Security Monitoring Rules
+
+Critical integration security metrics:
+
+| Metric                     | Purpose                |
+| -------------------------- | ---------------------- |
+| Invalid webhook signatures | Threat detection       |
+| OAuth failures             | Security monitoring    |
+| Replay attempts            | Abuse detection        |
+| Quota abuse                | Traffic protection     |
+| Circuit breaker storms     | Operational resilience |
+
+---
+
+# 24. Penetration Testing Recommendations
+
+Mandatory testing areas:
+
+| Area                        | Priority |
+| --------------------------- | -------- |
+| Webhook replay attacks      | Critical |
+| OAuth callback manipulation | Critical |
+| Secret leakage              | Critical |
+| Cross-tenant integrations   | Critical |
+| Circuit breaker abuse       | High     |
+
+---
+
+# 25. Compliance Security Rules
+
+The module must support:
+
+| Compliance | Purpose                |
+| ---------- | ---------------------- |
+| SOC2       | Operational governance |
+| GDPR       | Tenant isolation       |
+| PCI DSS    | Payment integrations   |
+| ISO 27001  | Security governance    |
+
+---
+
+# 26. API Security Rules
+
+## Mandatory Protections
+
+| Protection             | Required |
+| ---------------------- | -------- |
+| JWT validation         | Yes      |
+| Rate limiting          | Yes      |
+| Replay protection      | Yes      |
+| Correlation validation | Yes      |
 
 ---
 
 ## Recommended Limits
 
-| Endpoint           | Recommendation  |
-| ------------------ | --------------- |
-| Webhooks           | High-throughput |
-| Refund APIs        | Strict          |
-| Authorization APIs | Moderate        |
-| Retry APIs         | Strict          |
+| Endpoint        | Recommendation           |
+| --------------- | ------------------------ |
+| Webhooks        | Strict validation        |
+| OAuth callbacks | Strict replay protection |
+| Streaming APIs  | Connection throttling    |
+| Retry APIs      | Abuse prevention         |
 
 ---
 
-# 22. Chargeback Security Rules
-
-Disputes require strict governance.
-
----
-
-## Mandatory Protections
-
-| Protection                | Required |
-| ------------------------- | -------- |
-| Immutable dispute history | Yes      |
-| Evidence traceability     | Yes      |
-| Audit logging             | Yes      |
-
----
-
-## Examples
-
-```text id="h6x2vt"
-FRAUD
-UNRECOGNIZED_CHARGE
-```
-
----
-
-# 23. Settlement Security Rules
-
-Settlement reconciliation must remain consistent.
-
----
-
-## Mandatory Protections
-
-| Protection                | Required |
-| ------------------------- | -------- |
-| Settlement verification   | Yes      |
-| Reconciliation validation | Yes      |
-| Drift detection           | Yes      |
-
----
-
-# 24. Failure Handling Security Rules
-
-Failures must remain visible and traceable.
-
----
+# 27. Failure Handling Security Rules
 
 ## Critical Principle
 
-```text id="t9v4xp"
+```text id="k1m8vt"
 External provider failures
-must never be silently ignored
+must not compromise
+platform security
 ```
 
 ---
 
-## Mandatory Mechanisms
+## Failure Examples
 
-| Mechanism           | Required    |
-| ------------------- | ----------- |
-| Retry orchestration | Yes         |
-| Dead-letter queues  | Recommended |
-| Reconciliation jobs | Yes         |
-| Failure alerts      | Yes         |
-
----
-
-# 25. Auditability Rules
-
-All payment operations must remain auditable.
+| Failure              | Strategy           |
+| -------------------- | ------------------ |
+| Provider unavailable | Failover           |
+| Invalid webhook      | Reject             |
+| OAuth compromise     | Token revocation   |
+| Secret exposure      | Immediate rotation |
 
 ---
 
-## Audited Operations
-
-| Operation          | Audited |
-| ------------------ | ------- |
-| Authorization      | Yes     |
-| Capture            | Yes     |
-| Refunds            | Yes     |
-| Webhook processing | Yes     |
-| Chargebacks        | Yes     |
-
----
-
-## Important Principle
-
-```text id="j4x9wt"
-Financial operations
-must remain traceable
-```
-
----
-
-# 26. Penetration Testing Recommendations
-
-Mandatory security testing areas:
-
-| Area                | Priority |
-| ------------------- | -------- |
-| Replay attacks      | Critical |
-| Webhook spoofing    | Critical |
-| Cross-tenant access | Critical |
-| Duplicate captures  | Critical |
-| Refund abuse        | Critical |
-
----
-
-# 27. Security Monitoring Rules
-
-Critical metrics to monitor:
-
-| Metric                     | Purpose          |
-| -------------------------- | ---------------- |
-| Failed authorizations      | Fraud detection  |
-| Duplicate webhook attempts | Replay detection |
-| Excessive retries          | Abuse monitoring |
-| Chargeback spikes          | Fraud analytics  |
-
----
-
-# 28. Incident Response Rules
-
-Payment incidents require:
-
-| Requirement            | Description |
-| ---------------------- | ----------- |
-| Immediate traceability | Mandatory   |
-| Immutable audit logs   | Mandatory   |
-| Correlation tracing    | Mandatory   |
-| Recovery orchestration | Mandatory   |
-
----
-
-# 29. Future Security Extensions
+# 28. Future Security Extensions
 
 Future protections may include:
 
-* AI fraud detection
-* Behavioral anomaly detection
-* Geo-risk analysis
-* Advanced replay protection
-* Real-time threat intelligence
+* AI anomaly detection
+* Predictive abuse detection
+* Autonomous secret rotation
+* Behavioral integration monitoring
+* Self-healing integration security
 
 ---
 
-# 30. Summary
+# 29. Summary
 
-The Payment Management security rules provide:
+The Integration Management security rules provide:
 
-* Enterprise-grade payment protection
-* PCI-aware boundary isolation
-* Reactive payment security
-* Distributed provider synchronization protection
-* Fraud-aware transaction governance
-* Multi-provider payment resilience
-* Scalable SaaS financial security
+* Enterprise-grade integration security
+* Provider-agnostic protection
+* Fault-tolerant integrations
+* Reactive security orchestration
+* Distributed webhook protection
+* Multi-provider failover security
+* Secure interoperability
+* Scalable event-driven protection
 
-These rules define the security baseline of the payment ecosystem.
+These rules define the security baseline of the integration ecosystem.
 
 ```
 ```

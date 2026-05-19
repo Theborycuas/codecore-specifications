@@ -1,31 +1,33 @@
-# 11-payment-management/entities.md
+# 14-integration-management/entities.md
 
-````md id="o9x4vp"
-# Payment Management Entities
+````md id="s1x4vp"
+# Integration Management Entities
 
 ## 1. Introduction
 
-This document defines the entities of the Payment Management module.
+This document defines the entities of the Integration Management module.
 
-Entities represent payment domain objects that:
+Entities represent operational integration objects that:
 
-- Possess transactional identity
-- Maintain payment lifecycle continuity
-- Preserve financial traceability
-- Coordinate provider synchronization
-- Enable reconciliation
-- Support refund execution
-- Protect PCI boundaries
-- Enforce multi-tenant isolation
+- Possess lifecycle identity
+- Coordinate external providers
+- Preserve integration traceability
+- Support fault tolerance
+- Enable provider abstraction
+- Manage retries and failovers
+- Orchestrate webhooks
+- Govern secrets and credentials
+- Protect idempotency
+- Enable observability
 
 The entities are designed following:
 
 - Domain-Driven Design (DDD)
-- PCI DSS boundary isolation
+- Event-Driven Architecture (EDA)
+- Reactive integration orchestration
+- Provider-agnostic architecture
 - Multi-tenant SaaS governance
-- Event-driven payment orchestration
-- Reactive transaction processing
-- Enterprise financial resilience
+- Enterprise fault tolerance
 
 ---
 
@@ -33,137 +35,60 @@ The entities are designed following:
 
 | Entity | Purpose |
 |---|---|
-| PaymentTransaction | Core payment lifecycle |
-| PaymentMethod | Tokenized payment instrument |
-| ProviderTransaction | External provider state |
-| RefundExecution | Provider reimbursement |
-| WebhookEvent | External synchronization |
-| PaymentRetry | Retry orchestration |
-| FraudAssessment | Fraud evaluation |
-| PaymentReconciliation | Consistency validation |
-| ProviderRouting | Dynamic provider routing |
-| PaymentProjection | CQRS read projection |
-| PaymentAuthorization | Authorization metadata |
-| PaymentCapture | Capture metadata |
-| PaymentFailure | Failure traceability |
-| PaymentSession | Checkout/payment session |
-| ProviderCredentialReference | External provider linkage |
-| WebhookSignature | Webhook verification |
-| PaymentAuditRecord | Immutable payment traceability |
-| PaymentNotification | Payment communication |
-| PaymentDispute | Chargeback/dispute handling |
-| PaymentSettlement | Settlement reconciliation |
+| Integration | Core integration orchestration |
+| Provider | External provider definition |
+| ProviderEndpoint | External API endpoint |
+| Webhook | Inbound webhook orchestration |
+| WebhookDelivery | Webhook processing lifecycle |
+| RetryPolicy | Retry orchestration |
+| RetryAttempt | Retry execution |
+| CircuitBreaker | Fault tolerance |
+| DLQMessage | Dead-letter queue persistence |
+| OAuthIntegration | OAuth provider orchestration |
+| OAuthToken | OAuth token lifecycle |
+| IntegrationSecret | Secret management |
+| IntegrationEvent | Event-driven integration |
+| ProviderHealth | Provider operational health |
+| ProviderQuota | Provider quota tracking |
+| IdempotencyRecord | Duplicate prevention |
+| IntegrationTelemetry | Integration observability |
+| SynchronizationJob | Batch synchronization |
+| SynchronizationExecution | Sync execution tracking |
+| IntegrationProjection | CQRS projections |
 
 ---
 
-# 3. PaymentTransaction Entity
+# 3. Integration Entity
 
 ## Purpose
 
-Represents the core lifecycle of a financial transaction.
+Represents the orchestration of an external integration.
 
 ---
 
 ## Identity
 
 ```text id="u5m1wr"
-paymentTransactionId
+integrationId
 ````
 
 ---
 
-## Attributes
+## Responsibilities
 
-| Attribute     | Type    | Description                   |
-| ------------- | ------- | ----------------------------- |
-| transactionId | UUID    | Unique transaction identifier |
-| tenantId      | UUID    | Tenant owner                  |
-| invoiceId     | UUID    | Related invoice               |
-| provider      | String  | Payment provider              |
-| status        | String  | Payment lifecycle             |
-| amount        | Decimal | Transaction amount            |
-| currency      | String  | Transaction currency          |
-| createdAt     | Instant | Creation timestamp            |
-
----
-
-## Lifecycle States
-
-```text id="m8v3xp"
-PENDING
-AUTHORIZED
-CAPTURED
-FAILED
-REFUNDED
-CANCELED
-EXPIRED
-```
-
----
-
-## Behaviors
-
-| Behavior           | Description              |
-| ------------------ | ------------------------ |
-| authorizePayment() | Provider authorization   |
-| capturePayment()   | Funds capture            |
-| failPayment()      | Failure registration     |
-| cancelPayment()    | Transaction cancellation |
-
----
-
-## Critical Rules
-
-| Rule                          | Description    |
-| ----------------------------- | -------------- |
-| Duplicate captures forbidden  | Idempotency    |
-| Tenant ownership mandatory    | Isolation      |
-| Provider correlation required | Reconciliation |
-
----
-
-# 4. PaymentMethod Entity
-
-## Purpose
-
-Represents tokenized payment instruments.
-
----
-
-## Identity
-
-```text id="f2x7wr"
-paymentMethodId
-```
+* Coordinate provider execution
+* Preserve integration state
+* Support failover orchestration
 
 ---
 
 ## Examples
 
-```text id="r4m9vt"
-- Stripe token
-- PayPal billing agreement
-- Vault reference
-```
-
----
-
-## Attributes
-
-| Attribute       | Type    | Description         |
-| --------------- | ------- | ------------------- |
-| providerToken   | String  | Tokenized reference |
-| maskedNumber    | String  | Masked card         |
-| expirationMonth | Integer | Expiration month    |
-| expirationYear  | Integer | Expiration year     |
-
----
-
-## Important Principle
-
-```text id="x9v1wr"
-Raw PCI-sensitive data
-must never be stored
+```text id="m8v3xp"
+email integration
+payment integration
+CRM integration
+AI integration
 ```
 
 ---
@@ -172,88 +97,184 @@ must never be stored
 
 | Behavior             | Description            |
 | -------------------- | ---------------------- |
-| validateExpiration() | Expiration validation  |
-| deactivateMethod()   | Disable payment method |
+| executeIntegration() | External orchestration |
+| failoverProvider()   | Provider replacement   |
+| cancelIntegration()  | Workflow interruption  |
 
 ---
 
-# 5. ProviderTransaction Entity
+# 4. Provider Entity
 
 ## Purpose
 
-Represents external provider transaction synchronization.
+Represents an external provider.
+
+---
+
+## Identity
+
+```text id="f2x7wr"
+providerId
+```
+
+---
+
+## Examples
+
+```text id="r4m9vt"
+SES
+SendGrid
+Stripe
+OpenAI
+Twilio
+```
+
+---
+
+## Responsibilities
+
+* Provider registration
+* Health monitoring
+* Quota tracking
+* Priority management
+
+---
+
+## Behaviors
+
+| Behavior             | Description           |
+| -------------------- | --------------------- |
+| activateProvider()   | Enable provider       |
+| deactivateProvider() | Operational isolation |
+| updateHealthStatus() | Reliability tracking  |
+
+---
+
+## Critical Principle
+
+```text id="x9v1wr"
+Business logic
+must remain provider agnostic
+```
+
+---
+
+# 5. ProviderEndpoint Entity
+
+## Purpose
+
+Represents external provider endpoints.
 
 ---
 
 ## Identity
 
 ```text id="k3m8xp"
-providerTransactionId
+providerEndpointId
 ```
 
 ---
 
-## Attributes
-
-| Attribute         | Type   | Description        |
-| ----------------- | ------ | ------------------ |
-| providerReference | String | External reference |
-| providerStatus    | String | Provider lifecycle |
-| providerPayload   | JSON   | External metadata  |
-
----
-
-## Supported Providers
+## Examples
 
 ```text id="p1v9wr"
-STRIPE
-PAYPAL
-MERCADOPAGO
-ADYEN
+https://api.stripe.com
+https://api.openai.com
 ```
+
+---
+
+## Responsibilities
+
+* Endpoint configuration
+* Timeout management
+* Regional routing
 
 ---
 
 ## Behaviors
 
-| Behavior                   | Description    |
-| -------------------------- | -------------- |
-| synchronizeProviderState() | Reconciliation |
+| Behavior           | Description             |
+| ------------------ | ----------------------- |
+| validateEndpoint() | Connectivity validation |
+| switchEndpoint()   | Regional failover       |
 
 ---
 
-# 6. RefundExecution Entity
+# 6. Webhook Entity
 
 ## Purpose
 
-Represents provider reimbursement execution.
+Represents inbound webhook orchestration.
 
 ---
 
 ## Identity
 
 ```text id="g6m2xt"
-refundExecutionId
+webhookId
 ```
 
 ---
 
-## Refund Types
+## Examples
 
 ```text id="u7m1wr"
-FULL_REFUND
-PARTIAL_REFUND
+Stripe webhook
+GitHub webhook
+OAuth callback
 ```
 
 ---
 
-## Attributes
+## Responsibilities
 
-| Attribute               | Type    | Description             |
-| ----------------------- | ------- | ----------------------- |
-| refundAmount            | Decimal | Reimbursed amount       |
-| refundReason            | String  | Reimbursement rationale |
-| providerRefundReference | String  | External refund ID      |
+* Signature validation
+* Replay protection
+* Ordering coordination
+
+---
+
+## Behaviors
+
+| Behavior             | Description          |
+| -------------------- | -------------------- |
+| validateSignature()  | Security validation  |
+| detectReplay()       | Duplicate prevention |
+| acknowledgeWebhook() | Provider response    |
+
+---
+
+## Important Principle
+
+```text id="m4v8wr"
+External webhooks
+may arrive multiple times
+```
+
+---
+
+# 7. WebhookDelivery Entity
+
+## Purpose
+
+Represents webhook processing lifecycle.
+
+---
+
+## Identity
+
+```text id="t5v3xp"
+webhookDeliveryId
+```
+
+---
+
+## Responsibilities
+
+* Delivery tracking
+* Retry coordination
+* Failure persistence
 
 ---
 
@@ -261,184 +282,134 @@ PARTIAL_REFUND
 
 | Behavior        | Description            |
 | --------------- | ---------------------- |
-| executeRefund() | Provider reimbursement |
-| rejectRefund()  | Invalid refund         |
+| retryDelivery() | Recovery orchestration |
+| moveToDLQ()     | Failure persistence    |
 
 ---
 
-# 7. WebhookEvent Entity
+# 8. RetryPolicy Entity
 
 ## Purpose
 
-Represents inbound provider webhook events.
-
----
-
-## Identity
-
-```text id="m4v8wr"
-webhookEventId
-```
-
----
-
-## Attributes
-
-| Attribute  | Type    | Description          |
-| ---------- | ------- | -------------------- |
-| provider   | String  | Provider source      |
-| eventType  | String  | Webhook category     |
-| payload    | JSON    | Raw provider payload |
-| receivedAt | Instant | Arrival timestamp    |
-
----
-
-## Critical Challenges
-
-```text id="t5v3xp"
-- duplicate delivery
-- delayed delivery
-- replay attempts
-```
-
----
-
-## Behaviors
-
-| Behavior            | Description         |
-| ------------------- | ------------------- |
-| validateSignature() | Security validation |
-| processWebhook()    | Synchronization     |
-| detectReplay()      | Replay protection   |
-
----
-
-# 8. PaymentRetry Entity
-
-## Purpose
-
-Represents retry orchestration.
+Represents integration retry strategies.
 
 ---
 
 ## Identity
 
 ```text id="w2m8vt"
-paymentRetryId
+retryPolicyId
 ```
 
 ---
 
-## Attributes
+## Supported Strategies
 
-| Attribute   | Type    | Description       |
-| ----------- | ------- | ----------------- |
-| retryCount  | Integer | Retry attempts    |
-| nextRetryAt | Instant | Retry schedule    |
-| retryReason | String  | Failure rationale |
+```text id="q7x1wr"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
+```
 
 ---
 
 ## Behaviors
 
-| Behavior        | Description         |
-| --------------- | ------------------- |
-| scheduleRetry() | Retry orchestration |
-| abortRetries()  | Permanent failure   |
+| Behavior                   | Description      |
+| -------------------------- | ---------------- |
+| calculateNextRetry()       | Retry scheduling |
+| evaluateRetryEligibility() | Failure handling |
 
 ---
 
-# 9. FraudAssessment Entity
+# 9. RetryAttempt Entity
 
 ## Purpose
 
-Represents fraud analysis results.
+Represents retry executions.
 
 ---
 
 ## Identity
 
-```text id="q7x1wr"
-fraudAssessmentId
-```
-
----
-
-## Examples
-
 ```text id="y9v4xp"
-- Velocity checks
-- Country mismatch
-- Excessive retries
+retryAttemptId
 ```
 
 ---
 
-## Attributes
+## Responsibilities
 
-| Attribute      | Type    | Description           |
-| -------------- | ------- | --------------------- |
-| fraudScore     | Decimal | Risk evaluation       |
-| riskLevel      | String  | Threat classification |
-| recommendation | String  | Suggested action      |
+* Retry tracking
+* Delay management
+* Retry observability
 
 ---
 
 ## Behaviors
 
-| Behavior             | Description    |
-| -------------------- | -------------- |
-| approveTransaction() | Allow payment  |
-| blockTransaction()   | Reject payment |
+| Behavior                  | Description      |
+| ------------------------- | ---------------- |
+| incrementAttemptCounter() | Retry accounting |
 
 ---
 
-# 10. PaymentReconciliation Entity
+# 10. CircuitBreaker Entity
 
 ## Purpose
 
-Represents synchronization validation.
+Represents integration fault tolerance.
 
 ---
 
 ## Identity
 
 ```text id="f4m7wr"
-reconciliationId
+circuitBreakerId
 ```
 
 ---
 
-## Examples
+## Supported States
 
 ```text id="u1x8vt"
-Provider says CAPTURED
-Local says FAILED
+CLOSED
+OPEN
+HALF_OPEN
 ```
+
+---
+
+## Responsibilities
+
+* Failure isolation
+* Provider protection
+* Recovery evaluation
 
 ---
 
 ## Behaviors
 
-| Behavior              | Description            |
-| --------------------- | ---------------------- |
-| reconcileStates()     | Consistency validation |
-| recoverPaymentState() | Recovery orchestration |
+| Behavior            | Description          |
+| ------------------- | -------------------- |
+| openCircuit()       | Failure isolation    |
+| closeCircuit()      | Recovery             |
+| allowTrialRequest() | HALF_OPEN validation |
 
 ---
 
-# 11. ProviderRouting Entity
+# 11. DLQMessage Entity
 
 ## Purpose
 
-Represents dynamic provider routing.
+Represents dead-letter queue persistence.
 
 ---
 
 ## Identity
 
 ```text id="m6v2wr"
-providerRoutingId
+dlqMessageId
 ```
 
 ---
@@ -446,125 +417,110 @@ providerRoutingId
 ## Examples
 
 ```text id="g3x9vp"
-LATAM → MercadoPago
-US → Stripe
+failed webhook
+failed ERP sync
+failed CRM sync
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior           | Description     |
-| ------------------ | --------------- |
-| resolveProvider()  | Dynamic routing |
-| failoverProvider() | Provider switch |
+| Behavior         | Description            |
+| ---------------- | ---------------------- |
+| replayMessage()  | Recovery orchestration |
+| archiveMessage() | Retention governance   |
 
 ---
 
-# 12. PaymentProjection Entity
+# 12. OAuthIntegration Entity
 
 ## Purpose
 
-Represents CQRS-oriented payment views.
+Represents OAuth provider orchestration.
 
 ---
 
 ## Identity
 
 ```text id="r5m1xt"
-paymentProjectionId
+oauthIntegrationId
 ```
 
 ---
 
-## Usage
-
-Supports:
-
-* Payment dashboards
-* Failure analytics
-* Provider metrics
-
----
-
-# 13. PaymentAuthorization Entity
-
-## Purpose
-
-Represents authorization metadata.
-
----
-
-## Identity
+## Examples
 
 ```text id="x8v4wr"
-paymentAuthorizationId
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
 ```
 
 ---
 
-## Attributes
+## Responsibilities
 
-| Attribute         | Type    | Description             |
-| ----------------- | ------- | ----------------------- |
-| authorizationCode | String  | Provider authorization  |
-| authorizedAt      | Instant | Authorization timestamp |
+* OAuth coordination
+* Scope governance
+* Token lifecycle
 
 ---
 
 ## Behaviors
 
-| Behavior                | Description                |
-| ----------------------- | -------------------------- |
-| validateAuthorization() | Authorization verification |
+| Behavior                    | Description        |
+| --------------------------- | ------------------ |
+| exchangeAuthorizationCode() | OAuth flow         |
+| refreshAccessToken()        | Session continuity |
 
 ---
 
-# 14. PaymentCapture Entity
+# 13. OAuthToken Entity
 
 ## Purpose
 
-Represents capture execution metadata.
+Represents OAuth token lifecycle.
 
 ---
 
 ## Identity
 
 ```text id="n7m1vt"
-paymentCaptureId
+oauthTokenId
 ```
 
 ---
 
-## Attributes
+## Responsibilities
 
-| Attribute      | Type    | Description       |
-| -------------- | ------- | ----------------- |
-| capturedAmount | Decimal | Captured value    |
-| capturedAt     | Instant | Capture timestamp |
+* Token expiration
+* Refresh orchestration
+* Scope tracking
 
 ---
 
 ## Behaviors
 
-| Behavior         | Description           |
-| ---------------- | --------------------- |
-| executeCapture() | Capture orchestration |
+| Behavior       | Description           |
+| -------------- | --------------------- |
+| isExpired()    | Expiration validation |
+| refreshToken() | Token renewal         |
 
 ---
 
-# 15. PaymentFailure Entity
+# 14. IntegrationSecret Entity
 
 ## Purpose
 
-Represents transaction failure traceability.
+Represents integration credentials.
 
 ---
 
 ## Identity
 
 ```text id="k2v7xp"
-paymentFailureId
+integrationSecretId
 ```
 
 ---
@@ -572,246 +528,325 @@ paymentFailureId
 ## Examples
 
 ```text id="d1m8wr"
-- insufficient funds
-- provider timeout
-- fraud rejection
+API keys
+OAuth secrets
+Webhook secrets
 ```
+
+---
+
+## Responsibilities
+
+* Encryption
+* Rotation
+* Secure retrieval
 
 ---
 
 ## Behaviors
 
-| Behavior          | Description            |
-| ----------------- | ---------------------- |
-| classifyFailure() | Failure categorization |
+| Behavior        | Description                |
+| --------------- | -------------------------- |
+| rotateSecret()  | Credential renewal         |
+| encryptSecret() | Confidentiality protection |
 
 ---
 
-# 16. PaymentSession Entity
-
-## Purpose
-
-Represents checkout/payment sessions.
-
----
-
-## Identity
+## Critical Principle
 
 ```text id="h6x2vt"
-paymentSessionId
+Integration secrets
+must never be exposed
 ```
 
 ---
 
-## Attributes
-
-| Attribute    | Type    | Description        |
-| ------------ | ------- | ------------------ |
-| sessionToken | String  | Checkout reference |
-| expiresAt    | Instant | Session expiration |
-
----
-
-## Behaviors
-
-| Behavior        | Description          |
-| --------------- | -------------------- |
-| expireSession() | Session invalidation |
-
----
-
-# 17. ProviderCredentialReference Entity
+# 15. IntegrationEvent Entity
 
 ## Purpose
 
-Represents secure linkage with external providers.
+Represents event-driven integrations.
 
 ---
 
 ## Identity
 
 ```text id="t9v4xp"
-providerCredentialReferenceId
+integrationEventId
 ```
 
 ---
 
-## Important Principle
+## Examples
 
 ```text id="j4x9wt"
-Provider secrets
-must remain externalized
+UserCreated → CRM Sync
+PaymentCaptured → ERP Sync
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior                     | Description   |
-| ---------------------------- | ------------- |
-| resolveCredentialReference() | Secure lookup |
+| Behavior       | Description               |
+| -------------- | ------------------------- |
+| routeEvent()   | Integration orchestration |
+| publishEvent() | Async propagation         |
 
 ---
 
-# 18. WebhookSignature Entity
+# 16. ProviderHealth Entity
 
 ## Purpose
 
-Represents webhook authenticity verification.
+Represents provider operational health.
 
 ---
 
 ## Identity
 
 ```text id="m7v1xp"
-webhookSignatureId
+providerHealthId
 ```
 
 ---
 
-## Behaviors
-
-| Behavior            | Description             |
-| ------------------- | ----------------------- |
-| validateSignature() | Authenticity validation |
-
----
-
-# 19. PaymentAuditRecord Entity
-
-## Purpose
-
-Represents immutable payment traceability.
-
----
-
-## Identity
+## Example
 
 ```text id="u5x8wr"
-paymentAuditRecordId
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
 ```
 
 ---
 
-## Examples
+## Behaviors
+
+| Behavior               | Description            |
+| ---------------------- | ---------------------- |
+| calculateHealthScore() | Reliability analytics  |
+| detectDegradation()    | Operational monitoring |
+
+---
+
+# 17. ProviderQuota Entity
+
+## Purpose
+
+Represents provider quota governance.
+
+---
+
+## Identity
 
 ```text id="q9m3vt"
-AUTHORIZED → CAPTURED
-FAILED → RETRY_PENDING
+providerQuotaId
 ```
 
 ---
 
-## Behaviors
-
-| Behavior           | Description            |
-| ------------------ | ---------------------- |
-| appendAuditEvent() | Immutable traceability |
-
----
-
-# 20. PaymentNotification Entity
-
-## Purpose
-
-Represents communication related to payments.
-
----
-
-## Identity
+## Examples
 
 ```text id="k1m8vt"
-paymentNotificationId
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
 ```
 
 ---
 
-## Examples
+## Behaviors
+
+| Behavior                | Description            |
+| ----------------------- | ---------------------- |
+| incrementUsage()        | Quota accounting       |
+| detectQuotaExhaustion() | Operational protection |
+
+---
+
+# 18. IdempotencyRecord Entity
+
+## Purpose
+
+Represents duplicate prevention.
+
+---
+
+## Identity
 
 ```text id="d2m8wr"
-- payment success email
-- retry warning
-- refund confirmation
+idempotencyRecordId
+```
+
+---
+
+## Responsibilities
+
+* Replay detection
+* Duplicate prevention
+* Consistency tracking
+
+---
+
+## Behaviors
+
+| Behavior                 | Description       |
+| ------------------------ | ----------------- |
+| detectDuplicateRequest() | Replay prevention |
+
+---
+
+## Critical Principle
+
+```text id="u8x3wp"
+External providers
+may resend requests
+multiple times
+```
+
+---
+
+# 19. IntegrationTelemetry Entity
+
+## Purpose
+
+Represents integration observability.
+
+---
+
+## Identity
+
+```text id="f6m9wr"
+integrationTelemetryId
+```
+
+---
+
+## Monitored Metrics
+
+```text id="c8m4xt"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior           | Description                 |
-| ------------------ | --------------------------- |
-| sendNotification() | Communication orchestration |
+| Behavior        | Description            |
+| --------------- | ---------------------- |
+| recordLatency() | Performance visibility |
+| recordFailure() | Incident analytics     |
 
 ---
 
-# 21. PaymentDispute Entity
+# 20. SynchronizationJob Entity
 
 ## Purpose
 
-Represents chargebacks and disputes.
+Represents synchronization orchestration.
 
 ---
 
 ## Identity
 
-```text id="u8x3wp"
-paymentDisputeId
+```text id="u1x8wr"
+synchronizationJobId
 ```
 
 ---
 
 ## Examples
 
-```text id="f6m9wr"
-CHARGEBACK
-FRAUD_DISPUTE
+```text id="w6x3wr"
+CRM sync
+ERP sync
+billing export
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior         | Description        |
-| ---------------- | ------------------ |
-| openDispute()    | Dispute creation   |
-| resolveDispute() | Dispute resolution |
+| Behavior                | Description          |
+| ----------------------- | -------------------- |
+| startSynchronization()  | Job orchestration    |
+| cancelSynchronization() | Failure interruption |
 
 ---
 
-# 22. PaymentSettlement Entity
+# 21. SynchronizationExecution Entity
 
 ## Purpose
 
-Represents settlement reconciliation.
+Represents synchronization execution tracking.
 
 ---
 
 ## Identity
 
-```text id="c8m4xt"
-paymentSettlementId
+```text id="r1m7vp"
+synchronizationExecutionId
 ```
+
+---
+
+## Responsibilities
+
+* Execution tracking
+* Failure diagnostics
+* Retry orchestration
 
 ---
 
 ## Behaviors
 
-| Behavior              | Description           |
-| --------------------- | --------------------- |
-| reconcileSettlement() | Settlement validation |
+| Behavior          | Description      |
+| ----------------- | ---------------- |
+| markAsFailed()    | Failure handling |
+| markAsCompleted() | Success tracking |
+
+---
+
+# 22. IntegrationProjection Entity
+
+## Purpose
+
+Represents CQRS integration projections.
+
+---
+
+## Identity
+
+```text id="x4v8xt"
+integrationProjectionId
+```
+
+---
+
+## Responsibilities
+
+* Dashboard optimization
+* Provider analytics
+* Retry visibility
+* DLQ monitoring
 
 ---
 
 # 23. Entity Relationships
 
-```text id="u1x8wr"
-PaymentTransaction
-    ├── linked to -> PaymentMethod
-    ├── synchronized with -> ProviderTransaction
-    ├── protected by -> FraudAssessment
-    ├── coordinated by -> PaymentRetry
-    ├── validated by -> PaymentReconciliation
-    └── audited by -> PaymentAuditRecord
+```text id="f2v9xp"
+Integration
+    ├── routed through -> Provider
+    ├── protected by -> CircuitBreaker
+    ├── retried by -> RetryPolicy
+    ├── monitored by -> IntegrationTelemetry
+    ├── isolated by -> IdempotencyRecord
+    └── projected by -> IntegrationProjection
 ```
 
 ---
@@ -820,11 +855,11 @@ PaymentTransaction
 
 Tenant-scoped entities:
 
-```text id="w6x3wr"
-- PaymentTransaction
-- RefundExecution
-- PaymentMethod
-- PaymentProjection
+```text id="m6x3vt"
+- Integration
+- Webhook
+- OAuthIntegration
+- IntegrationTelemetry
 ```
 
 ---
@@ -833,61 +868,94 @@ Tenant-scoped entities:
 
 ## Mandatory Protections
 
-| Protection                   | Required |
-| ---------------------------- | -------- |
-| PCI isolation                | Yes      |
-| Tenant isolation             | Yes      |
-| Webhook signature validation | Yes      |
-| Replay protection            | Yes      |
+| Protection              | Required |
+| ----------------------- | -------- |
+| Secret encryption       | Yes      |
+| Replay protection       | Yes      |
+| Idempotency enforcement | Yes      |
+| Provider authentication | Yes      |
 
 ---
 
 ## Forbidden Behavior
 
-```text id="r1m7vp"
-Duplicate payment captures
-must never occur
+```text id="y5v2wp"
+Integration secrets
+must never be exposed
 ```
 
 ---
 
 # 26. Lifecycle Considerations
 
-| Entity             | Lifecycle      |
-| ------------------ | -------------- |
-| PaymentTransaction | Long-term      |
-| WebhookEvent       | High-frequency |
-| PaymentRetry       | Temporary      |
-| FraudAssessment    | Event-driven   |
-| PaymentProjection  | Read-optimized |
+| Entity               | Lifecycle               |
+| -------------------- | ----------------------- |
+| WebhookDelivery      | Short-term              |
+| DLQMessage           | Retention governed      |
+| OAuthToken           | Expiration-driven       |
+| IntegrationTelemetry | Analytics lifecycle     |
+| IdempotencyRecord    | Replay window lifecycle |
 
 ---
 
-# 27. Future Entity Extensions
+# 27. Reactive Considerations
+
+Reactive implementations should support:
+
+```text id="m2x7wp"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
+```
+
+---
+
+## Requirements
+
+* Non-blocking integrations
+* Async retries
+* Streaming orchestration
+* Backpressure support
+
+---
+
+# 28. Distributed System Considerations
+
+The entities support:
+
+* Multi-region integrations
+* Distributed retries
+* Event-driven orchestration
+* Horizontal scalability
+* Fault-tolerant provider routing
+
+---
+
+# 29. Future Entity Extensions
 
 Future entities may include:
 
-* CryptoPaymentTransaction
-* BNPLTransaction
-* SplitPayment
-* RealTimeTransfer
-* AI FraudAssessment
+* AIProviderRouting
+* PredictiveFailover
+* AutonomousRetry
+* SmartQuotaOptimization
+* SelfHealingIntegration
 
 ---
 
-# 28. Summary
+# 30. Summary
 
-The Payment Management entities provide:
+The Integration Management entities provide:
 
-* Enterprise-grade payment lifecycle modeling
-* PCI-aware boundary isolation
-* Reactive payment orchestration
-* Distributed provider synchronization
-* Fraud-aware transaction governance
-* Multi-provider routing support
-* Scalable SaaS payment consistency
+* Enterprise-grade external orchestration
+* Provider-agnostic architecture
+* Fault-tolerant integrations
+* Reactive integration pipelines
+* Distributed webhook orchestration
+* Multi-provider failover
+* Secure interoperability
+* Scalable event-driven integrations
 
-These entities form the operational foundation of the payment ecosystem.
+These entities form the operational foundation of the integration ecosystem.
 
 ```
 ```

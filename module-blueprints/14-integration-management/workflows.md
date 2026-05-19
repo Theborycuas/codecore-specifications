@@ -1,33 +1,35 @@
-# 11-payment-management/workflows.md
+# 14-integration-management/workflows.md
 
-````md id="q9x4vp"
-# Payment Management Workflows
+````md id="u1x4vp"
+# Integration Management Workflows
 
 ## 1. Introduction
 
-This document defines the workflows of the Payment Management module.
+This document defines the workflows of the Integration Management module.
 
-The workflows describe how payment operations are:
+The workflows describe how integrations are:
 
-- Authorized
-- Captured
-- Refunded
-- Retried
-- Reconciled
-- Synchronized
+- Executed
 - Routed
-- Validated
-- Audited
+- Retried
+- Failed over
 - Protected
+- Observed
+- Secured
+- Replayed
+- Synchronized
+- Streamed
+- Correlated
+- Escalated
 
 The workflows are designed following:
 
 - Domain-Driven Design (DDD)
 - Event-Driven Architecture (EDA)
-- PCI DSS boundary isolation
+- Reactive integration orchestration
+- Provider-agnostic architecture
 - Multi-tenant SaaS governance
-- Reactive payment orchestration
-- Enterprise financial resilience
+- Enterprise fault tolerance
 
 ---
 
@@ -35,140 +37,146 @@ The workflows are designed following:
 
 | Workflow | Purpose |
 |---|---|
-| Payment Authorization Workflow | Provider authorization |
-| Payment Capture Workflow | Fund capture |
-| Payment Failure Workflow | Failure orchestration |
-| Retry Workflow | Retry coordination |
-| Refund Workflow | Provider reimbursement |
-| Webhook Processing Workflow | External synchronization |
-| Payment Reconciliation Workflow | State consistency |
-| Fraud Detection Workflow | Risk validation |
-| Multi-Provider Routing Workflow | Dynamic provider selection |
-| Settlement Workflow | Settlement reconciliation |
-| Chargeback Workflow | Dispute handling |
-| Payment Method Tokenization Workflow | Tokenized storage |
-| Payment Expiration Workflow | Session expiration |
-| Payment Notification Workflow | Tenant communication |
+| Outbound Integration Workflow | External provider calls |
+| Inbound Webhook Workflow | External callback orchestration |
+| Provider Failover Workflow | Fault tolerance |
+| Retry Workflow | Recovery orchestration |
+| Circuit Breaker Workflow | Failure isolation |
+| DLQ Workflow | Failed integration persistence |
+| OAuth Workflow | OAuth orchestration |
+| Secret Resolution Workflow | Credential security |
+| Event-Driven Integration Workflow | Async integrations |
+| Synchronization Workflow | Batch integrations |
+| Idempotency Workflow | Duplicate prevention |
+| Quota Management Workflow | Provider limit governance |
+| Provider Health Workflow | Reliability scoring |
+| Integration Observability Workflow | Operational telemetry |
+| Streaming Integration Workflow | Real-time integrations |
 
 ---
 
-# 3. Payment Authorization Workflow
+# 3. Outbound Integration Workflow
 
 ## Purpose
 
-Authorizes a payment through an external provider.
+Executes outbound provider integrations.
 
 ---
 
 # Workflow Steps
 
 ```text id="u5m1wr"
-1. Invoice received
-2. Payment method validated
-3. Fraud checks executed
-4. Provider selected
-5. Authorization requested
-6. Provider response received
-7. Transaction persisted
-8. PaymentAuthorized event emitted
+1. Business event triggered
+2. Integration selected
+3. Provider resolved
+4. Secret resolved
+5. Request executed
+6. Response validated
+7. Metrics recorded
+8. Result persisted
 ````
 
 ---
 
-## Possible Outcomes
-
-| Outcome         | Description         |
-| --------------- | ------------------- |
-| AUTHORIZED      | Payment approved    |
-| FAILED          | Payment rejected    |
-| REVIEW_REQUIRED | Fraud/manual review |
-
----
-
-## Critical Rule
+## Examples
 
 ```text id="m8v3xp"
-Authorization
-must remain idempotent
+Send email
+Call AI provider
+Sync CRM
+Call payment gateway
 ```
 
 ---
 
-# 4. Payment Capture Workflow
-
-## Purpose
-
-Captures authorized funds.
-
----
-
-# Workflow Steps
+## Critical Principle
 
 ```text id="f2x7wr"
-1. Authorized transaction loaded
-2. Provider capture requested
-3. Capture response validated
-4. Transaction updated
-5. Capture event emitted
+Business logic
+must remain provider agnostic
 ```
 
 ---
 
-## Critical Rule
-
-```text id="r4m9vt"
-Duplicate captures
-must never occur
-```
-
----
-
-## Example Lifecycle
-
-```text id="x9v1wr"
-AUTHORIZED
-    → CAPTURED
-```
-
----
-
-# 5. Payment Failure Workflow
+# 4. Inbound Webhook Workflow
 
 ## Purpose
 
-Handles payment failures safely.
+Processes inbound external callbacks.
 
 ---
 
 # Workflow Steps
 
-```text id="k3m8xp"
-1. Provider rejection received
-2. Failure reason classified
-3. Retry eligibility evaluated
-4. Failure persisted
-5. Failure event emitted
+```text id="r4m9vt"
+1. Webhook received
+2. Signature validated
+3. Replay detection executed
+4. Idempotency checked
+5. Payload normalized
+6. Event processed
+7. Response acknowledged
 ```
 
 ---
 
 ## Examples
 
-```text id="p1v9wr"
-- insufficient funds
-- provider timeout
-- fraud rejection
+```text id="x9v1wr"
+Stripe webhook
+GitHub webhook
+OAuth callback
 ```
 
 ---
 
-## Possible Actions
+## Critical Principle
 
-| Action         | Description         |
-| -------------- | ------------------- |
-| Retry payment  | Temporary failure   |
-| Reject payment | Permanent failure   |
-| Manual review  | Suspicious activity |
+```text id="k3m8xp"
+External webhooks
+may arrive multiple times
+```
+
+---
+
+# 5. Provider Failover Workflow
+
+## Purpose
+
+Automatically replaces failing providers.
+
+---
+
+# Workflow Steps
+
+```text id="p1v9wr"
+1. Provider failure detected
+2. Health score recalculated
+3. Circuit breaker evaluated
+4. Secondary provider selected
+5. Integration retried
+6. Observability updated
+```
+
+---
+
+## Example
+
+```text id="g6m2xt"
+Primary Provider → Failure
+        ↓
+Secondary Provider Activated
+```
+
+---
+
+## Supported Strategies
+
+| Strategy                | Description       |
+| ----------------------- | ----------------- |
+| Priority-based failover | Ordered providers |
+| Health-based routing    | Dynamic selection |
+| Weighted routing        | Traffic balancing |
 
 ---
 
@@ -176,285 +184,260 @@ Handles payment failures safely.
 
 ## Purpose
 
-Retries transient payment failures.
+Recovers failed integrations.
 
 ---
 
 # Workflow Steps
 
-```text id="g6m2xt"
-1. Retry eligibility validated
-2. Retry schedule calculated
-3. Retry attempt executed
-4. Provider response evaluated
-5. Retry status updated
+```text id="u7m1wr"
+1. Integration failed
+2. Retry policy evaluated
+3. Retry delay calculated
+4. Retry scheduled
+5. Request replayed
+6. Result evaluated
 ```
 
 ---
 
-## Retryable Scenarios
+## Supported Strategies
 
-| Scenario             | Retry |
-| -------------------- | ----- |
-| Temporary timeout    | Yes   |
-| Network interruption | Yes   |
-| Fraud rejection      | No    |
-| Invalid card         | No    |
+```text id="m4v8wr"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
+```
 
 ---
 
 ## Important Principle
 
-```text id="u7m1wr"
+```text id="t5v3xp"
 Retries
-must remain replay-safe
+must not amplify failures
 ```
 
 ---
 
-# 7. Refund Workflow
+# 7. Circuit Breaker Workflow
 
 ## Purpose
 
-Executes reimbursements through providers.
+Protects integrations from cascading failures.
 
 ---
 
 # Workflow Steps
-
-```text id="m4v8wr"
-1. Refund approval received
-2. Transaction validated
-3. Refund amount calculated
-4. Provider refund requested
-5. Refund confirmed
-6. RefundExecuted event emitted
-```
-
----
-
-## Refund Types
-
-```text id="t5v3xp"
-FULL_REFUND
-PARTIAL_REFUND
-```
-
----
-
-## Critical Rule
 
 ```text id="w2m8vt"
-Refund execution
-must remain traceable
+1. Failure threshold exceeded
+2. Circuit opened
+3. Requests blocked
+4. Cooldown period applied
+5. HALF_OPEN trial executed
+6. Circuit restored or reopened
 ```
 
 ---
 
-# 8. Webhook Processing Workflow
-
-## Purpose
-
-Synchronizes local state with external providers.
-
----
-
-# Workflow Steps
+## Supported States
 
 ```text id="q7x1wr"
-1. Webhook received
-2. Signature validated
-3. Replay detection executed
-4. Event classified
-5. Transaction synchronized
-6. Audit record appended
+CLOSED
+OPEN
+HALF_OPEN
 ```
 
 ---
 
-## Critical Challenges
+## Benefits
 
-```text id="y9v4xp"
-- duplicate delivery
-- delayed delivery
-- out-of-order delivery
-```
-
----
-
-## Mandatory Protections
-
-| Protection           | Required |
-| -------------------- | -------- |
-| Signature validation | Yes      |
-| Idempotency          | Yes      |
-| Replay protection    | Yes      |
+| Benefit               | Description            |
+| --------------------- | ---------------------- |
+| Failure isolation     | Stability              |
+| Provider protection   | Operational resilience |
+| Resource preservation | Scalability            |
 
 ---
 
-# 9. Payment Reconciliation Workflow
+# 8. DLQ Workflow
 
 ## Purpose
 
-Validates consistency between internal and external payment states.
+Persists unrecoverable failures.
 
 ---
 
 # Workflow Steps
 
-```text id="f4m7wr"
-1. Provider transactions loaded
-2. Local transactions loaded
-3. State comparison executed
-4. Inconsistencies detected
-5. Recovery workflows triggered
+```text id="y9v4xp"
+1. Retry exhaustion detected
+2. Failure persisted
+3. DLQ event published
+4. Operational alerts triggered
+5. Replay eligibility evaluated
 ```
 
 ---
 
 ## Examples
 
+```text id="f4m7wr"
+failed webhook
+failed CRM sync
+failed ERP event
+```
+
+---
+
+## Important Principle
+
 ```text id="u1x8vt"
-Provider says CAPTURED
-Local says FAILED
+Failures
+must remain recoverable
+```
+
+---
+
+# 9. OAuth Workflow
+
+## Purpose
+
+Orchestrates OAuth integrations.
+
+---
+
+# Workflow Steps
+
+```text id="m6v2wr"
+1. Authorization initiated
+2. User redirected
+3. Callback received
+4. Authorization code exchanged
+5. Access token persisted
+6. Refresh token scheduled
+```
+
+---
+
+## Examples
+
+```text id="g3x9vp"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
+```
+
+---
+
+## Responsibilities
+
+| Responsibility   | Description              |
+| ---------------- | ------------------------ |
+| Token exchange   | OAuth flow               |
+| Token refresh    | Session continuity       |
+| Scope validation | Authorization governance |
+
+---
+
+# 10. Secret Resolution Workflow
+
+## Purpose
+
+Securely resolves provider credentials.
+
+---
+
+# Workflow Steps
+
+```text id="r5m1xt"
+1. Secret reference received
+2. Vault queried
+3. Secret decrypted
+4. Secure memory injection
+5. Integration executed
+6. Secret discarded
+```
+
+---
+
+## Examples
+
+```text id="x8v4wr"
+API keys
+OAuth secrets
+Webhook secrets
 ```
 
 ---
 
 ## Critical Principle
 
-```text id="m6v2wr"
-Provider inconsistencies
-must never be ignored
-```
-
----
-
-# 10. Fraud Detection Workflow
-
-## Purpose
-
-Evaluates transaction risk.
-
----
-
-# Workflow Steps
-
-```text id="g3x9vp"
-1. Payment initiated
-2. Fraud signals collected
-3. Risk engine evaluated
-4. Risk classification assigned
-5. Decision generated
-```
-
----
-
-## Examples
-
-```text id="r5m1xt"
-- country mismatch
-- excessive retries
-- velocity anomalies
-```
-
----
-
-## Possible Decisions
-
-| Decision | Description         |
-| -------- | ------------------- |
-| APPROVE  | Continue payment    |
-| REVIEW   | Manual verification |
-| BLOCK    | Reject transaction  |
-
----
-
-# 11. Multi-Provider Routing Workflow
-
-## Purpose
-
-Selects the optimal payment provider.
-
----
-
-# Workflow Steps
-
-```text id="x8v4wr"
-1. Tenant region resolved
-2. Provider availability checked
-3. Routing rules evaluated
-4. Provider selected
-5. Payment routed
-```
-
----
-
-## Examples
-
 ```text id="n7m1vt"
-LATAM → MercadoPago
-US → Stripe
+Secrets
+must never be hardcoded
 ```
 
 ---
 
-## Possible Routing Factors
-
-| Factor       | Example              |
-| ------------ | -------------------- |
-| Region       | LATAM                |
-| Availability | Provider outage      |
-| Cost         | Lower fees           |
-| Performance  | Faster authorization |
-
----
-
-# 12. Settlement Workflow
+# 11. Event-Driven Integration Workflow
 
 ## Purpose
 
-Validates settlement synchronization.
+Processes asynchronous integrations.
 
 ---
 
 # Workflow Steps
 
 ```text id="k2v7xp"
-1. Provider settlement reports loaded
-2. Internal captures loaded
-3. Settlement comparison executed
-4. Missing settlements detected
-5. Settlement records updated
+1. Domain event published
+2. Integration event generated
+3. Event routed
+4. Provider selected
+5. Integration executed
+6. Observability updated
 ```
 
 ---
 
-## Important Principle
+## Examples
 
 ```text id="d1m8wr"
-Captured funds
-must reconcile with settlements
+UserCreated → CRM Sync
+PaymentCaptured → ERP Sync
 ```
 
 ---
 
-# 13. Chargeback Workflow
+## Benefits
+
+| Benefit          | Description             |
+| ---------------- | ----------------------- |
+| Loose coupling   | Scalability             |
+| Async resilience | Failure isolation       |
+| Retry support    | Operational reliability |
+
+---
+
+# 12. Synchronization Workflow
 
 ## Purpose
 
-Handles disputes and chargebacks.
+Executes synchronization jobs.
 
 ---
 
 # Workflow Steps
 
 ```text id="h6x2vt"
-1. Provider dispute received
-2. Transaction resolved
-3. Evidence gathered
-4. Dispute status updated
-5. Resolution emitted
+1. Sync job scheduled
+2. Source data collected
+3. Target provider selected
+4. Batch execution started
+5. Retry coordination applied
+6. Results persisted
 ```
 
 ---
@@ -462,265 +445,373 @@ Handles disputes and chargebacks.
 ## Examples
 
 ```text id="t9v4xp"
-FRAUD
-UNRECOGNIZED_CHARGE
-DUPLICATE_PAYMENT
+CRM sync
+ERP sync
+billing export
 ```
 
 ---
 
-## Possible Outcomes
-
-| Outcome | Description               |
-| ------- | ------------------------- |
-| WON     | Merchant victory          |
-| LOST    | Provider/customer victory |
-| PENDING | Investigation             |
-
----
-
-# 14. Payment Method Tokenization Workflow
-
-## Purpose
-
-Stores provider-issued payment references safely.
-
----
-
-# Workflow Steps
+## Supported Modes
 
 ```text id="j4x9wt"
-1. Provider tokenization requested
-2. Provider token returned
-3. Token stored securely
-4. Raw credentials discarded
+FULL_SYNC
+INCREMENTAL_SYNC
+REALTIME_SYNC
 ```
 
 ---
 
-## Critical Rule
+# 13. Idempotency Workflow
+
+## Purpose
+
+Prevents duplicate integration execution.
+
+---
+
+# Workflow Steps
 
 ```text id="m7v1xp"
-Raw PCI-sensitive data
-must never be persisted
+1. Request received
+2. Idempotency key extracted
+3. Existing execution searched
+4. Duplicate detection evaluated
+5. Request accepted or rejected
 ```
 
 ---
 
-# 15. Payment Expiration Workflow
-
-## Purpose
-
-Handles expiration of sessions and authorizations.
-
----
-
-# Workflow Steps
+## Critical Principle
 
 ```text id="u5x8wr"
-1. Expiration threshold reached
-2. Transaction evaluated
-3. Session invalidated
-4. Expiration event emitted
+External providers
+may resend requests
+multiple times
 ```
 
 ---
 
-## Examples
-
-```text id="q9m3vt"
-- checkout session expiration
-- authorization timeout
-```
-
----
-
-# 16. Payment Notification Workflow
+# 14. Quota Management Workflow
 
 ## Purpose
 
-Communicates payment events to tenants.
+Protects provider quota limits.
 
 ---
 
 # Workflow Steps
 
-```text id="k1m8vt"
-1. Payment event received
-2. Notification template resolved
-3. Communication generated
-4. Notification delivered
+```text id="q9m3vt"
+1. Request prepared
+2. Quota usage checked
+3. Limits evaluated
+4. Execution allowed or delayed
+5. Usage updated
+6. Alerts triggered if needed
 ```
 
 ---
 
 ## Examples
 
-```text id="d2m8wr"
-- payment success
-- retry warning
-- refund confirmation
+```text id="k1m8vt"
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
 ```
 
 ---
 
-# 17. Event-Driven Workflow Integration
+# 15. Provider Health Workflow
+
+## Purpose
+
+Monitors provider operational reliability.
+
+---
+
+# Workflow Steps
+
+```text id="d2m8wr"
+1. Provider metrics collected
+2. Failures analyzed
+3. Latency evaluated
+4. Health score recalculated
+5. Routing recommendations updated
+```
+
+---
+
+## Example
+
+```text id="u8x3wp"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
+```
+
+---
+
+## Important Principle
+
+```text id="f6m9wr"
+Provider routing
+should adapt to provider health
+```
+
+---
+
+# 16. Integration Observability Workflow
+
+## Purpose
+
+Monitors integration operational telemetry.
+
+---
+
+# Workflow Steps
+
+```text id="c8m4xt"
+1. Integration executed
+2. Metrics collected
+3. Distributed traces generated
+4. Logs indexed
+5. Dashboards updated
+6. Alerts evaluated
+```
+
+---
+
+## Monitored Metrics
+
+```text id="u1x8wr"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+# 17. Streaming Integration Workflow
+
+## Purpose
+
+Processes real-time integrations.
+
+---
+
+# Workflow Steps
+
+```text id="w6x3wr"
+1. Stream connection established
+2. Streaming events received
+3. Backpressure applied
+4. Events normalized
+5. Async propagation executed
+6. Observability updated
+```
+
+---
+
+## Examples
+
+```text id="r1m7vp"
+Kafka streams
+Webhook streams
+AI streaming APIs
+```
+
+---
+
+## Characteristics
+
+```text id="x4v8xt"
+event-driven
++
+streaming-based
++
+fault tolerant
++
+reactive
+```
+
+---
+
+# 18. Event Publishing Workflow
+
+## Purpose
+
+Publishes integration lifecycle events.
+
+---
 
 ## Published Events
 
-```text id="u8x3wp"
-- PaymentAuthorized
-- PaymentCaptured
-- PaymentFailed
-- RefundExecuted
-- PaymentExpired
-- ChargebackOpened
+```text id="f2v9xp"
+IntegrationExecuted
+WebhookProcessed
+ProviderFailed
+RetryScheduled
+DLQMessageCreated
 ```
 
 ---
 
 ## Consumed Events
 
-```text id="f6m9wr"
-- InvoiceIssued
-- RefundApproved
-- BillingRetryRequested
+```text id="m6x3vt"
+UserCreated
+PaymentCaptured
+SubscriptionUpdated
 ```
 
 ---
 
-# 18. Audit Workflow Integration
+# 19. CQRS Workflow Considerations
 
-## Purpose
+## Write Side
 
-Provides immutable payment traceability.
-
----
-
-## Audited Operations
-
-| Operation             | Audited |
-| --------------------- | ------- |
-| Payment authorization | Yes     |
-| Capture execution     | Yes     |
-| Refund execution      | Yes     |
-| Webhook processing    | Yes     |
-| Chargeback handling   | Yes     |
+* Integration execution
+* Retry orchestration
+* Provider failover
+* DLQ persistence
 
 ---
 
-# 19. Reactive Workflow Considerations
+## Read Side
+
+* Integration dashboards
+* Retry analytics
+* Provider health projections
+* DLQ visibility
+
+---
+
+# 20. Reactive Workflow Considerations
 
 Reactive implementations should support:
 
-```text id="c8m4xt"
-Mono<PaymentTransaction>
-Flux<WebhookEvent>
-Flux<RetryExecution>
+```text id="y5v2wp"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
 ```
 
 ---
 
 ## Requirements
 
-* Non-blocking provider calls
-* Async reconciliation
-* High-concurrency processing
-* Reactive retry orchestration
+* Non-blocking integrations
+* Async retries
+* Streaming orchestration
+* Backpressure handling
 
 ---
 
-# 20. Failure Handling Workflow
+# 21. Failure Handling Workflow
 
 ## Purpose
 
-Handles distributed payment failures safely.
+Ensures graceful degradation.
 
 ---
 
-## Example Failures
+## Failure Examples
 
-| Failure                 | Strategy          |
-| ----------------------- | ----------------- |
-| Duplicate webhook       | Idempotency       |
-| Provider outage         | Failover          |
-| Network interruption    | Retry             |
-| Reconciliation mismatch | Recovery workflow |
+| Failure              | Strategy       |
+| -------------------- | -------------- |
+| Provider unavailable | Failover       |
+| Timeout              | Retry          |
+| Rate limit exceeded  | Backoff        |
+| Invalid signature    | Reject webhook |
+| Retry exhaustion     | DLQ            |
 
 ---
 
 ## Critical Principle
 
-```text id="u1x8wr"
-Financial consistency
-has priority over availability
+```text id="m2x7wp"
+External provider failures
+must not crash
+business systems
 ```
 
 ---
 
-# 21. Distributed System Considerations
-
-Workflows support:
-
-* Multi-region payment orchestration
-* Distributed reconciliation
-* Event-driven synchronization
-* Horizontal scalability
-* Replay-safe payment processing
-
----
-
-# 22. CQRS Considerations
-
-Recommended projections:
-
-| Projection                | Purpose              |
-| ------------------------- | -------------------- |
-| PaymentProjection         | Fast retrieval       |
-| ProviderMetricsProjection | Analytics            |
-| FraudAnalyticsProjection  | Risk analysis        |
-| SettlementProjection      | Settlement reporting |
-
----
-
-# 23. Compliance Workflow Considerations
+# 22. Multi-Region Workflow Considerations
 
 The workflows support:
 
-| Compliance                 | Usage                     |
-| -------------------------- | ------------------------- |
-| PCI DSS boundary isolation | Payment segregation       |
-| SOC2                       | Financial traceability    |
-| GDPR                       | Tenant governance         |
-| Audit compliance           | Immutable payment history |
+* Regional provider routing
+* Distributed retries
+* Multi-region failover
+* Cross-region observability
 
 ---
 
-# 24. Future Workflow Extensions
+# 23. Security Workflow Considerations
+
+## Mandatory Protections
+
+| Protection             | Required |
+| ---------------------- | -------- |
+| Secret encryption      | Yes      |
+| Replay protection      | Yes      |
+| Idempotency validation | Yes      |
+| Signature validation   | Yes      |
+
+---
+
+## Forbidden Behavior
+
+```text id="h4m9wr"
+Secrets
+must never be exposed
+```
+
+---
+
+# 24. Performance Considerations
+
+Critical performance areas:
+
+| Area                | Optimization          |
+| ------------------- | --------------------- |
+| Retry orchestration | Async scheduling      |
+| Webhook processing  | Streaming ingestion   |
+| Provider routing    | Cached health scoring |
+| DLQ processing      | Batch replay          |
+
+---
+
+# 25. Future Workflow Extensions
 
 Future workflows may include:
 
-* Crypto payment workflows
-* BNPL workflows
-* Real-time transfer workflows
-* AI fraud workflows
-* Marketplace split-payment workflows
+* AI-driven provider routing workflows
+* Predictive failover workflows
+* Autonomous retry optimization workflows
+* Smart quota allocation workflows
+* Self-healing integration workflows
 
 ---
 
-# 25. Summary
+# 26. Summary
 
-The Payment Management workflows provide:
+The Integration Management workflows provide:
 
-* Enterprise-grade payment orchestration
-* PCI-aware payment isolation
-* Reactive payment processing
-* Distributed provider synchronization
-* Fraud-aware transaction governance
-* Multi-provider routing support
-* Scalable SaaS payment resilience
+* Enterprise-grade external orchestration
+* Provider-agnostic architecture
+* Fault-tolerant integrations
+* Reactive integration pipelines
+* Distributed webhook orchestration
+* Multi-provider failover
+* Secure interoperability
+* Scalable event-driven integrations
 
-These workflows define the operational behavior of the payment ecosystem.
+These workflows define the operational behavior of the integration ecosystem.
 
 ```
 ```

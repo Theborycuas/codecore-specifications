@@ -1,59 +1,61 @@
-# 11-payment-management/events.md
+# 14-integration-management/events.md
 
-````md id="r9x4vp"
-# Payment Management Domain Events
+````md id="v1x4vp"
+# Integration Management Domain Events
 
 ## 1. Introduction
 
-This document defines the domain events emitted and consumed by the Payment Management module.
+This document defines the domain events emitted and consumed by the Integration Management module.
 
-Payment events represent important transactional occurrences related to:
+Integration events represent important operational occurrences related to:
 
-- Payment authorization
-- Payment capture
-- Refund execution
-- Webhook synchronization
-- Retry orchestration
-- Provider reconciliation
-- Fraud detection
-- Chargeback handling
-- Settlement synchronization
-- Payment expiration
-- Multi-provider routing
+- External provider orchestration
+- Webhook processing
+- Retry coordination
+- Circuit breaker transitions
+- DLQ persistence
+- OAuth integrations
+- Secret management
+- Provider failover
+- Event-driven integrations
+- Synchronization workflows
+- Quota enforcement
+- Idempotency protection
+- Integration observability
 
 These events are fundamental for:
 
 - Event-Driven Architecture (EDA)
-- Distributed financial consistency
-- Provider synchronization
-- Payment observability
-- Fraud monitoring
-- Reactive orchestration
-- Auditability
-- SaaS scalability
+- Reactive integration orchestration
+- Distributed fault tolerance
+- Operational observability
+- Async provider orchestration
+- Retry recovery
+- Integration scalability
+- Enterprise resilience
 
 The events are designed following:
 
 - Domain-Driven Design (DDD)
-- PCI DSS boundary isolation
+- Reactive integration architecture
+- Provider-agnostic orchestration
 - Multi-tenant SaaS governance
-- Reactive payment orchestration
-- Enterprise financial resilience
+- Enterprise fault tolerance
 
 ---
 
 # 2. Event Design Principles
 
-All payment events must follow:
+All integration events must follow:
 
 | Principle | Description |
 |---|---|
 | Immutable | Events never change |
 | Replay-safe | Retry compatibility |
-| Tenant-aware | Isolation required |
-| Correlated | Distributed tracing |
-| Serializable | Distributed messaging |
-| Auditable | Financial traceability |
+| Tenant-aware | SaaS isolation |
+| Serializable | Streaming compatibility |
+| Correlated | Distributed traceability |
+| Fault-tolerant | Failure resilience |
 
 ---
 
@@ -61,20 +63,22 @@ All payment events must follow:
 
 | Category | Purpose |
 |---|---|
-| Payment Lifecycle Events | Transaction progression |
-| Refund Events | Reimbursement execution |
-| Webhook Events | Provider synchronization |
-| Fraud Events | Risk evaluation |
-| Retry Events | Retry orchestration |
-| Reconciliation Events | Consistency validation |
-| Settlement Events | Settlement synchronization |
-| Chargeback Events | Dispute handling |
+| Provider Events | Provider lifecycle |
+| Webhook Events | Inbound orchestration |
+| Retry Events | Recovery coordination |
+| Circuit Breaker Events | Fault tolerance |
+| DLQ Events | Failure persistence |
+| OAuth Events | OAuth orchestration |
+| Secret Events | Credential governance |
+| Synchronization Events | Batch integrations |
+| Observability Events | Operational visibility |
+| Quota Events | Limit governance |
 
 ---
 
 # 4. Common Event Metadata
 
-All payment events should include:
+All integration events should include:
 
 | Field | Type | Description |
 |---|---|---|
@@ -82,332 +86,54 @@ All payment events should include:
 | eventType | String | Event name |
 | occurredAt | Instant | Event timestamp |
 | correlationId | String | Distributed tracing |
-| aggregateId | UUID | Aggregate identifier |
-| aggregateType | String | Aggregate type |
 | tenantId | UUID | Tenant scope |
-| actorId | UUID | Responsible actor |
+| providerId | UUID | Provider correlation |
+| integrationId | UUID | Integration correlation |
 | version | Integer | Event schema version |
 
 ---
 
-# 5. PaymentInitiated Event
+# 5. IntegrationExecuted Event
 
 ## Purpose
 
-Published when a payment process begins.
+Published after successful integration execution.
 
 ---
 
-## Trigger
+## Examples
 
 ```text id="u5m1wr"
-Payment workflow started
+email integration
+payment integration
+CRM sync
+AI provider request
 ````
 
 ---
 
-## Payload
-
-| Field                | Type    | Description            |
-| -------------------- | ------- | ---------------------- |
-| paymentTransactionId | UUID    | Transaction identifier |
-| invoiceId            | UUID    | Related invoice        |
-| amount               | Decimal | Payment amount         |
-| currency             | String  | Currency               |
-
----
-
 ## Consumers
 
-* Fraud detection
-* Audit Management
-* Observability Management
+* Observability module
+* Analytics dashboards
+* Audit telemetry
 
 ---
 
-# 6. PaymentAuthorized Event
+# 6. IntegrationFailed Event
 
 ## Purpose
 
-Published after successful provider authorization.
+Published after integration failures.
 
 ---
 
-## Side Effects
+## Examples
 
 ```text id="m8v3xp"
-- Capture workflow enabled
-- Payment lifecycle updated
-- Audit trail appended
-```
-
----
-
-## Critical Rule
-
-```text id="f2x7wr"
-Authorization events
-must remain idempotent
-```
-
----
-
-# 7. PaymentCaptured Event
-
-## Purpose
-
-Published after successful fund capture.
-
----
-
-## Payload
-
-| Field             | Type    | Description          |
-| ----------------- | ------- | -------------------- |
-| providerReference | String  | Provider transaction |
-| capturedAmount    | Decimal | Captured value       |
-
----
-
-## Consumers
-
-* Billing Management
-* Subscription Management
-* Revenue analytics
-
----
-
-## Important Principle
-
-```text id="r4m9vt"
-Captured payments
-must become immutable
-```
-
----
-
-# 8. PaymentFailed Event
-
-## Purpose
-
-Published after transaction failure.
-
----
-
-## Examples
-
-```text id="x9v1wr"
-- insufficient funds
-- provider timeout
-- fraud rejection
-```
-
----
-
-## Side Effects
-
-* Retry orchestration
-* Failure analytics
-* Tenant notifications
-
----
-
-# 9. PaymentCanceled Event
-
-## Purpose
-
-Published after transaction cancellation.
-
----
-
-## Examples
-
-```text id="k3m8xp"
-- user cancellation
-- authorization expiration
-```
-
----
-
-## Consumers
-
-* Billing Management
-* Audit systems
-
----
-
-# 10. PaymentExpired Event
-
-## Purpose
-
-Published after payment/session expiration.
-
----
-
-## Examples
-
-```text id="p1v9wr"
-- expired checkout session
-- authorization timeout
-```
-
----
-
-## Side Effects
-
-* Session invalidation
-* Notification workflows
-
----
-
-# 11. RefundExecutionStarted Event
-
-## Purpose
-
-Published when provider reimbursement begins.
-
----
-
-## Consumers
-
-* Audit Management
-* Billing Management
-
----
-
-# 12. RefundExecuted Event
-
-## Purpose
-
-Published after successful reimbursement.
-
----
-
-## Payload
-
-| Field             | Type    | Description       |
-| ----------------- | ------- | ----------------- |
-| refundExecutionId | UUID    | Refund identifier |
-| refundAmount      | Decimal | Reimbursed amount |
-
----
-
-## Consumers
-
-* Billing Management
-* Revenue analytics
-* Notification systems
-
----
-
-# 13. RefundFailed Event
-
-## Purpose
-
-Published after reimbursement failure.
-
----
-
-## Examples
-
-```text id="g6m2xt"
-- provider rejection
-- invalid refund state
-```
-
----
-
-## Side Effects
-
-* Retry workflows
-* Manual review escalation
-
----
-
-# 14. WebhookReceived Event
-
-## Purpose
-
-Published after inbound webhook reception.
-
----
-
-## Examples
-
-```text id="u7m1wr"
-PAYMENT_SUCCEEDED
-PAYMENT_FAILED
-```
-
----
-
-## Side Effects
-
-* Synchronization workflows
-* Audit traceability
-
----
-
-# 15. WebhookValidated Event
-
-## Purpose
-
-Published after signature verification.
-
----
-
-## Critical Rule
-
-```text id="m4v8wr"
-Webhook signatures
-must always be validated
-```
-
----
-
-## Consumers
-
-* Synchronization workflows
-* Security analytics
-
----
-
-# 16. WebhookReplayDetected Event
-
-## Purpose
-
-Published after replay attack detection.
-
----
-
-## Examples
-
-```text id="t5v3xp"
-Duplicate webhook delivery
-```
-
----
-
-## Consumers
-
-* Security monitoring
-* Fraud analytics
-
----
-
-# 17. PaymentRetryScheduled Event
-
-## Purpose
-
-Published after retry orchestration scheduling.
-
----
-
-## Retryable Examples
-
-```text id="w2m8vt"
-- temporary timeout
-- provider unavailable
+provider timeout
+authentication failure
+quota exceeded
 ```
 
 ---
@@ -415,474 +141,720 @@ Published after retry orchestration scheduling.
 ## Consumers
 
 * Retry engine
-* Observability Management
+* Circuit breakers
+* DLQ orchestration
 
 ---
 
-# 18. PaymentRetryExecuted Event
+# 7. ProviderRegistered Event
 
 ## Purpose
 
-Published after retry attempt execution.
+Published after provider onboarding.
+
+---
+
+## Examples
+
+```text id="f2x7wr"
+SES
+SendGrid
+Stripe
+OpenAI
+```
+
+---
+
+## Consumers
+
+* Provider registry
+* Routing engine
+* Health monitoring
+
+---
+
+# 8. ProviderDisabled Event
+
+## Purpose
+
+Published after provider deactivation.
+
+---
+
+## Reasons
+
+```text id="r4m9vt"
+security issue
+provider outage
+quota exhaustion
+```
+
+---
+
+## Consumers
+
+* Failover orchestration
+* Routing engine
+* Observability dashboards
+
+---
+
+# 9. ProviderHealthChanged Event
+
+## Purpose
+
+Published after provider health updates.
+
+---
+
+## Examples
+
+```text id="x9v1wr"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
+```
+
+---
+
+## Consumers
+
+* Dynamic routing
+* Failover engine
+* Monitoring dashboards
+
+---
+
+## Important Principle
+
+```text id="k3m8xp"
+Provider routing
+should adapt to provider health
+```
+
+---
+
+# 10. WebhookReceived Event
+
+## Purpose
+
+Published after inbound webhook ingestion.
+
+---
+
+## Examples
+
+```text id="p1v9wr"
+Stripe webhook
+GitHub webhook
+OAuth callback
+```
+
+---
+
+## Consumers
+
+* Signature validation
+* Replay protection
+* Event processing
+
+---
+
+# 11. WebhookValidated Event
+
+## Purpose
+
+Published after webhook signature validation.
 
 ---
 
 ## Side Effects
 
-* Payment lifecycle updates
-* Retry analytics
-
----
-
-# 19. PaymentRetryExhausted Event
-
-## Purpose
-
-Published after maximum retries reached.
-
----
-
-## Examples
-
-```text id="q7x1wr"
-Repeated provider failure
-```
-
----
-
-## Consumers
-
-* Manual review workflows
-* Customer notifications
-
----
-
-# 20. FraudAssessmentCompleted Event
-
-## Purpose
-
-Published after fraud evaluation.
-
----
-
-## Examples
-
-```text id="y9v4xp"
-LOW_RISK
-HIGH_RISK
-BLOCKED
-```
-
----
-
-## Possible Actions
-
-| Action  | Description         |
-| ------- | ------------------- |
-| APPROVE | Continue payment    |
-| REVIEW  | Manual verification |
-| BLOCK   | Reject transaction  |
-
----
-
-# 21. PaymentBlockedByFraud Event
-
-## Purpose
-
-Published after fraud rejection.
-
----
-
-## Examples
-
-```text id="f4m7wr"
-- excessive retries
-- suspicious geography
-```
-
----
-
-## Consumers
-
-* Security analytics
-* Audit systems
-
----
-
-# 22. ProviderRoutingResolved Event
-
-## Purpose
-
-Published after dynamic provider selection.
-
----
-
-## Examples
-
-```text id="u1x8vt"
-LATAM → MercadoPago
-US → Stripe
-```
-
----
-
-## Consumers
-
-* Payment orchestrator
-* Provider analytics
-
----
-
-# 23. ProviderFailoverTriggered Event
-
-## Purpose
-
-Published after provider failover activation.
-
----
-
-## Examples
-
-```text id="m6v2wr"
-Primary provider unavailable
-```
-
----
-
-## Side Effects
-
-* Alternative provider routing
-* Observability alerts
-
----
-
-# 24. PaymentReconciliationStarted Event
-
-## Purpose
-
-Published when reconciliation begins.
-
----
-
-## Consumers
-
-* Audit systems
-* Financial monitoring
-
----
-
-# 25. PaymentReconciliationCompleted Event
-
-## Purpose
-
-Published after successful synchronization validation.
-
----
-
-## Side Effects
-
-```text id="g3x9vp"
-- Financial consistency verified
-- Provider synchronization confirmed
-```
-
----
-
-# 26. PaymentDesynchronizationDetected Event
-
-## Purpose
-
-Published after provider inconsistency detection.
-
----
-
-## Examples
-
-```text id="r5m1xt"
-Provider says CAPTURED
-Local says FAILED
+```text id="g6m2xt"
+- integrity validation
+- replay prevention
+- provider authentication
 ```
 
 ---
 
 ## Critical Principle
 
-```text id="x8v4wr"
-Provider inconsistencies
-must never be ignored
+```text id="u7m1wr"
+Webhook payloads
+must be verifiable
 ```
 
 ---
 
-# 27. SettlementReceived Event
+# 12. WebhookRejected Event
 
 ## Purpose
 
-Published after provider settlement reception.
+Published after webhook rejection.
 
 ---
 
-## Consumers
+## Reasons
 
-* Settlement reconciliation
-* Financial analytics
-
----
-
-# 28. SettlementReconciled Event
-
-## Purpose
-
-Published after settlement validation.
-
----
-
-## Side Effects
-
-* Financial reconciliation
-* Revenue synchronization
-
----
-
-# 29. ChargebackOpened Event
-
-## Purpose
-
-Published after dispute creation.
-
----
-
-## Examples
-
-```text id="n7m1vt"
-FRAUD
-UNRECOGNIZED_CHARGE
+```text id="m4v8wr"
+invalid signature
+duplicate payload
+malformed request
 ```
 
 ---
 
 ## Consumers
 
-* Dispute workflows
-* Fraud analytics
+* Security monitoring
+* Incident alerts
+* Audit telemetry
 
 ---
 
-# 30. ChargebackResolved Event
+# 13. RetryScheduled Event
 
 ## Purpose
 
-Published after dispute resolution.
+Published after retry orchestration.
 
 ---
 
-## Possible Outcomes
+## Supported Strategies
 
-```text id="k2v7xp"
-WON
-LOST
-PENDING
+```text id="t5v3xp"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
 ```
+
+---
+
+## Consumers
+
+* Retry scheduler
+* Observability dashboards
+* Failure analytics
+
+---
+
+# 14. RetryExhausted Event
+
+## Purpose
+
+Published after retry exhaustion.
 
 ---
 
 ## Side Effects
 
-* Revenue adjustment
-* Audit updates
-
----
-
-# 31. PaymentMethodTokenized Event
-
-## Purpose
-
-Published after provider token generation.
+* DLQ persistence
+* Operational alerts
+* Incident creation
 
 ---
 
 ## Important Principle
 
-```text id="d1m8wr"
-Raw payment credentials
-must never be persisted
+```text id="w2m8vt"
+Failures
+must remain recoverable
+```
+
+---
+
+# 15. CircuitOpened Event
+
+## Purpose
+
+Published after circuit breaker activation.
+
+---
+
+## Supported States
+
+```text id="q7x1wr"
+CLOSED
+OPEN
+HALF_OPEN
 ```
 
 ---
 
 ## Consumers
 
-* Payment method vault
-* Payment orchestration
+* Routing engine
+* Provider failover
+* Monitoring dashboards
 
 ---
 
-# 32. PaymentMethodExpired Event
+# 16. CircuitClosed Event
 
 ## Purpose
 
-Published after token expiration.
+Published after provider recovery.
 
 ---
 
 ## Side Effects
 
-* Payment method invalidation
-* Customer notifications
+* Traffic restoration
+* Health score updates
+* Retry reactivation
 
 ---
 
-# 33. PaymentNotificationSent Event
+# 17. DLQMessageCreated Event
 
 ## Purpose
 
-Published after communication delivery.
+Published after dead-letter queue persistence.
 
 ---
 
 ## Examples
 
-```text id="h6x2vt"
-- payment success email
-- retry warning
-- refund confirmation
+```text id="y9v4xp"
+failed webhook
+failed CRM sync
+failed ERP event
 ```
 
 ---
 
 ## Consumers
 
-* Notification analytics
-* Audit systems
+* Replay engine
+* Operational dashboards
+* Failure analytics
 
 ---
 
-# 34. Event Ordering Considerations
+# 18. DLQReplayStarted Event
 
-Certain events require ordering guarantees.
+## Purpose
+
+Published after DLQ replay orchestration.
+
+---
+
+## Consumers
+
+* Retry orchestration
+* Observability dashboards
+
+---
+
+# 19. OAuthAuthorizationStarted Event
+
+## Purpose
+
+Published after OAuth authorization initiation.
+
+---
+
+## Examples
+
+```text id="f4m7wr"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
+```
+
+---
+
+## Consumers
+
+* OAuth orchestration
+* Session management
+
+---
+
+# 20. OAuthTokenExchanged Event
+
+## Purpose
+
+Published after token exchange.
+
+---
+
+## Side Effects
+
+* Token persistence
+* Session activation
+* Refresh scheduling
+
+---
+
+# 21. OAuthTokenRefreshed Event
+
+## Purpose
+
+Published after access token renewal.
+
+---
+
+## Consumers
+
+* Session continuity
+* Integration orchestration
+
+---
+
+# 22. SecretRotated Event
+
+## Purpose
+
+Published after secret rotation.
+
+---
+
+## Examples
+
+```text id="u1x8vt"
+API keys
+OAuth secrets
+Webhook secrets
+```
+
+---
+
+## Consumers
+
+* Security monitoring
+* Integration orchestration
+* Secret synchronization
+
+---
+
+## Critical Principle
+
+```text id="m6v2wr"
+Secrets
+must never be hardcoded
+```
+
+---
+
+# 23. IntegrationEventPublished Event
+
+## Purpose
+
+Published after event-driven integration orchestration.
+
+---
+
+## Examples
+
+```text id="g3x9vp"
+UserCreated → CRM Sync
+PaymentCaptured → ERP Sync
+```
+
+---
+
+## Consumers
+
+* Async integrations
+* External providers
+* Synchronization workflows
+
+---
+
+# 24. SynchronizationStarted Event
+
+## Purpose
+
+Published after synchronization job initialization.
+
+---
+
+## Examples
+
+```text id="r5m1xt"
+CRM sync
+ERP sync
+billing export
+```
+
+---
+
+## Consumers
+
+* Job monitoring
+* Retry orchestration
+* Observability dashboards
+
+---
+
+# 25. SynchronizationCompleted Event
+
+## Purpose
+
+Published after synchronization completion.
+
+---
+
+## Side Effects
+
+* Metrics updates
+* Dashboard refresh
+* Audit logging
+
+---
+
+# 26. SynchronizationFailed Event
+
+## Purpose
+
+Published after synchronization failures.
+
+---
+
+## Consumers
+
+* Retry orchestration
+* DLQ engine
+* Operational alerts
+
+---
+
+# 27. QuotaThresholdExceeded Event
+
+## Purpose
+
+Published after quota limit violations.
+
+---
+
+## Examples
+
+```text id="x8v4wr"
+OpenAI TPM exceeded
+SES quota exhausted
+Twilio SMS limit reached
+```
+
+---
+
+## Consumers
+
+* Routing engine
+* Alerting systems
+* Traffic throttling
+
+---
+
+# 28. IdempotencyViolationDetected Event
+
+## Purpose
+
+Published after duplicate request detection.
+
+---
+
+## Critical Principle
+
+```text id="n7m1vt"
+External providers
+may resend requests
+multiple times
+```
+
+---
+
+## Consumers
+
+* Security monitoring
+* Replay prevention
+* Audit telemetry
+
+---
+
+# 29. IntegrationTelemetryRecorded Event
+
+## Purpose
+
+Published after integration observability collection.
+
+---
+
+## Monitored Metrics
+
+```text id="k2v7xp"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+## Consumers
+
+* Monitoring dashboards
+* Alerting systems
+* Analytics pipelines
+
+---
+
+# 30. StreamingIntegrationStarted Event
+
+## Purpose
+
+Published after stream integration initialization.
+
+---
+
+## Examples
+
+```text id="d1m8wr"
+Kafka streams
+Webhook streams
+AI streaming APIs
+```
+
+---
+
+## Consumers
+
+* Streaming analytics
+* Backpressure orchestration
+* Monitoring dashboards
+
+---
+
+# 31. Event Ordering Considerations
+
+Certain integration events require ordering guarantees.
 
 ---
 
 ## Example
 
-```text id="t9v4xp"
-PaymentAuthorized
-    before
-PaymentCaptured
+```text id="h6x2vt"
+WebhookReceived
+before
+WebhookValidated
 ```
 
 ---
 
 ## Recommended Strategies
 
-| Strategy           | Purpose             |
-| ------------------ | ------------------- |
-| Kafka partitioning | Tenant ordering     |
-| Outbox pattern     | Reliable delivery   |
-| Aggregate ordering | Payment consistency |
+| Strategy           | Purpose      |
+| ------------------ | ------------ |
+| Kafka partitioning | Ordering     |
+| Correlation IDs    | Traceability |
+| Event sequencing   | Consistency  |
 
 ---
 
-# 35. Event Delivery Guarantees
+# 32. Event Delivery Guarantees
 
 Recommended semantics:
 
-| Event Type               | Guarantee              |
-| ------------------------ | ---------------------- |
-| Payment lifecycle events | At least once          |
-| Fraud events             | Durable delivery       |
-| Analytics events         | Best effort acceptable |
-| Settlement events        | Durable persistence    |
+| Event Type           | Guarantee            |
+| -------------------- | -------------------- |
+| Webhook events       | Durable delivery     |
+| DLQ events           | Strong durability    |
+| Retry events         | At least once        |
+| Observability events | Eventual consistency |
 
 ---
 
-# 36. Replay and Reconstruction Considerations
+# 33. Replay and Reconstruction Considerations
 
 Replay-compatible events:
 
-| Event             | Purpose                |
-| ----------------- | ---------------------- |
-| PaymentAuthorized | Payment reconstruction |
-| PaymentCaptured   | Financial replay       |
-| RefundExecuted    | Refund reconstruction  |
-| WebhookReceived   | Synchronization replay |
+| Event               | Purpose                |
+| ------------------- | ---------------------- |
+| WebhookReceived     | Replay testing         |
+| RetryScheduled      | Recovery orchestration |
+| DLQMessageCreated   | Failure reconstruction |
+| IntegrationExecuted | Analytics replay       |
 
 ---
 
-# 37. CQRS Integration
+# 34. CQRS Integration
 
 Events may update projections including:
 
-* PaymentProjection
-* FraudAnalyticsProjection
-* SettlementProjection
-* ProviderMetricsProjection
-* FailureAnalyticsProjection
+* Provider health dashboards
+* Retry analytics
+* DLQ visibility
+* Integration throughput analytics
+* Synchronization monitoring
 
 ---
 
-# 38. Sensitive Data Restrictions
+# 35. Sensitive Data Restrictions
 
-Payment events must NEVER expose:
+Integration events must NEVER expose:
 
-```text id="j4x9wt"
-- CVV data
-- Full credit card numbers
-- Banking credentials
-- Provider secrets
+```text id="t9v4xp"
+- raw API keys
+- OAuth secrets
+- private credentials
+- webhook secrets
 ```
 
 ---
 
-# 39. Distributed System Considerations
+# 36. Distributed System Considerations
 
 Events support:
 
-* Multi-region payment orchestration
-* Distributed reconciliation
-* Reactive synchronization
+* Multi-region integrations
+* Distributed retries
+* Event-driven orchestration
 * Horizontal scalability
-* Replay-safe workflows
+* Fault-tolerant provider routing
 
 ---
 
-# 40. Failure Handling Rules
+# 37. Failure Handling Rules
 
 If event publication fails:
 
-| Event Type               | Strategy            |
-| ------------------------ | ------------------- |
-| Payment lifecycle events | Retry mandatory     |
-| Fraud analytics          | Retry recommended   |
-| Settlement events        | Durable persistence |
+| Event Type           | Strategy                        |
+| -------------------- | ------------------------------- |
+| Webhook events       | Retry mandatory                 |
+| DLQ events           | Durable persistence             |
+| Retry events         | Buffered retries                |
+| Observability events | Eventual consistency acceptable |
 
 ---
 
-# 41. Future Event Extensions
+# 38. Future Event Extensions
 
 Future events may include:
 
-* CryptoPaymentConfirmed
-* BNPLApproved
-* RealTimeTransferCompleted
-* AI FraudDetected
-* MarketplaceSplitSettled
+* AIProviderRoutingChanged
+* PredictiveFailoverTriggered
+* AutonomousRetryOptimized
+* SmartQuotaRebalanced
+* SelfHealingIntegrationActivated
 
 ---
 
-# 42. Summary
+# 39. Summary
 
-The Payment Management events provide:
+The Integration Management events provide:
 
-* Enterprise-grade payment traceability
-* PCI-aware payment isolation
-* Reactive payment orchestration
-* Distributed provider synchronization
-* Fraud-aware transaction governance
-* Multi-provider routing support
-* Scalable SaaS payment resilience
+* Enterprise-grade external orchestration
+* Provider-agnostic event-driven architecture
+* Fault-tolerant integrations
+* Reactive integration pipelines
+* Distributed webhook orchestration
+* Multi-provider failover
+* Secure interoperability
+* Scalable async integrations
 
-These events form the integration backbone of the payment ecosystem.
+These events form the integration backbone of the external connectivity ecosystem.
 
 ```
 ```

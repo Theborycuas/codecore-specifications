@@ -1,36 +1,40 @@
-# 11-payment-management/repositories.md
+# 14-integration-management/repositories.md
 
-````md id="t9x4vp"
-# Payment Management Repositories
+````md id="x1x4vp"
+# Integration Management Repositories
 
 ## 1. Introduction
 
-This document defines the repositories of the Payment Management module.
+This document defines the repositories of the Integration Management module.
 
 Repositories are responsible for persisting and retrieving:
 
-- Payment transactions
-- Payment methods
-- Provider transactions
-- Refund executions
-- Webhook events
-- Retry executions
-- Fraud assessments
-- Reconciliation records
-- Settlement records
-- Chargebacks
-- Payment sessions
-- CQRS payment projections
-- Provider routing metadata
+- Integration executions
+- External providers
+- Webhook deliveries
+- Retry orchestration
+- Circuit breaker states
+- Dead-letter queue messages
+- OAuth integrations
+- OAuth tokens
+- Integration secrets
+- Integration events
+- Provider health scores
+- Quota tracking
+- Idempotency records
+- Integration telemetry
+- Synchronization jobs
+- CQRS integration projections
 
-The repository layer is designed following:
+The repositories are designed following:
 
 - Domain-Driven Design (DDD)
 - Repository Pattern
 - Hexagonal Architecture
-- PCI DSS boundary isolation
+- Reactive persistence orchestration
+- Event-driven integrations
 - Multi-tenant SaaS governance
-- Reactive persistence architecture
+- Enterprise fault tolerance
 
 ---
 
@@ -38,12 +42,12 @@ The repository layer is designed following:
 
 | Principle | Description |
 |---|---|
-| Tenant-aware persistence | Mandatory |
-| PCI boundary isolation | Critical |
-| Reactive-first design | Scalability |
-| Replay-safe persistence | Reliability |
-| CQRS compatibility | Read optimization |
-| Event-driven synchronization | Distributed consistency |
+| Reactive-first persistence | Scalability |
+| Provider-agnostic orchestration | Mandatory |
+| Tenant-aware repositories | Mandatory |
+| Replay-safe persistence | Required |
+| Eventual consistency support | Required |
+| CQRS optimization | Required |
 
 ---
 
@@ -51,101 +55,68 @@ The repository layer is designed following:
 
 | Repository | Responsibility |
 |---|---|
-| PaymentTransactionRepository | Payment lifecycle |
-| PaymentMethodRepository | Tokenized payment methods |
-| ProviderTransactionRepository | External provider synchronization |
-| RefundExecutionRepository | Refund execution |
-| WebhookEventRepository | Webhook traceability |
-| PaymentRetryRepository | Retry orchestration |
-| FraudAssessmentRepository | Fraud analysis |
-| PaymentReconciliationRepository | Consistency validation |
-| SettlementRepository | Settlement synchronization |
-| ChargebackRepository | Dispute handling |
-| PaymentSessionRepository | Checkout sessions |
-| ProviderRoutingRepository | Routing orchestration |
-| PaymentProjectionRepository | CQRS projections |
-| PaymentAuditRepository | Immutable traceability |
-| PaymentNotificationRepository | Payment communication |
+| IntegrationRepository | Core integration orchestration |
+| ProviderRepository | External provider lifecycle |
+| ProviderEndpointRepository | Provider endpoint persistence |
+| WebhookRepository | Webhook orchestration |
+| WebhookDeliveryRepository | Delivery lifecycle |
+| RetryPolicyRepository | Retry orchestration |
+| RetryAttemptRepository | Retry execution tracking |
+| CircuitBreakerRepository | Fault tolerance persistence |
+| DLQRepository | Dead-letter queue persistence |
+| OAuthIntegrationRepository | OAuth orchestration |
+| OAuthTokenRepository | OAuth token lifecycle |
+| IntegrationSecretRepository | Secret governance |
+| IntegrationEventRepository | Event-driven integrations |
+| ProviderHealthRepository | Health scoring |
+| QuotaRepository | Quota tracking |
+| IdempotencyRepository | Duplicate prevention |
+| IntegrationTelemetryRepository | Observability persistence |
+| SynchronizationJobRepository | Batch synchronization |
+| SynchronizationExecutionRepository | Sync execution tracking |
+| IntegrationProjectionRepository | CQRS projections |
 
 ---
 
-# 4. PaymentTransactionRepository
+# 4. IntegrationRepository
 
 ## Purpose
 
-Persists payment lifecycle transactions.
-
-Primary repository of the payment module.
+Persists outbound and inbound integration executions.
 
 ---
 
 ## Responsibilities
 
-- Persist payment transactions
-- Preserve payment traceability
-- Maintain lifecycle consistency
-- Support reconciliation
+- Integration persistence
+- Lifecycle tracking
+- Provider correlation
+- Retry coordination
 
 ---
 
-## Example Contract
+## Examples
 
-```java id="u5m1wr"
-public interface PaymentTransactionRepository {
-
-    Mono<PaymentTransaction> save(
-        PaymentTransaction transaction
-    );
-
-    Mono<PaymentTransaction> findById(
-        PaymentTransactionId transactionId
-    );
-
-    Flux<PaymentTransaction> findByTenant(
-        TenantId tenantId
-    );
-}
+```text id="u5m1wr"
+email integration
+payment integration
+CRM sync
+AI integration
 ````
-
----
-
-## Critical Rules
-
-| Rule                          | Description    |
-| ----------------------------- | -------------- |
-| Duplicate captures forbidden  | Idempotency    |
-| Tenant ownership mandatory    | Isolation      |
-| Provider correlation required | Reconciliation |
-
----
-
-# 5. PaymentMethodRepository
-
-## Purpose
-
-Persists tokenized payment instruments.
-
----
-
-## Responsibilities
-
-* Store provider-issued tokens
-* Maintain payment method preferences
-* Support token lifecycle
 
 ---
 
 ## Example Contract
 
 ```java id="m8v3xp"
-public interface PaymentMethodRepository {
+public interface IntegrationRepository {
 
-    Mono<PaymentMethod> save(
-        PaymentMethod paymentMethod
+    Mono<Integration> save(
+        Integration integration
     );
 
-    Flux<PaymentMethod> findByTenant(
-        TenantId tenantId
+    Mono<Integration> findById(
+        IntegrationId integrationId
     );
 }
 ```
@@ -155,414 +126,201 @@ public interface PaymentMethodRepository {
 ## Critical Principle
 
 ```text id="f2x7wr"
-Raw PCI-sensitive data
-must never be persisted
+Business logic
+must remain provider agnostic
 ```
 
 ---
 
-# 6. ProviderTransactionRepository
+# 5. ProviderRepository
 
 ## Purpose
 
-Persists provider synchronization state.
+Persists external provider configurations.
+
+---
+
+## Examples
+
+```text id="r4m9vt"
+SES
+SendGrid
+Stripe
+OpenAI
+Twilio
+```
 
 ---
 
 ## Responsibilities
 
-* Store provider transaction references
-* Support reconciliation workflows
-* Preserve provider traceability
-
----
-
-## Example Contract
-
-```java id="r4m9vt"
-public interface ProviderTransactionRepository {
-
-    Mono<ProviderTransaction> save(
-        ProviderTransaction providerTransaction
-    );
-
-    Mono<ProviderTransaction> findByProviderReference(
-        ProviderReference reference
-    );
-}
-```
-
----
-
-# 7. RefundExecutionRepository
-
-## Purpose
-
-Persists reimbursement execution lifecycle.
-
----
-
-## Responsibilities
-
-* Store refund executions
-* Preserve reimbursement traceability
-* Support provider synchronization
+* Provider registration
+* Provider prioritization
+* Failover orchestration
+* Health coordination
 
 ---
 
 ## Example Contract
 
 ```java id="x9v1wr"
-public interface RefundExecutionRepository {
+public interface ProviderRepository {
 
-    Mono<RefundExecution> save(
-        RefundExecution refundExecution
-    );
-
-    Flux<RefundExecution> findByTenant(
-        TenantId tenantId
+    Flux<Provider> findByType(
+        ProviderType providerType
     );
 }
 ```
 
 ---
 
-# 8. WebhookEventRepository
+# 6. ProviderEndpointRepository
 
 ## Purpose
 
-Persists inbound webhook events.
+Persists provider endpoint configurations.
+
+---
+
+## Examples
+
+```text id="k3m8xp"
+https://api.stripe.com
+https://api.openai.com
+```
 
 ---
 
 ## Responsibilities
 
-* Preserve webhook history
-* Support replay protection
-* Enable webhook auditing
+* Endpoint management
+* Regional routing
+* Timeout persistence
 
 ---
 
 ## Example Contract
 
-```java id="k3m8xp"
-public interface WebhookEventRepository {
+```java id="p1v9wr"
+public interface ProviderEndpointRepository {
 
-    Mono<WebhookEvent> save(
-        WebhookEvent webhookEvent
-    );
-
-    Mono<Boolean> existsByProviderEventId(
-        String providerEventId
+    Flux<ProviderEndpoint> findByProvider(
+        ProviderId providerId
     );
 }
 ```
 
 ---
 
-## Important Principle
-
-```text id="p1v9wr"
-Webhook processing
-must remain replay-safe
-```
-
----
-
-# 9. PaymentRetryRepository
+# 7. WebhookRepository
 
 ## Purpose
 
-Persists retry orchestration metadata.
+Persists inbound webhook orchestration.
+
+---
+
+## Examples
+
+```text id="g6m2xt"
+Stripe webhook
+GitHub webhook
+OAuth callback
+```
 
 ---
 
 ## Responsibilities
 
-* Store retry attempts
-* Prevent retry storms
-* Support retry analytics
-
----
-
-## Example Contract
-
-```java id="g6m2xt"
-public interface PaymentRetryRepository {
-
-    Mono<PaymentRetry> save(
-        PaymentRetry paymentRetry
-    );
-}
-```
-
----
-
-# 10. FraudAssessmentRepository
-
-## Purpose
-
-Persists fraud evaluation results.
-
----
-
-## Responsibilities
-
-* Store fraud classifications
-* Support fraud analytics
-* Preserve fraud traceability
+* Webhook persistence
+* Replay tracking
+* Signature correlation
 
 ---
 
 ## Example Contract
 
 ```java id="u7m1wr"
-public interface FraudAssessmentRepository {
+public interface WebhookRepository {
 
-    Mono<FraudAssessment> save(
-        FraudAssessment assessment
+    Mono<Webhook> save(
+        Webhook webhook
     );
 }
 ```
 
 ---
 
-## Examples
+## Critical Principle
 
 ```text id="m4v8wr"
-- velocity anomalies
-- suspicious geography
-- excessive retries
+External webhooks
+may arrive multiple times
 ```
 
 ---
 
-# 11. PaymentReconciliationRepository
+# 8. WebhookDeliveryRepository
 
 ## Purpose
 
-Persists provider consistency validation.
+Persists webhook delivery lifecycle.
 
 ---
 
 ## Responsibilities
 
-* Detect provider drift
-* Support recovery workflows
-* Preserve reconciliation history
+* Delivery tracking
+* Retry coordination
+* DLQ correlation
 
 ---
 
 ## Example Contract
 
 ```java id="t5v3xp"
-public interface PaymentReconciliationRepository {
+public interface WebhookDeliveryRepository {
 
-    Mono<PaymentReconciliation> save(
-        PaymentReconciliation reconciliation
+    Mono<WebhookDelivery> save(
+        WebhookDelivery delivery
     );
 }
 ```
 
 ---
 
-## Example Validation
-
-```text id="w2m8vt"
-Provider says CAPTURED
-Local says FAILED
-```
-
----
-
-# 12. SettlementRepository
+# 9. RetryPolicyRepository
 
 ## Purpose
 
-Persists settlement synchronization data.
+Persists retry orchestration policies.
+
+---
+
+## Supported Strategies
+
+```text id="w2m8vt"
+EXPONENTIAL_BACKOFF
+FIXED_RETRY
+NO_RETRY
+```
 
 ---
 
 ## Responsibilities
 
-* Store provider settlements
-* Support settlement reconciliation
-* Preserve settlement history
+* Retry configuration
+* Delay orchestration
+* Recovery persistence
 
 ---
 
 ## Example Contract
 
 ```java id="q7x1wr"
-public interface SettlementRepository {
+public interface RetryPolicyRepository {
 
-    Mono<SettlementRecord> save(
-        SettlementRecord settlement
-    );
-}
-```
-
----
-
-# 13. ChargebackRepository
-
-## Purpose
-
-Persists disputes and chargebacks.
-
----
-
-## Responsibilities
-
-* Store dispute lifecycle
-* Preserve dispute traceability
-* Support investigation workflows
-
----
-
-## Example Contract
-
-```java id="y9v4xp"
-public interface ChargebackRepository {
-
-    Mono<Chargeback> save(
-        Chargeback chargeback
-    );
-}
-```
-
----
-
-## Examples
-
-```text id="f4m7wr"
-FRAUD
-UNRECOGNIZED_CHARGE
-```
-
----
-
-# 14. PaymentSessionRepository
-
-## Purpose
-
-Persists checkout/payment sessions.
-
----
-
-## Responsibilities
-
-* Store checkout sessions
-* Manage session expiration
-* Support provider redirects
-
----
-
-## Example Contract
-
-```java id="u1x8vt"
-public interface PaymentSessionRepository {
-
-    Mono<PaymentSession> save(
-        PaymentSession session
-    );
-}
-```
-
----
-
-# 15. ProviderRoutingRepository
-
-## Purpose
-
-Persists provider routing metadata.
-
----
-
-## Responsibilities
-
-* Store routing rules
-* Support provider failover
-* Enable dynamic routing
-
----
-
-## Example Contract
-
-```java id="m6v2wr"
-public interface ProviderRoutingRepository {
-
-    Mono<ProviderRoutingRule> findByRegion(
-        String region
-    );
-}
-```
-
----
-
-## Examples
-
-```text id="g3x9vp"
-LATAM → MercadoPago
-US → Stripe
-```
-
----
-
-# 16. PaymentProjectionRepository
-
-## Purpose
-
-Provides CQRS-oriented payment read models.
-
----
-
-## Responsibilities
-
-* Fast transaction retrieval
-* Dashboard optimization
-* Fraud analytics
-* Provider metrics
-
----
-
-## Example Contract
-
-```java id="r5m1xt"
-public interface PaymentProjectionRepository {
-
-    Mono<PaymentProjection> findByTransaction(
-        PaymentTransactionId transactionId
-    );
-}
-```
-
----
-
-# 17. PaymentAuditRepository
-
-## Purpose
-
-Persists immutable payment traceability.
-
----
-
-## Responsibilities
-
-* Store lifecycle transitions
-* Preserve audit history
-* Support financial compliance
-
----
-
-## Example Contract
-
-```java id="x8v4wr"
-public interface PaymentAuditRepository {
-
-    Mono<PaymentAuditRecord> save(
-        PaymentAuditRecord record
-    );
+    Flux<RetryPolicy> findActivePolicies();
 }
 ```
 
@@ -570,49 +328,542 @@ public interface PaymentAuditRepository {
 
 ## Important Principle
 
-```text id="n7m1vt"
-Payment audit history
-must remain immutable
+```text id="y9v4xp"
+Retries
+must not amplify failures
 ```
 
 ---
 
-# 18. PaymentNotificationRepository
+# 10. RetryAttemptRepository
 
 ## Purpose
 
-Persists payment communication records.
+Persists retry executions.
 
 ---
 
 ## Responsibilities
 
-* Store notifications
-* Support communication traceability
-* Enable notification analytics
+* Retry tracking
+* Delay tracking
+* Failure analytics
 
 ---
 
 ## Example Contract
 
-```java id="k2v7xp"
-public interface PaymentNotificationRepository {
+```java id="f4m7wr"
+public interface RetryAttemptRepository {
 
-    Mono<PaymentNotification> save(
-        PaymentNotification notification
+    Mono<RetryAttempt> save(
+        RetryAttempt retryAttempt
     );
 }
 ```
 
 ---
 
-# 19. Multi-Tenant Repository Rules
+# 11. CircuitBreakerRepository
+
+## Purpose
+
+Persists circuit breaker states.
+
+---
+
+## Supported States
+
+```text id="u1x8vt"
+CLOSED
+OPEN
+HALF_OPEN
+```
+
+---
+
+## Responsibilities
+
+* Failure isolation persistence
+* State tracking
+* Recovery coordination
+
+---
+
+## Example Contract
+
+```java id="m6v2wr"
+public interface CircuitBreakerRepository {
+
+    Mono<CircuitBreaker> findByProvider(
+        ProviderId providerId
+    );
+}
+```
+
+---
+
+# 12. DLQRepository
+
+## Purpose
+
+Persists dead-letter queue failures.
+
+---
+
+## Examples
+
+```text id="g3x9vp"
+failed webhook
+failed CRM sync
+failed ERP event
+```
+
+---
+
+## Responsibilities
+
+* Failure persistence
+* Replay coordination
+* Operational visibility
+
+---
+
+## Example Contract
+
+```java id="r5m1xt"
+public interface DLQRepository {
+
+    Flux<DLQMessage> findReplayableMessages();
+}
+```
+
+---
+
+## Important Principle
+
+```text id="x8v4wr"
+Failures
+must remain recoverable
+```
+
+---
+
+# 13. OAuthIntegrationRepository
+
+## Purpose
+
+Persists OAuth integrations.
+
+---
+
+## Examples
+
+```text id="n7m1vt"
+Google OAuth
+Microsoft OAuth
+GitHub OAuth
+```
+
+---
+
+## Responsibilities
+
+* OAuth lifecycle persistence
+* Callback orchestration
+* Scope governance
+
+---
+
+## Example Contract
+
+```java id="k2v7xp"
+public interface OAuthIntegrationRepository {
+
+    Mono<OAuthIntegration> save(
+        OAuthIntegration oauthIntegration
+    );
+}
+```
+
+---
+
+# 14. OAuthTokenRepository
+
+## Purpose
+
+Persists OAuth tokens.
+
+---
+
+## Responsibilities
+
+* Token lifecycle
+* Refresh orchestration
+* Expiration tracking
+
+---
+
+## Example Contract
+
+```java id="d1m8wr"
+public interface OAuthTokenRepository {
+
+    Mono<OAuthToken> findActiveToken(
+        ProviderId providerId
+    );
+}
+```
+
+---
+
+# 15. IntegrationSecretRepository
+
+## Purpose
+
+Persists integration secret references.
+
+---
+
+## Examples
+
+```text id="h6x2vt"
+API keys
+OAuth secrets
+Webhook secrets
+```
+
+---
+
+## Responsibilities
+
+* Secret references
+* Rotation metadata
+* Access governance
+
+---
+
+## Example Contract
+
+```java id="t9v4xp"
+public interface IntegrationSecretRepository {
+
+    Mono<IntegrationSecret> findByReference(
+        SecretReference reference
+    );
+}
+```
+
+---
+
+## Critical Principle
+
+```text id="j4x9wt"
+Secrets
+must never be exposed
+```
+
+---
+
+# 16. IntegrationEventRepository
+
+## Purpose
+
+Persists event-driven integration metadata.
+
+---
+
+## Examples
+
+```text id="m7v1xp"
+UserCreated → CRM Sync
+PaymentCaptured → ERP Sync
+```
+
+---
+
+## Responsibilities
+
+* Event persistence
+* Async orchestration
+* Replay support
+
+---
+
+## Example Contract
+
+```java id="u5x8wr"
+public interface IntegrationEventRepository {
+
+    Mono<IntegrationEvent> save(
+        IntegrationEvent integrationEvent
+    );
+}
+```
+
+---
+
+# 17. ProviderHealthRepository
+
+## Purpose
+
+Persists provider operational health.
+
+---
+
+## Example
+
+```text id="q9m3vt"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
+```
+
+---
+
+## Responsibilities
+
+* Health scoring
+* Availability tracking
+* Routing analytics
+
+---
+
+## Example Contract
+
+```java id="k1m8vt"
+public interface ProviderHealthRepository {
+
+    Mono<ProviderHealth> findByProvider(
+        ProviderId providerId
+    );
+}
+```
+
+---
+
+# 18. QuotaRepository
+
+## Purpose
+
+Persists provider quota tracking.
+
+---
+
+## Examples
+
+```text id="d2m8wr"
+OpenAI TPM
+SES daily quota
+Twilio SMS quota
+```
+
+---
+
+## Responsibilities
+
+* Quota persistence
+* Usage accounting
+* Limit enforcement
+
+---
+
+## Example Contract
+
+```java id="u8x3wp"
+public interface QuotaRepository {
+
+    Mono<ProviderQuota> findQuota(
+        ProviderId providerId
+    );
+}
+```
+
+---
+
+# 19. IdempotencyRepository
+
+## Purpose
+
+Persists duplicate prevention metadata.
+
+---
+
+## Responsibilities
+
+* Replay protection
+* Duplicate detection
+* Request uniqueness
+
+---
+
+## Example Contract
+
+```java id="f6m9wr"
+public interface IdempotencyRepository {
+
+    Mono<IdempotencyRecord> findByKey(
+        IdempotencyKey key
+    );
+}
+```
+
+---
+
+## Critical Principle
+
+```text id="c8m4xt"
+External providers
+may resend requests
+multiple times
+```
+
+---
+
+# 20. IntegrationTelemetryRepository
+
+## Purpose
+
+Persists integration observability telemetry.
+
+---
+
+## Monitored Metrics
+
+```text id="u1x8wr"
+latency
+provider failures
+timeouts
+retry counts
+DLQ size
+```
+
+---
+
+## Responsibilities
+
+* Metrics persistence
+* Distributed tracing
+* Failure analytics
+
+---
+
+## Example Contract
+
+```java id="w6x3wr"
+public interface IntegrationTelemetryRepository {
+
+    Mono<IntegrationTelemetry> save(
+        IntegrationTelemetry telemetry
+    );
+}
+```
+
+---
+
+# 21. SynchronizationJobRepository
+
+## Purpose
+
+Persists synchronization workflows.
+
+---
+
+## Examples
+
+```text id="r1m7vp"
+CRM sync
+ERP sync
+billing export
+```
+
+---
+
+## Responsibilities
+
+* Job persistence
+* Batch orchestration
+* Scheduling coordination
+
+---
+
+## Example Contract
+
+```java id="x4v8xt"
+public interface SynchronizationJobRepository {
+
+    Mono<SynchronizationJob> save(
+        SynchronizationJob job
+    );
+}
+```
+
+---
+
+# 22. SynchronizationExecutionRepository
+
+## Purpose
+
+Persists synchronization execution tracking.
+
+---
+
+## Responsibilities
+
+* Execution tracking
+* Retry coordination
+* Failure persistence
+
+---
+
+## Example Contract
+
+```java id="f2v9xp"
+public interface SynchronizationExecutionRepository {
+
+    Mono<SynchronizationExecution> save(
+        SynchronizationExecution execution
+    );
+}
+```
+
+---
+
+# 23. IntegrationProjectionRepository
+
+## Purpose
+
+Provides CQRS integration projections.
+
+---
+
+## Responsibilities
+
+* Integration dashboards
+* Provider analytics
+* Retry analytics
+* DLQ visibility
+
+---
+
+## Example Contract
+
+```java id="m6x3vt"
+public interface IntegrationProjectionRepository {
+
+    Flux<IntegrationProjection> findActiveProjections();
+}
+```
+
+---
+
+# 24. Multi-Tenant Repository Rules
 
 ## Mandatory Isolation
 
 Repositories must enforce:
 
-```sql id="d1m8wr"
+```sql id="y5v2wp"
 WHERE tenant_id = :tenantId
 ```
 
@@ -620,81 +871,58 @@ WHERE tenant_id = :tenantId
 
 ## Forbidden Behavior
 
-```text id="h6x2vt"
-Cross-tenant payment access
+```text id="m2x7wp"
+Cross-tenant integration access
 ```
 
 ---
 
-# 20. PCI Boundary Isolation Rules
+# 25. Persistence Strategies
 
-## Forbidden Persistence
-
-Repositories must NEVER persist:
-
-```text id="t9v4xp"
-- CVV data
-- Full credit card numbers
-- Banking passwords
-- Raw provider secrets
-```
+| Aggregate                      | Strategy                  |
+| ------------------------------ | ------------------------- |
+| IntegrationAggregate           | Transactional persistence |
+| RetryPolicyAggregate           | Configuration persistence |
+| CircuitBreakerAggregate        | Fast state persistence    |
+| DLQAggregate                   | Durable append-only       |
+| IntegrationProjectionAggregate | CQRS projections          |
 
 ---
 
-## Allowed Data
+# 26. Recommended Database Technologies
 
-| Data                | Allowed |
-| ------------------- | ------- |
-| Payment tokens      | Yes     |
-| Masked card numbers | Yes     |
-| Provider references | Yes     |
-
----
-
-# 21. Persistence Strategies
-
-| Aggregate                   | Strategy                 |
-| --------------------------- | ------------------------ |
-| PaymentTransactionAggregate | Relational persistence   |
-| WebhookAggregate            | Append-heavy persistence |
-| FraudDetectionAggregate     | Event-driven persistence |
-| PaymentProjectionAggregate  | Read-optimized storage   |
+| Technology    | Usage                     |
+| ------------- | ------------------------- |
+| PostgreSQL    | Transactional persistence |
+| Redis         | Idempotency/cache         |
+| Kafka         | Event persistence         |
+| Elasticsearch | Integration observability |
+| ClickHouse    | Analytics                 |
+| Vault         | Secret references         |
 
 ---
 
-# 22. Recommended Database Technologies
-
-| Technology    | Usage                    |
-| ------------- | ------------------------ |
-| PostgreSQL    | Core payment persistence |
-| Redis         | CQRS projections         |
-| Kafka         | Payment events           |
-| Elasticsearch | Fraud analytics          |
-| TimescaleDB   | Payment metrics          |
-
----
-
-# 23. CQRS Considerations
+# 27. CQRS Considerations
 
 ## Write Side
 
-* Payment authorization
-* Payment capture
-* Refund execution
-* Webhook synchronization
+* Integration execution
+* Retry orchestration
+* Provider failover
+* DLQ persistence
 
 ---
 
 ## Read Side
 
-* Payment dashboards
-* Fraud analytics
-* Settlement reporting
-* Provider metrics
+* Integration dashboards
+* Provider analytics
+* Retry visibility
+* Quota analytics
 
 ---
 
-# 24. Reactive Repository Considerations
+# 28. Reactive Repository Considerations
 
 Reactive support strongly recommended.
 
@@ -702,56 +930,33 @@ Reactive support strongly recommended.
 
 ## Example
 
-```java id="j4x9wt"
-Mono<PaymentTransaction>
-Flux<WebhookEvent>
+```java id="h4m9wr"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
 ```
 
 ---
 
 ## Benefits
 
-| Benefit                  | Description               |
-| ------------------------ | ------------------------- |
-| Non-blocking persistence | Scalability               |
-| High concurrency         | SaaS scale                |
-| Async reconciliation     | Distributed orchestration |
+| Benefit                   | Description          |
+| ------------------------- | -------------------- |
+| Non-blocking integrations | Scalability          |
+| Async retries             | Fault tolerance      |
+| Streaming orchestration   | Real-time processing |
 
 ---
 
-# 25. Transaction Management
-
-## Strong Consistency Required
-
-| Operation                 | Reason                 |
-| ------------------------- | ---------------------- |
-| Payment capture           | Financial integrity    |
-| Refund execution          | Monetary correctness   |
-| Webhook synchronization   | State consistency      |
-| Settlement reconciliation | Financial traceability |
-
----
-
-## Eventual Consistency Acceptable
-
-| Operation          | Reason            |
-| ------------------ | ----------------- |
-| Fraud analytics    | Reporting         |
-| Payment dashboards | Read optimization |
-| Provider metrics   | BI workloads      |
-
----
-
-# 26. Security-Critical Repository Rules
+# 29. Security-Critical Repository Rules
 
 ## Mandatory Protections
 
-| Protection             | Required |
-| ---------------------- | -------- |
-| Tenant isolation       | Yes      |
-| PCI boundary isolation | Yes      |
-| Replay protection      | Yes      |
-| Immutable auditability | Yes      |
+| Protection              | Required |
+| ----------------------- | -------- |
+| Secret encryption       | Yes      |
+| Replay protection       | Yes      |
+| Idempotency enforcement | Yes      |
+| Provider authentication | Yes      |
 
 ---
 
@@ -759,56 +964,12 @@ Flux<WebhookEvent>
 
 Repositories must never expose:
 
-```text id="m7v1xp"
-- CVV data
-- Banking credentials
-- Provider secrets
+```text id="d1x8vp"
+- raw API keys
+- OAuth secrets
+- webhook secrets
+- private credentials
 ```
-
----
-
-# 27. Performance Considerations
-
-Critical performance areas:
-
-| Area                      | Optimization           |
-| ------------------------- | ---------------------- |
-| Webhook ingestion         | Append/event streaming |
-| Payment retrieval         | CQRS projections       |
-| Fraud analytics           | Elasticsearch          |
-| Settlement reconciliation | Async processing       |
-
----
-
-# 28. Indexing Recommendations
-
-| Table                 | Recommended Index  |
-| --------------------- | ------------------ |
-| payment_transactions  | tenant_id + status |
-| provider_transactions | provider_reference |
-| webhook_events        | provider_event_id  |
-| settlements           | settlement_date    |
-
----
-
-# 29. Soft Delete Strategy
-
-Recommended approach:
-
-```text id="u5x8wr"
-Logical deletion preferred
-for payment traceability
-```
-
----
-
-## Benefits
-
-| Benefit            | Description            |
-| ------------------ | ---------------------- |
-| Auditability       | Financial traceability |
-| Recovery support   | Operational safety     |
-| Compliance support | Governance             |
 
 ---
 
@@ -816,11 +977,11 @@ for payment traceability
 
 Repositories support:
 
-* Multi-region payment orchestration
-* Distributed reconciliation
-* Reactive synchronization
-* Event-driven consistency
+* Multi-region integrations
+* Distributed retries
+* Event-driven orchestration
 * Horizontal scalability
+* Fault-tolerant provider routing
 
 ---
 
@@ -828,27 +989,28 @@ Repositories support:
 
 Future repositories may include:
 
-* CryptoPaymentRepository
-* BNPLRepository
-* MarketplaceSplitRepository
-* RealTimeTransferRepository
-* AI FraudSignalRepository
+* AIProviderRoutingRepository
+* PredictiveFailoverRepository
+* AutonomousRetryRepository
+* SmartQuotaOptimizationRepository
+* SelfHealingIntegrationRepository
 
 ---
 
 # 32. Summary
 
-The Payment Management repositories provide:
+The Integration Management repositories provide:
 
-* Enterprise-grade payment persistence
-* PCI-aware payment isolation
-* Reactive payment orchestration
-* Distributed provider synchronization
-* Fraud-aware transaction governance
-* Multi-provider routing support
-* Scalable SaaS payment resilience
+* Enterprise-grade external orchestration persistence
+* Provider-agnostic architecture
+* Fault-tolerant integrations
+* Reactive integration pipelines
+* Distributed webhook orchestration
+* Multi-provider failover
+* Secure interoperability
+* Scalable event-driven integrations
 
-These repositories form the persistence backbone of the payment ecosystem.
+These repositories form the persistence backbone of the integration ecosystem.
 
 ```
 ```

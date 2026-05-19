@@ -1,31 +1,32 @@
-# 11-payment-management/value-objects.md
+# 14-integration-management/value-objects.md
 
-````md id="p9x4vp"
-# Payment Management Value Objects
+````md id="t1x4vp"
+# Integration Management Value Objects
 
 ## 1. Introduction
 
-This document defines the Value Objects of the Payment Management module.
+This document defines the Value Objects of the Integration Management module.
 
-Value Objects represent immutable payment concepts that:
+Value Objects represent immutable integration concepts that:
 
 - Have no identity
 - Are compared by value
-- Encapsulate payment validation
-- Protect transactional integrity
-- Preserve provider consistency
-- Support PCI boundary isolation
-- Enable replay-safe orchestration
-- Improve domain expressiveness
+- Encapsulate integration semantics
+- Preserve provider abstraction
+- Enable fault tolerance
+- Support retry orchestration
+- Protect webhook security
+- Govern idempotency
+- Enable observability
 
 The Value Objects are designed following:
 
 - Domain-Driven Design (DDD)
-- PCI DSS boundary isolation
+- Event-Driven Architecture (EDA)
+- Reactive integration orchestration
+- Provider-agnostic architecture
 - Multi-tenant SaaS governance
-- Reactive payment orchestration
-- Event-driven financial consistency
-- Enterprise payment resilience
+- Enterprise fault tolerance
 
 ---
 
@@ -33,355 +34,139 @@ The Value Objects are designed following:
 
 | Value Object | Purpose |
 |---|---|
-| PaymentStatus | Transaction lifecycle |
-| PaymentProvider | External processor |
-| PaymentMethodType | Payment mechanism |
-| PaymentAmount | Monetary payment value |
-| CurrencyCode | Currency normalization |
-| ProviderReference | External correlation |
-| AuthorizationCode | Provider authorization |
-| CaptureReference | Capture tracking |
-| RefundType | Reimbursement classification |
-| RefundReason | Refund rationale |
-| RetryPolicy | Retry orchestration |
-| RetryStrategy | Retry behavior |
-| RetryCount | Retry tracking |
-| FraudRiskLevel | Fraud classification |
-| FraudScore | Fraud evaluation |
-| WebhookSignatureValue | Signature validation |
+| ProviderType | Provider classification |
+| IntegrationType | Integration categorization |
+| WebhookSignature | Webhook validation |
+| RetryStrategy | Retry semantics |
+| CircuitBreakerState | Fault tolerance state |
+| ProviderHealthStatus | Provider availability |
+| IntegrationLatency | Performance analytics |
+| QuotaLimit | Provider quotas |
+| QuotaUsage | Consumption tracking |
+| OAuthScope | OAuth authorization |
+| OAuthGrantType | OAuth flow definition |
+| SecretReference | Secure secret reference |
+| IdempotencyKey | Replay prevention |
+| IntegrationStatus | Integration lifecycle |
+| RetryDelay | Retry scheduling |
+| ProviderPriority | Failover routing |
+| DLQReason | Failure classification |
+| IntegrationProtocol | Transport protocol |
+| ProviderRegion | Regional routing |
+| IntegrationErrorCode | Failure classification |
 | WebhookEventType | Webhook categorization |
-| PaymentToken | Tokenized reference |
-| MaskedCardNumber | PCI-safe card visualization |
-| PaymentExpiration | Payment/session expiration |
-| ReconciliationStatus | Provider synchronization |
-| SettlementStatus | Settlement lifecycle |
-| PaymentFailureReason | Failure classification |
-| ProviderRoutingRule | Dynamic routing |
-| ChargebackReason | Dispute classification |
-| CorrelationReference | Distributed tracing |
+| SynchronizationMode | Sync orchestration |
+| IntegrationDirection | Inbound/outbound routing |
+| IntegrationHealthScore | Reliability scoring |
+| ProviderCapability | Provider feature support |
 
 ---
 
-# 3. PaymentStatus
+# 3. ProviderType
 
 ## Purpose
 
-Represents the lifecycle state of a payment.
+Represents external provider classification.
 
 ---
 
-## Supported Values
+## Examples
 
 ```text id="u5m1wr"
-PENDING
-AUTHORIZED
-CAPTURED
-FAILED
-REFUNDED
-CANCELED
-EXPIRED
-RETRY_PENDING
+EMAIL
+PAYMENT
+AI
+CRM
+ERP
+SMS
 ````
 
 ---
 
 ## Behaviors
 
-| Behavior        | Description            |
-| --------------- | ---------------------- |
-| isFinal()       | Final state validation |
-| allowsCapture() | Capture eligibility    |
-| allowsRefund()  | Refund eligibility     |
+| Behavior            | Description           |
+| ------------------- | --------------------- |
+| supportsStreaming() | Capability evaluation |
+| supportsRetries()   | Resilience validation |
 
 ---
 
-## Critical Rule
-
-```text id="m8v3xp"
-Captured payments
-must become immutable
-```
-
----
-
-# 4. PaymentProvider
+# 4. IntegrationType
 
 ## Purpose
 
-Represents external payment processors.
+Represents integration categorization.
 
 ---
 
-## Supported Providers
+## Examples
 
-```text id="f2x7wr"
-STRIPE
-PAYPAL
-MERCADOPAGO
-ADYEN
+```text id="m8v3xp"
+SYNC
+ASYNC
+EVENT_DRIVEN
+STREAMING
+BATCH
 ```
-
----
-
-## Behaviors
-
-| Behavior                 | Description            |
-| ------------------------ | ---------------------- |
-| supportsRefunds()        | Capability validation  |
-| supportsPartialCapture() | Provider compatibility |
 
 ---
 
 ## Important Principle
 
-```text id="r4m9vt"
-Provider SDKs
-must remain isolated
-behind ACL layers
+```text id="f2x7wr"
+Different integration types
+require different resiliency models
 ```
 
 ---
 
-# 5. PaymentMethodType
+# 5. WebhookSignature
 
 ## Purpose
 
-Represents payment mechanisms.
+Represents webhook signature validation.
 
 ---
 
-## Supported Types
+## Responsibilities
 
-```text id="x9v1wr"
-CARD
-BANK_TRANSFER
-DIGITAL_WALLET
-APPLE_PAY
-GOOGLE_PAY
-```
+* Signature verification
+* Replay protection
+* Integrity validation
 
 ---
 
 ## Behaviors
 
-| Behavior                | Description         |
-| ----------------------- | ------------------- |
-| requiresAuthorization() | Workflow validation |
-
----
-
-# 6. PaymentAmount
-
-## Purpose
-
-Represents monetary payment values.
-
----
-
-## Examples
-
-```text id="k3m8xp"
-49.99 USD
-120.00 EUR
-```
-
----
-
-## Validation Rules
-
-| Rule                      | Description          |
-| ------------------------- | -------------------- |
-| Negative values forbidden | Financial integrity  |
-| Precision enforcement     | Monetary correctness |
-| Currency consistency      | Validation           |
-
----
-
-## Behaviors
-
-| Behavior    | Description           |
-| ----------- | --------------------- |
-| add()       | Monetary aggregation  |
-| subtract()  | Financial subtraction |
-| compareTo() | Financial comparison  |
+| Behavior            | Description           |
+| ------------------- | --------------------- |
+| validateSignature() | Security verification |
 
 ---
 
 ## Critical Principle
 
-```text id="p1v9wr"
-Floating-point arithmetic
-must not be used
-for payment calculations
+```text id="r4m9vt"
+Webhook payloads
+must be verifiable
 ```
 
 ---
 
-# 7. CurrencyCode
+# 6. RetryStrategy
 
 ## Purpose
 
-Represents ISO currency identifiers.
+Represents retry orchestration semantics.
 
 ---
 
-## Examples
+## Supported Strategies
 
-```text id="g6m2xt"
-USD
-EUR
-GBP
-```
-
----
-
-## Validation Rules
-
-| Rule                    | Description |
-| ----------------------- | ----------- |
-| ISO-4217 compliance     | Recommended |
-| Uppercase normalization | Required    |
-
----
-
-# 8. ProviderReference
-
-## Purpose
-
-Represents external provider transaction correlation.
-
----
-
-## Examples
-
-```text id="u7m1wr"
-pi_xxxxx
-txn_xxxxx
-mp_xxxxx
-```
-
----
-
-## Behaviors
-
-| Behavior             | Description            |
-| -------------------- | ---------------------- |
-| normalizeReference() | Consistency validation |
-
----
-
-# 9. AuthorizationCode
-
-## Purpose
-
-Represents provider authorization references.
-
----
-
-## Examples
-
-```text id="m4v8wr"
-AUTH-2026-XYZ
-```
-
----
-
-## Behaviors
-
-| Behavior                      | Description         |
-| ----------------------------- | ------------------- |
-| validateAuthorizationFormat() | Provider validation |
-
----
-
-# 10. CaptureReference
-
-## Purpose
-
-Represents payment capture correlation.
-
----
-
-## Examples
-
-```text id="t5v3xp"
-CAPTURE-STRIPE-001
-```
-
----
-
-## Behaviors
-
-| Behavior                   | Description             |
-| -------------------------- | ----------------------- |
-| validateCaptureReference() | Traceability validation |
-
----
-
-# 11. RefundType
-
-## Purpose
-
-Represents reimbursement categories.
-
----
-
-## Supported Types
-
-```text id="w2m8vt"
-FULL_REFUND
-PARTIAL_REFUND
-```
-
----
-
-## Behaviors
-
-| Behavior    | Description           |
-| ----------- | --------------------- |
-| isPartial() | Refund classification |
-
----
-
-# 12. RefundReason
-
-## Purpose
-
-Represents reimbursement rationale.
-
----
-
-## Examples
-
-```text id="q7x1wr"
-CUSTOMER_REQUEST
-FRAUD
-BILLING_ERROR
-```
-
----
-
-## Behaviors
-
-| Behavior                 | Description           |
-| ------------------------ | --------------------- |
-| requiresManualApproval() | Governance validation |
-
----
-
-# 13. RetryPolicy
-
-## Purpose
-
-Represents retry orchestration rules.
-
----
-
-## Examples
-
-```text id="y9v4xp"
+```text id="x9v1wr"
 EXPONENTIAL_BACKOFF
-FIXED_DELAY
+FIXED_RETRY
 NO_RETRY
 ```
 
@@ -389,104 +174,167 @@ NO_RETRY
 
 ## Behaviors
 
-| Behavior             | Description      |
-| -------------------- | ---------------- |
-| calculateNextRetry() | Retry scheduling |
+| Behavior              | Description      |
+| --------------------- | ---------------- |
+| calculateRetryDelay() | Retry scheduling |
 
 ---
 
-# 14. RetryStrategy
+## Important Principle
+
+```text id="k3m8xp"
+Retries
+must not amplify failures
+```
+
+---
+
+# 7. CircuitBreakerState
 
 ## Purpose
 
-Represents retry execution behavior.
+Represents circuit breaker states.
 
 ---
 
-## Examples
+## Supported States
 
-```text id="f4m7wr"
-IMMEDIATE
-DELAYED
-MANUAL_REVIEW
+```text id="p1v9wr"
+CLOSED
+OPEN
+HALF_OPEN
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior               | Description      |
-| ---------------------- | ---------------- |
-| allowsAutomaticRetry() | Retry governance |
+| Behavior         | Description                |
+| ---------------- | -------------------------- |
+| allowsRequests() | Fault tolerance evaluation |
 
 ---
 
-# 15. RetryCount
+# 8. ProviderHealthStatus
 
 ## Purpose
 
-Represents retry attempts.
+Represents provider operational health.
 
 ---
 
-## Validation Rules
+## Supported States
 
-| Rule                       | Description |
-| -------------------------- | ----------- |
-| Negative retries forbidden | Validation  |
-| Max retries enforced       | Protection  |
-
----
-
-## Behaviors
-
-| Behavior        | Description      |
-| --------------- | ---------------- |
-| increment()     | Retry tracking   |
-| exceededLimit() | Retry exhaustion |
+```text id="g6m2xt"
+HEALTHY
+DEGRADED
+DOWN
+UNKNOWN
+```
 
 ---
 
-# 16. FraudRiskLevel
+## Examples
 
-## Purpose
-
-Represents fraud classification.
-
----
-
-## Supported Levels
-
-```text id="u1x8vt"
-LOW
-MEDIUM
-HIGH
-CRITICAL
+```text id="u7m1wr"
+Stripe = HEALTHY
+OpenAI = DEGRADED
+SMTP = DOWN
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior               | Description      |
-| ---------------------- | ---------------- |
-| requiresManualReview() | Fraud governance |
+| Behavior          | Description        |
+| ----------------- | ------------------ |
+| supportsTraffic() | Routing validation |
 
 ---
 
-# 17. FraudScore
+# 9. IntegrationLatency
 
 ## Purpose
 
-Represents fraud evaluation scores.
+Represents provider response latency.
 
 ---
 
 ## Examples
 
-```text id="m6v2wr"
-0.15
-0.92
+```text id="m4v8wr"
+50ms
+300ms
+2s
+```
+
+---
+
+## Behaviors
+
+| Behavior           | Description            |
+| ------------------ | ---------------------- |
+| exceedsThreshold() | Performance evaluation |
+
+---
+
+# 10. QuotaLimit
+
+## Purpose
+
+Represents provider quota limits.
+
+---
+
+## Examples
+
+```text id="t5v3xp"
+1000 requests/minute
+50000 emails/day
+```
+
+---
+
+## Behaviors
+
+| Behavior     | Description       |
+| ------------ | ----------------- |
+| isExceeded() | Quota enforcement |
+
+---
+
+# 11. QuotaUsage
+
+## Purpose
+
+Represents provider consumption tracking.
+
+---
+
+## Behaviors
+
+| Behavior                  | Description            |
+| ------------------------- | ---------------------- |
+| incrementUsage()          | Consumption accounting |
+| calculateRemainingQuota() | Operational visibility |
+
+---
+
+# 12. OAuthScope
+
+## Purpose
+
+Represents OAuth authorization scopes.
+
+---
+
+## Examples
+
+```text id="w2m8vt"
+email
+profile
+payments.read
+crm.write
 ```
 
 ---
@@ -495,36 +343,295 @@ Represents fraud evaluation scores.
 
 | Behavior           | Description      |
 | ------------------ | ---------------- |
-| exceedsThreshold() | Fraud evaluation |
+| grantsPermission() | Scope validation |
 
 ---
 
-# 18. WebhookSignatureValue
+# 13. OAuthGrantType
 
 ## Purpose
 
-Represents webhook authenticity validation.
+Represents OAuth grant semantics.
+
+---
+
+## Supported Types
+
+```text id="q7x1wr"
+AUTHORIZATION_CODE
+CLIENT_CREDENTIALS
+REFRESH_TOKEN
+```
 
 ---
 
 ## Behaviors
 
-| Behavior            | Description       |
-| ------------------- | ----------------- |
-| validateSignature() | Replay protection |
+| Behavior                  | Description     |
+| ------------------------- | --------------- |
+| requiresUserInteraction() | Flow evaluation |
 
 ---
 
-## Critical Rule
+# 14. SecretReference
 
-```text id="g3x9vp"
-Webhook signatures
-must always be validated
+## Purpose
+
+Represents secure secret references.
+
+---
+
+## Examples
+
+```text id="y9v4xp"
+vault://stripe/api-key
+vault://openai/secret
 ```
 
 ---
 
-# 19. WebhookEventType
+## Behaviors
+
+| Behavior        | Description      |
+| --------------- | ---------------- |
+| resolveSecret() | Secure retrieval |
+
+---
+
+## Critical Principle
+
+```text id="f4m7wr"
+Secrets
+must never be hardcoded
+```
+
+---
+
+# 15. IdempotencyKey
+
+## Purpose
+
+Represents duplicate prevention semantics.
+
+---
+
+## Responsibilities
+
+* Replay detection
+* Duplicate prevention
+* Request uniqueness
+
+---
+
+## Behaviors
+
+| Behavior         | Description          |
+| ---------------- | -------------------- |
+| matchesRequest() | Duplicate validation |
+
+---
+
+## Important Principle
+
+```text id="u1x8vt"
+External providers
+may resend requests
+multiple times
+```
+
+---
+
+# 16. IntegrationStatus
+
+## Purpose
+
+Represents integration lifecycle states.
+
+---
+
+## Supported States
+
+```text id="m6v2wr"
+PENDING
+RUNNING
+COMPLETED
+FAILED
+CANCELLED
+```
+
+---
+
+## Behaviors
+
+| Behavior          | Description          |
+| ----------------- | -------------------- |
+| isTerminalState() | Lifecycle evaluation |
+
+---
+
+# 17. RetryDelay
+
+## Purpose
+
+Represents retry scheduling delays.
+
+---
+
+## Examples
+
+```text id="g3x9vp"
+1s
+5s
+30s
+5m
+```
+
+---
+
+## Behaviors
+
+| Behavior      | Description            |
+| ------------- | ---------------------- |
+| applyJitter() | Retry storm prevention |
+
+---
+
+# 18. ProviderPriority
+
+## Purpose
+
+Represents provider failover priority.
+
+---
+
+## Examples
+
+```text id="r5m1xt"
+PRIMARY
+SECONDARY
+TERTIARY
+```
+
+---
+
+## Behaviors
+
+| Behavior               | Description        |
+| ---------------------- | ------------------ |
+| isHigherPriorityThan() | Routing comparison |
+
+---
+
+# 19. DLQReason
+
+## Purpose
+
+Represents dead-letter queue failure classification.
+
+---
+
+## Examples
+
+```text id="x8v4wr"
+TIMEOUT
+INVALID_SIGNATURE
+RATE_LIMIT
+PROVIDER_DOWN
+```
+
+---
+
+## Behaviors
+
+| Behavior                     | Description         |
+| ---------------------------- | ------------------- |
+| requiresManualIntervention() | Recovery evaluation |
+
+---
+
+# 20. IntegrationProtocol
+
+## Purpose
+
+Represents transport protocols.
+
+---
+
+## Supported Protocols
+
+```text id="n7m1vt"
+HTTP
+HTTPS
+gRPC
+Kafka
+AMQP
+WebSocket
+```
+
+---
+
+## Behaviors
+
+| Behavior            | Description           |
+| ------------------- | --------------------- |
+| supportsStreaming() | Capability validation |
+
+---
+
+# 21. ProviderRegion
+
+## Purpose
+
+Represents provider regional routing.
+
+---
+
+## Examples
+
+```text id="k2v7xp"
+us-east
+eu-west
+sa-east
+```
+
+---
+
+## Behaviors
+
+| Behavior                      | Description         |
+| ----------------------------- | ------------------- |
+| supportsLatencyOptimization() | Regional evaluation |
+
+---
+
+# 22. IntegrationErrorCode
+
+## Purpose
+
+Represents integration failure semantics.
+
+---
+
+## Examples
+
+```text id="d1m8wr"
+TIMEOUT
+AUTH_FAILURE
+QUOTA_EXCEEDED
+INVALID_PAYLOAD
+```
+
+---
+
+## Behaviors
+
+| Behavior      | Description         |
+| ------------- | ------------------- |
+| isRetryable() | Recovery evaluation |
+
+---
+
+# 23. WebhookEventType
 
 ## Purpose
 
@@ -534,102 +641,88 @@ Represents webhook categorization.
 
 ## Examples
 
-```text id="r5m1xt"
-PAYMENT_SUCCEEDED
-PAYMENT_FAILED
-REFUND_COMPLETED
+```text id="h6x2vt"
+PAYMENT_CAPTURED
+SUBSCRIPTION_UPDATED
+USER_CREATED
 ```
 
 ---
 
 ## Behaviors
 
-| Behavior                  | Description          |
-| ------------------------- | -------------------- |
-| isPaymentLifecycleEvent() | Event classification |
+| Behavior           | Description         |
+| ------------------ | ------------------- |
+| requiresOrdering() | Workflow evaluation |
 
 ---
 
-# 20. PaymentToken
+# 24. SynchronizationMode
 
 ## Purpose
 
-Represents tokenized payment references.
+Represents synchronization orchestration.
+
+---
+
+## Supported Modes
+
+```text id="t9v4xp"
+FULL_SYNC
+INCREMENTAL_SYNC
+REALTIME_SYNC
+```
+
+---
+
+## Behaviors
+
+| Behavior         | Description         |
+| ---------------- | ------------------- |
+| supportsReplay() | Recovery validation |
+
+---
+
+# 25. IntegrationDirection
+
+## Purpose
+
+Represents integration routing direction.
+
+---
+
+## Supported Directions
+
+```text id="j4x9wt"
+INBOUND
+OUTBOUND
+```
 
 ---
 
 ## Examples
 
-```text id="x8v4wr"
-tok_xxx
-vault_ref_xxx
+```text id="m7v1xp"
+Stripe webhook → INBOUND
+CRM sync → OUTBOUND
 ```
 
 ---
 
-## Important Principle
-
-```text id="n7m1vt"
-Raw payment credentials
-must never be stored
-```
-
----
-
-# 21. MaskedCardNumber
+# 26. IntegrationHealthScore
 
 ## Purpose
 
-Represents PCI-safe card visualization.
+Represents provider reliability scoring.
 
 ---
 
 ## Examples
 
-```text id="k2v7xp"
-**** **** **** 1234
-```
-
----
-
-## Behaviors
-
-| Behavior   | Description      |
-| ---------- | ---------------- |
-| maskCard() | PCI-safe masking |
-
----
-
-# 22. PaymentExpiration
-
-## Purpose
-
-Represents session/payment expiration.
-
----
-
-## Behaviors
-
-| Behavior    | Description           |
-| ----------- | --------------------- |
-| isExpired() | Expiration validation |
-
----
-
-# 23. ReconciliationStatus
-
-## Purpose
-
-Represents synchronization consistency.
-
----
-
-## Supported Values
-
-```text id="d1m8wr"
-SYNCHRONIZED
-PENDING_RECONCILIATION
-DESYNCHRONIZED
+```text id="u5x8wr"
+95%
+72%
+15%
 ```
 
 ---
@@ -638,75 +731,24 @@ DESYNCHRONIZED
 
 | Behavior           | Description            |
 | ------------------ | ---------------------- |
-| requiresRecovery() | Recovery orchestration |
+| supportsFailover() | Reliability evaluation |
 
 ---
 
-# 24. SettlementStatus
+# 27. ProviderCapability
 
 ## Purpose
 
-Represents settlement lifecycle.
-
----
-
-## Supported Values
-
-```text id="h6x2vt"
-PENDING
-SETTLED
-FAILED
-```
-
----
-
-## Behaviors
-
-| Behavior    | Description           |
-| ----------- | --------------------- |
-| isSettled() | Settlement validation |
-
----
-
-# 25. PaymentFailureReason
-
-## Purpose
-
-Represents transaction failure classification.
+Represents provider-supported features.
 
 ---
 
 ## Examples
 
-```text id="t9v4xp"
-INSUFFICIENT_FUNDS
-PROVIDER_TIMEOUT
-FRAUD_REJECTED
-```
-
----
-
-## Behaviors
-
-| Behavior      | Description       |
-| ------------- | ----------------- |
-| isRetryable() | Retry eligibility |
-
----
-
-# 26. ProviderRoutingRule
-
-## Purpose
-
-Represents provider routing logic.
-
----
-
-## Examples
-
-```text id="j4x9wt"
-LATAM → MercadoPago
-EU → Adyen
+```text id="q9m3vt"
+streaming
+batch-processing
+async-callbacks
 ```
 
 ---
@@ -715,53 +757,11 @@ EU → Adyen
 
 | Behavior          | Description           |
 | ----------------- | --------------------- |
-| resolveProvider() | Routing orchestration |
+| supportsFeature() | Capability evaluation |
 
 ---
 
-# 27. ChargebackReason
-
-## Purpose
-
-Represents dispute classifications.
-
----
-
-## Examples
-
-```text id="m7v1xp"
-FRAUD
-DUPLICATE_PAYMENT
-UNRECOGNIZED_CHARGE
-```
-
----
-
-## Behaviors
-
-| Behavior                | Description        |
-| ----------------------- | ------------------ |
-| requiresInvestigation() | Dispute governance |
-
----
-
-# 28. CorrelationReference
-
-## Purpose
-
-Represents distributed tracing identifiers.
-
----
-
-## Behaviors
-
-| Behavior               | Description         |
-| ---------------------- | ------------------- |
-| propagateCorrelation() | Distributed tracing |
-
----
-
-# 29. Equality Rules
+# 28. Equality Rules
 
 All Value Objects compare by value.
 
@@ -769,107 +769,117 @@ All Value Objects compare by value.
 
 ## Example
 
-```text id="u5x8wr"
-PaymentAmount(10.00 USD)
+```text id="k1m8vt"
+RetryStrategy(EXPONENTIAL_BACKOFF)
 ==
-PaymentAmount(10.00 USD)
+RetryStrategy(EXPONENTIAL_BACKOFF)
 ```
 
 ---
 
-# 30. Immutability Requirements
+# 29. Immutability Requirements
 
 All Value Objects must be:
 
 * Immutable
 * Thread-safe
-* Side-effect free
 * Serialization-safe
+* Side-effect free
 
 ---
 
-# 31. Serialization Considerations
+# 30. Serialization Considerations
 
 Value Objects must support:
 
 * JSON serialization
 * Kafka serialization
-* Reactive pipelines
-* Distributed tracing
+* Reactive propagation
+* Distributed messaging
 
 ---
 
-# 32. Security-Critical Rules
+# 31. Security-Critical Rules
 
 ## Mandatory Protections
 
-| Protection                   | Required |
-| ---------------------------- | -------- |
-| PCI isolation                | Yes      |
-| Webhook signature validation | Yes      |
-| Fraud traceability           | Yes      |
-| Provider correlation         | Yes      |
+| Protection              | Required |
+| ----------------------- | -------- |
+| Secret references only  | Yes      |
+| Replay protection       | Yes      |
+| Idempotency enforcement | Yes      |
+| Provider authentication | Yes      |
 
 ---
 
 ## Forbidden Behavior
 
-```text id="q9m3vt"
-Raw payment credentials
-must never cross
-domain boundaries
+```text id="d2m8wr"
+Secrets
+must never be hardcoded
 ```
 
 ---
 
-# 33. Reactive Considerations
+# 32. Reactive Considerations
 
 Reactive implementations should support:
 
-```text id="k1m8vt"
-Mono<PaymentStatus>
-Flux<WebhookEventType>
+```text id="u8x3wp"
+Flux<IntegrationEvent>
+Mono<ProviderResponse>
 ```
 
 ---
 
-# 34. Distributed System Considerations
+## Benefits
+
+| Benefit                   | Description            |
+| ------------------------- | ---------------------- |
+| Non-blocking integrations | Scalability            |
+| Async retries             | Resilience             |
+| Streaming orchestration   | Real-time connectivity |
+
+---
+
+# 33. Distributed System Considerations
 
 The Value Objects support:
 
-* Multi-provider orchestration
-* Replay-safe payments
-* Distributed reconciliation
-* Event-driven synchronization
+* Multi-region integrations
+* Distributed retries
+* Event-driven orchestration
 * Horizontal scalability
+* Fault-tolerant provider routing
 
 ---
 
-# 35. Future Value Object Extensions
+# 34. Future Value Object Extensions
 
 Future Value Objects may include:
 
-* CryptoWalletReference
-* BNPLProviderReference
-* AI FraudSignal
-* RealTimeTransferReference
-* MarketplaceSplitRule
+* AIProviderRoutingPolicy
+* PredictiveFailoverScore
+* AutonomousRetryStrategy
+* SmartQuotaAllocation
+* SelfHealingDecision
 
 ---
 
-# 36. Summary
+# 35. Summary
 
-The Payment Management Value Objects provide:
+The Integration Management Value Objects provide:
 
-* Enterprise-grade payment modeling
-* PCI-aware boundary isolation
-* Reactive payment orchestration
-* Distributed provider synchronization
-* Fraud-aware transaction governance
-* Multi-provider routing consistency
-* Scalable SaaS payment integrity
+* Enterprise-grade integration semantics
+* Provider-agnostic architecture
+* Fault-tolerant orchestration
+* Reactive integration pipelines
+* Distributed webhook protection
+* Multi-provider failover
+* Secure interoperability
+* Scalable event-driven integrations
 
-These Value Objects form the immutable semantic foundation of the payment ecosystem.
+These Value Objects form the immutable semantic foundation of the integration ecosystem.
 
 ```
 ```
