@@ -1,0 +1,23 @@
+# IntelliJ
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+out/
+target/
+
+# Generated
+bin/
+
+# Environment
+.env
