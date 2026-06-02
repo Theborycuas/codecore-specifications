@@ -190,6 +190,33 @@ Integration tests MUST validate:
 
 ---
 
+# 6.5 Implemented Integration Tests (CodeCore backend — PASO 10.7)
+
+**Infrastructure:** Testcontainers `postgres:16-alpine` only (no local Docker DB, no H2).
+
+**Base class:** `AbstractPostgresIntegrationTest` — shared container, Flyway `classpath:db/migration`, dynamic R2DBC properties.
+
+**Current scope:**
+
+| Test class | Validates |
+|---|---|
+| `RegisterIdentityUseCaseIT` | `RegisterIdentityUseCase` → `IdentityRepository` → `R2dbcIdentityRepository` → PostgreSQL |
+| `R2dbcIdentityRepositoryIT` | Repository adapter, tenant email uniqueness, round-trip |
+
+**Persistence rules verified (10.7):**
+
+* Flyway: schema `iam`, table `iam.iam_user`, `flyway_schema_history`
+* Tenant-scoped email uniqueness (`tenant_id` + `normalized_email`)
+* Same email allowed across different tenants
+* Registration status `PENDING_VERIFICATION` and `email_verified` projection consistency
+* Full round-trip save/load via use case (no repository mocks)
+
+**Not yet implemented (future steps):** SessionRepository IT, JWT, Redis, LoginAttempt, optimistic-lock concurrency IT.
+
+**Reactive standard:** `StepVerifier` — no `.block()` in assertions.
+
+---
+
 # 7. REACTIVE TESTING RULES
 
 ---

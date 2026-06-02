@@ -95,6 +95,10 @@ existsByTenantAndUsername()
 delete()
 ````
 
+> **Implementation note (CodeCore v1, PASO 10.5.2):** authentication is **email-first**.
+> `findByUsername`, `findByTenantAndUsername`, and `existsByTenantAndUsername` are **not** implemented.
+> Use `findByTenantAndEmail` / `existsByTenantAndEmail` with normalized email only.
+
 ---
 
 # 4.4 Authentication Query Rules
