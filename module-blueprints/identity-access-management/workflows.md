@@ -132,6 +132,25 @@ Authentication MUST:
 
 ---
 
+# 4.6 Authenticate Identity Workflow (implemented — CodeCore PASO 10.9)
+
+**Scope:** credential verification + lifecycle gate — tokens and sessions deferred to PASO 11.x.
+
+```text
+1. Receive AuthenticationCommand (tenantId, email, password)
+2. Normalize email (EmailAddress)
+3. Retrieve identity by tenant + email
+4. Reject if identity missing (InvalidCredentialsException — anti-enumeration)
+5. Reject if status is not ACTIVE (IdentityNotAllowedToAuthenticateException)
+6. Validate password via PasswordHasher.matches
+7. Reject if password invalid (InvalidCredentialsException)
+8. Return AuthenticationResult (identityId, tenantId, email, status)
+```
+
+**Not in PASO 10.9:** lockout evaluation, session creation, JWT, refresh token, audit events, HTTP adapter.
+
+---
+
 # 5. REFRESH TOKEN WORKFLOW
 
 ---

@@ -117,6 +117,45 @@ All IAM APIs MUST:
 
 ---
 
+# 4.5 Identity Registration (implemented — CodeCore PASO 10.8)
+
+| Endpoint            | Method | Purpose              |
+| ------------------- | ------ | -------------------- |
+| /api/v1/identities  | POST   | Register new identity |
+
+**Request** (`application/json`):
+
+```json
+{
+  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "user@example.com",
+  "password": "********"
+}
+```
+
+**Response** (`201 Created`):
+
+```json
+{
+  "identityId": "550e8400-e29b-41d4-a716-446655440001",
+  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "user@example.com",
+  "status": "PENDING_VERIFICATION"
+}
+```
+
+**Status codes:**
+
+| Code | Condition |
+| ---- | --------- |
+| 201  | Registration successful |
+| 400  | Validation failure or invalid domain value |
+| 409  | Email already exists for tenant |
+
+> No profile fields (`firstName`, `lastName`, etc.) — user-management bounded context.
+
+---
+
 # 5. REQUEST DTO CONTRACTS
 
 ---

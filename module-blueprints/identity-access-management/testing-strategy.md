@@ -217,6 +217,47 @@ Integration tests MUST validate:
 
 ---
 
+# 6.6 HTTP Integration Tests (PASO 10.8)
+
+**Tool:** `WebTestClient` + `SpringBootTest` (random port) + shared `AbstractPostgresIntegrationTest`.
+
+| Test class | Validates |
+|---|---|
+| `RegisterIdentityControllerIT` | `POST /api/v1/identities` → use case → PostgreSQL row |
+
+**HTTP cases verified:**
+
+* `201 Created` + response body fields
+* `409 Conflict` duplicate tenant + email
+* `400 Bad Request` missing/blank required fields
+* JDBC row exists after successful POST
+
+No repository mocks. No WireMock.
+
+---
+
+# 6.7 Authentication Integration Tests (PASO 10.9)
+
+**Infrastructure:** Testcontainers PostgreSQL + real BCrypt hashes (no repository mocks).
+
+| Test class | Validates |
+|---|---|
+| `AuthenticateIdentityUseCaseIT` | `AuthenticateIdentityUseCase` → `IdentityRepository` → PostgreSQL |
+
+**Cases verified:**
+
+* ACTIVE identity + correct password → success (`AuthenticationResult`)
+* ACTIVE + wrong password → `InvalidCredentialsException`
+* Unknown tenant/email → `InvalidCredentialsException`
+* `PENDING_VERIFICATION` (via registration) → `IdentityNotAllowedToAuthenticateException`
+* `LOCKED`, `DISABLED`, `PASSWORD_RESET_REQUIRED` (persisted rows) → `IdentityNotAllowedToAuthenticateException`
+
+**Unit tests:** `AuthenticateIdentityUseCaseTest` — mocked ports, seven minimum scenarios.
+
+**Not yet:** login HTTP IT, JWT, session store, lockout counter IT.
+
+---
+
 # 7. REACTIVE TESTING RULES
 
 ---

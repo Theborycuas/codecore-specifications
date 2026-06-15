@@ -131,6 +131,34 @@ Credential validation SHOULD:
 
 ---
 
+# 4.5 Authentication Flow (implemented — CodeCore PASO 10.9)
+
+**Scope:** application use case only — no JWT, sessions, or HTTP in this step.
+
+```text
+AuthenticationCommand (tenantId, email, rawPassword)
+  → validate inputs
+  → IdentityRepository.findByTenantAndEmail
+  → missing identity → InvalidCredentialsException (generic message)
+  → status != ACTIVE → IdentityNotAllowedToAuthenticateException
+  → PasswordHasher.matches → false → InvalidCredentialsException
+  → AuthenticationResult (identityId, tenantId, email, status)
+```
+
+**Eligibility (PASO 10.9):**
+
+| Status | Authentication |
+|--------|----------------|
+| ACTIVE | Allowed |
+| PENDING_VERIFICATION | Rejected |
+| LOCKED | Rejected |
+| DISABLED | Rejected |
+| PASSWORD_RESET_REQUIRED | Rejected |
+
+**Output restrictions:** no password hash, no tokens, no credential fields in `AuthenticationResult`.
+
+---
+
 # 5. PASSWORD SECURITY RULES
 
 ---
